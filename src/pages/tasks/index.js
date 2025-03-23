@@ -1,49 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HeaderPages } from '../../components/header';
-import { Search, MoreVertical, Edit, MoreHorizontal } from 'lucide-react';
+import { Search, MoreVertical } from 'lucide-react';
 import { TaskData } from '../../stores/data/task.task';
 import { CreateTask } from '../../components/modals/CreateTask';
-
-// Component Dropdown Menu
-const DropdownMenu = ({ isOpen, onClose }) => {
-  const menuRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div 
-      ref={menuRef}
-      className="absolute right-4 mt-1 w-32 bg-white rounded-md shadow-lg z-10 border border-gray-200"
-    >
-      <ul className="py-1">
-        <li className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center">
-          <Edit size={14} className="mr-2" />
-          <span>Edit</span>
-        </li>
-        <li className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer flex items-center">
-          <MoreHorizontal size={14} className="mr-2" />
-          <span>More</span>
-        </li>
-      </ul>
-    </div>
-  );
-};
+import DropdownMenu from '../../components/DropdownMenu';
+import Modal from '../../components/modals';
+import EditTaskModal from '../../components/modals/EditTask';
+import MoreDetailsModal from '../../components/modals/MoreTask';
 
 export const TaskPages = () => {
   const [openModalCreateTask, setOpenModalCreateTask] = useState(false);
@@ -51,6 +14,9 @@ export const TaskPages = () => {
   const [filteredTasks, setFilteredTasks] = useState(TaskData);
   const [activeFilter, setActiveFilter] = useState('all');
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [moreModalOpen, setMoreModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
 
   // Tìm kiếm và lọc dữ liệu
   useEffect(() => {
@@ -104,16 +70,28 @@ export const TaskPages = () => {
     }
   };
 
-  const handleEditTask = (taskId) => {
-    console.log('Edit task:', taskId);
+  const handleEditTask = (task) => {
+    setSelectedTask(task);
+    setEditModalOpen(true);
     setActiveDropdown(null);
-    // Thêm logic xử lý khi nhấn Edit
   };
 
-  const handleMoreOptions = (taskId) => {
-    console.log('More options for task:', taskId);
+  const handleMoreOptions = (task) => {
+    setSelectedTask(task);
+    setMoreModalOpen(true);
     setActiveDropdown(null);
-    // Thêm logic xử lý khi nhấn More
+  };
+
+  const handleSaveTask = (updatedTask) => {
+    console.log('Saving updated task:', updatedTask);
+    // Thực hiện logic cập nhật task
+    // Ví dụ:
+    // const updatedTasks = filteredTasks.map(task => 
+    //   task.mst === updatedTask.mst ? updatedTask : task
+    // );
+    // setFilteredTasks(updatedTasks);
+    
+    setEditModalOpen(false);
   };
 
   return (
@@ -217,7 +195,14 @@ export const TaskPages = () => {
                           <td className="p-3">{task.typeData}</td>
                           <td className="p-3">{task.AtSetting}</td>
                           <td className="p-3">{task.userId.name}</td>
-                          <td className="p-3">{task.status}</td>
+                          <td className="p-3">
+                          <span className={`px-2 py-1 rounded-full text-xs text-white ${
+                              task.status === 'Done' ? 'bg-blue-500 px-4 py-0' : 
+                              task.status === 'Pending' ? 'bg-green-500  py-0' : 'bg-red-500'
+                            }`}>
+                            {task.status}
+                          </span>
+                          </td>
                           <td className="p-3 text-right relative">
                             <div>
                               <MoreVertical 
@@ -225,9 +210,11 @@ export const TaskPages = () => {
                                 size={18} 
                                 onClick={() => toggleDropdown(index)}
                               />
-                              <DropdownMenu 
+                              <DropdownMenu
                                 isOpen={activeDropdown === index} 
                                 onClose={() => setActiveDropdown(null)}
+                                onEdit={() => handleEditTask(task)}
+                                onMore={() => handleMoreOptions(task)}
                               />
                             </div>
                           </td>
@@ -247,6 +234,28 @@ export const TaskPages = () => {
           </>
         )}
       </div>
+
+      {/* Edit Task Modal */}
+      <Modal
+        isOpen={editModalOpen} 
+        onClose={() => setEditModalOpen(false)}
+        title="Chỉnh sửa thông tin"
+      >
+        <EditTaskModal
+          task={selectedTask} 
+          onClose={() => setEditModalOpen(false)} 
+          onSave={handleSaveTask}
+        />
+      </Modal>
+
+      {/* More Details Modal */}
+      <Modal 
+        isOpen={moreModalOpen} 
+        onClose={() => setMoreModalOpen(false)}
+        title="Chi tiết công việc"
+      >
+        <MoreDetailsModal task={selectedTask} />
+      </Modal>
     </div>
   );
 };

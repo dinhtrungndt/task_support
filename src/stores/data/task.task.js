@@ -6,7 +6,7 @@ export const TaskData = [
       connectionType: "Internet",
       PInstaller: "Trưng",
       codeData: "DATA001",
-      typeData: "Fiber",
+      typeData: "Data",
       AtSetting: "2024-03-01",
       userId: {
         id: "65ff1a2b3c4d5e6f7g8h9i",
@@ -38,7 +38,7 @@ export const TaskData = [
       connectionType: "VPN",
       PInstaller: "Lê Văn C",
       codeData: "DATA003",
-      typeData: "Encrypted",
+      typeData: "Cloud",
       AtSetting: "2024-01-10",
       userId: {
         id: "65ff1a2b3c4d5e6f7g8h9i",
@@ -54,7 +54,7 @@ export const TaskData = [
       connectionType: "Database",
       PInstaller: "Phạm Văn D",
       codeData: "DATA004",
-      typeData: "SQL",
+      typeData: "Data",
       AtSetting: "2024-03-05",
       userId: {
         id: "65ff1a2b3c4d5e6f7g8h9i",
@@ -70,13 +70,13 @@ export const TaskData = [
       connectionType: "Firewall",
       PInstaller: "Đinh Thị E",
       codeData: "DATA005",
-      typeData: "Security",
+      typeData: "Data",
       AtSetting: "2024-04-02",
       userId: {
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "inactive",
+      status: "Pending",
       createdAt: "2024-04-05",
     },
     {
@@ -86,7 +86,7 @@ export const TaskData = [
       connectionType: "Cloud Service",
       PInstaller: "Hoàng Văn F",
       codeData: "DATA006",
-      typeData: "AWS",
+      typeData: "Data",
       AtSetting: "2024-03-20",
       userId: {
         id: "65ff1a2b3c4d5e6f7g8h9i",
@@ -102,7 +102,7 @@ export const TaskData = [
       connectionType: "Email Hosting",
       PInstaller: "Nguyễn Thị G",
       codeData: "DATA007",
-      typeData: "G-Suite",
+      typeData: "Cloud",
       AtSetting: "2024-02-28",
       userId: {
         id: "65ff1a2b3c4d5e6f7g8h9i",
@@ -118,13 +118,13 @@ export const TaskData = [
       connectionType: "Network Security",
       PInstaller: "Phan Văn H",
       codeData: "DATA008",
-      typeData: "Firewall",
+      typeData: "Data",
       AtSetting: "2024-01-25",
       userId: {
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "inactive",
+      status: "Done",
       createdAt: "2024-01-30",
     },
     {
@@ -150,7 +150,7 @@ export const TaskData = [
       connectionType: "IoT Service",
       PInstaller: "Trịnh Văn K",
       codeData: "DATA010",
-      typeData: "5G Network",
+      typeData: "Data",
       AtSetting: "2024-02-05",
       userId: {
         id: "65ff1a2b3c4d5e6f7g8h9i",
@@ -166,7 +166,7 @@ export const TaskData = [
       connectionType: "IoT Service",
       PInstaller: "Trịnh Văn K",
       codeData: "DATA010",
-      typeData: "5G Network",
+      typeData: "Data",
       AtSetting: "2024-02-05",
       userId: {
         id: "65ff1a2b3c4d5e6f7g8h9i",
@@ -182,7 +182,7 @@ export const TaskData = [
       connectionType: "IoT Service",
       PInstaller: "Trịnh Văn K",
       codeData: "DATA010",
-      typeData: "5G Network",
+      typeData: "Data",
       AtSetting: "2024-02-05",
       userId: {
         id: "65ff1a2b3c4d5e6f7g8h9i",
@@ -198,7 +198,7 @@ export const TaskData = [
       connectionType: "IoT Service",
       PInstaller: "Trịnh Văn K",
       codeData: "DATA010",
-      typeData: "5G Network",
+      typeData: "Data",
       AtSetting: "2024-02-05",
       userId: {
         id: "65ff1a2b3c4d5e6f7g8h9i",
@@ -214,7 +214,7 @@ export const TaskData = [
       connectionType: "IoT Service",
       PInstaller: "Trịnh Văn K",
       codeData: "DATA010",
-      typeData: "5G Network",
+      typeData: "Data",
       AtSetting: "2024-02-05",
       userId: {
         id: "65ff1a2b3c4d5e6f7g8h9i",
@@ -230,7 +230,7 @@ export const TaskData = [
       connectionType: "IoT Service",
       PInstaller: "Trịnh Văn K",
       codeData: "DATA010",
-      typeData: "5G Network",
+      typeData: "Data",
       AtSetting: "2024-02-05",
       userId: {
         id: "65ff1a2b3c4d5e6f7g8h9i",
