@@ -1,10 +1,7 @@
+import { SidebarComponents } from "./components/sidebar";
 
-function App() {
+export default function App() {
   return (
-    <div className="App">
-      <h1>My First React App</h1>
-    </div>
+    <SidebarComponents />
   );
 }
-
-export default App;
