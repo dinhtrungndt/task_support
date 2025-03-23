@@ -1,7 +1,12 @@
 import React from 'react'
+import { HeaderPages } from '../../components/header'
 
 export const TaskPages = () => {
   return (
-    <div>TaskPages</div>
+    <div>
+      {/* header */}
+      <HeaderPages title="Tasks" />
+      {/* body */}
+    </div>
   )
 }
