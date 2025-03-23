@@ -13,7 +13,7 @@ export const Routers = () => {
     <Router>
       <div className="flex">
         <SidebarComponents />
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 pb-0">
           <Routes>
             <Route path="/" element={<OverviewPages />} />
             <Route path="/task" element={<TaskPages />} />

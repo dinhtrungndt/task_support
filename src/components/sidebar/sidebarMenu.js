@@ -47,7 +47,7 @@ export default function Sidebar({ children }) {
               <h4 className="font-semibold">John Doe</h4>
               <span className="text-xs text-gray-600">johndoe@gmail.com</span>
             </div>
-            <MoreVertical size={20} />
+            <MoreVertical size={20} className="cursor-pointer" />
           </div>
         </div>
       </nav>
