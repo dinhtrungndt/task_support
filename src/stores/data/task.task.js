@@ -60,7 +60,7 @@ export const TaskData = [
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "Pending",
+      status: "rejected",
       createdAt: "2024-03-07",
     },
     {
@@ -76,7 +76,7 @@ export const TaskData = [
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "Pending",
+      status: "rejected",
       createdAt: "2024-04-05",
     },
     {
@@ -188,7 +188,7 @@ export const TaskData = [
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "Pending",
+      status: "rejected",
       createdAt: "2024-02-07",
     },
     {
@@ -236,7 +236,7 @@ export const TaskData = [
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "Pending",
+      status: "rejected",
       createdAt: "2024-02-07",
     },
   ];
