@@ -198,7 +198,7 @@ export const TaskPages = () => {
                           <td className="p-3">
                           <span className={`px-2 py-1 rounded-full text-xs text-white ${
                               task.status === 'Done' ? 'bg-blue-500 px-4 py-0' : 
-                              task.status === 'Pending' ? 'bg-green-500  py-0' : 'bg-red-500'
+                              task.status === 'Pending' ? 'bg-green-500 py-0' : 'bg-red-500 py-0'
                             }`}>
                             {task.status}
                           </span>
