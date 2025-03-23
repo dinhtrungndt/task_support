@@ -17,7 +17,7 @@ export const OverviewPages = () => {
         </div>
       </div>
       <div className='bg-white rounded-md shadow-md p-4'>
-        <p className='text-xl font-bold pt-2'>Today's Task</p>
+        <p className='text-xl font-bold pt-2'>Today's Action</p>
       </div>
     </div>
   )
