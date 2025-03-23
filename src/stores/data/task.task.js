@@ -28,7 +28,7 @@ export const TaskData = [
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "pending",
+      status: "Pending",
       createdAt: "2024-02-20",
     },
     {
@@ -60,7 +60,7 @@ export const TaskData = [
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "pending",
+      status: "Pending",
       createdAt: "2024-03-07",
     },
     {
@@ -108,7 +108,7 @@ export const TaskData = [
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "pending",
+      status: "Pending",
       createdAt: "2024-03-01",
     },
     {
@@ -156,7 +156,7 @@ export const TaskData = [
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "pending",
+      status: "Pending",
       createdAt: "2024-02-07",
     },
     {
@@ -172,7 +172,7 @@ export const TaskData = [
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "pending",
+      status: "Pending",
       createdAt: "2024-02-07",
     },
     {
@@ -188,7 +188,7 @@ export const TaskData = [
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "pending",
+      status: "Pending",
       createdAt: "2024-02-07",
     },
     {
@@ -204,7 +204,7 @@ export const TaskData = [
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "pending",
+      status: "Pending",
       createdAt: "2024-02-07",
     },
     {
@@ -220,7 +220,7 @@ export const TaskData = [
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "pending",
+      status: "Pending",
       createdAt: "2024-02-07",
     },
     {
@@ -236,7 +236,7 @@ export const TaskData = [
         id: "65ff1a2b3c4d5e6f7g8h9i",
         name: "Trưng",
       },
-      status: "pending",
+      status: "Pending",
       createdAt: "2024-02-07",
     },
   ];
