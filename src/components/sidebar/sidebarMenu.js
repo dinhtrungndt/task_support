@@ -17,7 +17,7 @@ export default function Sidebar({ children }) {
               }`}
             alt=""
           />
-          <h3 className={`overflow-hidden transition-all ${expanded ? "font-semibold text-lg" : "w-0"
+          <h3 className={`overflow-hidden transition-all ${expanded ? "font-semibold text-base" : "w-0"
             }`}>Task Support</h3>
           <button
             onClick={() => setExpanded((curr) => !curr)}
