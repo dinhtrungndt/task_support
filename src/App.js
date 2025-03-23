@@ -1,7 +1,7 @@
-import { SidebarComponents } from "./components/sidebar";
+import { Routers } from "./routers";
 
 export default function App() {
   return (
-    <SidebarComponents />
+    <Routers />
   );
 }
