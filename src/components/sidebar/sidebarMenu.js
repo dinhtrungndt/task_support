@@ -1,11 +1,16 @@
 import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react"
 import React, { useContext, createContext, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
+import { AuthContext } from "../../contexts/start/AuthContext";
+import { DropdownMenuLogout } from "../DropdownMenu/logout";
 
 const SidebarContext = createContext()
 
 export default function Sidebar({ children }) {
+  const auth = useContext(AuthContext);
   const [expanded, setExpanded] = useState(true)
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
 
   return (
     <aside className="h-screen">
@@ -44,10 +49,19 @@ export default function Sidebar({ children }) {
           `}
           >
             <div className="leading-3">
-              <h4 className="font-semibold text-sm">John Doe</h4>
-              <span className="text-xs text-gray-600">johndoe@gmail.com</span>
+              <h4 className="font-semibold text-sm">{auth?.user?.name}</h4>
+              <span className="text-xs text-gray-600">{auth?.user?.email}</span>
             </div>
-            <MoreVertical size={16} className="cursor-pointer" />
+            <div className="relative">
+              <MoreVertical
+                className="cursor-pointer"
+                size={16}
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              />
+              {dropdownOpen && (
+                <DropdownMenuLogout />
+              )}
+            </div>
           </div>
         </div>
       </nav>
@@ -58,7 +72,7 @@ export default function Sidebar({ children }) {
 export function SidebarItem({ icon, text, to, alert }) {
   const { expanded } = useContext(SidebarContext);
   const location = useLocation();
-  const isActive = location.pathname === to; 
+  const isActive = location.pathname === to;
 
   return (
     <li

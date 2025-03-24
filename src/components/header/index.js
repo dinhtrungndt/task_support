@@ -1,13 +1,15 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { BellDot, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Calendar } from '../Calendar'
+import { AuthContext } from '../../contexts/start/AuthContext';
 
 export const HeaderPages = () => {
+    const auth = useContext(AuthContext);
 
     return (
         <div className='flex justify-between w-full'>
             <div>
-                <p className='text-base font-bold'>Nguyễn Đình Trưng</p>
+                <p className='text-base font-bold'>{auth?.user?.name}</p>
                 <p className='text-xs'>Let's finish your task today!</p>
             </div>
             <div className='flex gap-4 items-center'>

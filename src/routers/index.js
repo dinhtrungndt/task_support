@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { SidebarComponents } from "../components/sidebar";
 import { OverviewPages } from "../pages/Overview";
 import { TaskPages } from "../pages/tasks";
@@ -12,6 +12,7 @@ import Login from "../pages/login";
 import Register from "../pages/register";
 import PrivateRoute from "../components/user/PrivateRoute";
 import { ToastContainer } from "react-toastify";
+import PublicRoute from "../components/user/PublicRoute";
 
 export const Routers = () => {
   const { user } = useContext(AuthContext);
@@ -24,8 +25,12 @@ export const Routers = () => {
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<OverviewPages />} />
           </Route>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          {/* <Route path="/login"element={user ? <Navigate to="/" /> : <Login />} />
+          <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} /> */}
+          <Route element={<PublicRoute />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Route>
           <Route path="/task" element={<TaskPages />} />
           <Route path="/message" element={<MessagesPage />} />
           <Route path="/business" element={<BusinessPages />} />

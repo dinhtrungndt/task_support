@@ -9,6 +9,14 @@ export const AuthProvider = ({ children }) => {
   });
 
   useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  }, [user]);
+
+  useEffect(() => {
     const handleStorageChange = () => {
       const storedUser = localStorage.getItem("user");
       setUser(storedUser ? JSON.parse(storedUser) : null);
@@ -18,13 +26,13 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  const loginUser = (user) => {
-    localStorage.setItem("user", JSON.stringify({ _id: user._id, name: user.name, email: user.email }));
-    setUser({ _id: user._id, name: user.name, email: user.email }); 
+  const loginUser = (userData) => {
+    setUser({ _id: userData._id, name: userData.name, email: userData.email });
   };
 
   const logoutUser = () => {
-    localStorage.removeItem("user");
+    localStorage.removeItem("user");    
+    localStorage.removeItem("token");
     setUser(null);
   };
 
