@@ -11,6 +11,7 @@ import { AuthContext, AuthProvider } from "../contexts/start/AuthContext";
 import Login from "../pages/login";
 import Register from "../pages/register";
 import PrivateRoute from "../components/user/PrivateRoute";
+import { ToastContainer } from "react-toastify";
 
 export const Routers = () => {
   const { user } = useContext(AuthContext);
@@ -32,6 +33,7 @@ export const Routers = () => {
           <Route path="/settings" element={<SettingPages />} />
         </Routes>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };
