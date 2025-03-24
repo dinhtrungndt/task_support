@@ -17,6 +17,8 @@ export const TaskPages = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [moreModalOpen, setMoreModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [selectAll, setSelectAll] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   // Tìm kiếm và lọc dữ liệu
   useEffect(() => {
@@ -93,6 +95,21 @@ export const TaskPages = () => {
     
     setEditModalOpen(false);
   };
+  
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredTasks.map(task => task.id));
+    }
+    setSelectAll(!selectAll);
+  };
+  
+  const handleCheckboxChange = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
+    );
+  };
 
   return (
     <div>
@@ -101,7 +118,7 @@ export const TaskPages = () => {
       <div className="container mx-auto p-4 pb-0">
         {/* Search and Filter Buttons */}
         <div className="flex justify-between mt-4">
-          <div className="flex w-1/3 border border-gray-400 rounded-lg p-2 text-xs">
+          <div className="flex w-1/3 border border-gray-400 rounded-lg p-2 text-xs py-1">
             <input 
               type="text" 
               placeholder="Search Task" 
@@ -113,7 +130,13 @@ export const TaskPages = () => {
           </div>
           <div className="flex space-x-2">
             <button 
-              className={`px-3 rounded-full text-xs ${activeFilter === 'Done' ? 'bg-blue-600' : 'bg-blue-500'} text-white hover:bg-blue-600`}
+              className={`px-6 rounded-full text-xs ${activeFilter === 'all' ? 'bg-gray-600' : 'bg-gray-500'} text-white hover:bg-gray-600`}
+              onClick={() => handleFilterClick('all')}
+            >
+              All
+            </button>
+            <button 
+              className={`px-4 rounded-full text-xs ${activeFilter === 'Done' ? 'bg-blue-600' : 'bg-blue-500'} text-white hover:bg-blue-600`}
               onClick={() => handleFilterClick('Done')}
             >
               Done
@@ -129,12 +152,6 @@ export const TaskPages = () => {
               onClick={() => handleFilterClick('rejected')}
             >
               Rejected
-            </button>
-            <button 
-              className={`px-3 rounded-full text-xs ${activeFilter === 'all' ? 'bg-gray-600' : 'bg-gray-500'} text-white hover:bg-gray-600`}
-              onClick={() => handleFilterClick('all')}
-            >
-              All
             </button>
           </div>
         </div>
@@ -158,14 +175,21 @@ export const TaskPages = () => {
             </div>
 
             {/* Task List */}
-            <div className="mt-4 bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="mt-4 bg-white shadow-md rounded-lg overflow-hidden ">
               <div className="max-h-96 overflow-y-auto">
                 <table className="w-full text-left">
                   <thead className="bg-gray-100 text-gray-600 text-sm sticky top-0">
                     <tr className='text-xs'>
-                      <th className="p-3 w-10">
-                        <input type="checkbox" />
-                      </th>
+                    <th scope="col" className="px-3 py-3 text-left">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          className="h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                        />
+                      </div>
+                    </th>
                       <th className="p-3">MST</th>
                       <th className="p-3">Tên công ty</th>
                       <th className="p-3">Địa chỉ</th>
@@ -183,9 +207,16 @@ export const TaskPages = () => {
                     {filteredTasks.length > 0 ? (
                       filteredTasks.map((task, index) => (
                         <tr key={index} className="border-t hover:bg-gray-50 text-xs">
-                          <td className="p-3">
-                            <input type="checkbox" />
-                          </td>
+                        <td className="px-3 py-3 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <input
+                              type="checkbox"
+                              className="h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                              checked={selectedIds.includes(task._id)}
+                              onChange={() => handleCheckboxChange(task._id)}
+                            />
+                          </div>
+                        </td>
                           <td className="p-3">{task.mst}</td>
                           <td className="p-3">{task.name}</td>
                           <td className="p-3">{task.address}</td>
@@ -222,10 +253,23 @@ export const TaskPages = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="12" className="p-4 text-center text-gray-500">
-                          Không tìm thấy dữ liệu phù hợp
-                        </td>
-                      </tr>
+                      <td colSpan={10} className="px-3 py-8 text-center text-sm text-gray-500">
+                        <div className="flex flex-col items-center justify-center">
+                          <svg className="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          <p className="text-gray-500">Không tìm thấy kết quả nào</p>
+                          {searchTerm && (
+                            <button 
+                              className="mt-2 text-blue-600 hover:text-blue-800"
+                              onClick={() => setSearchTerm("")}
+                            >
+                              Xóa tìm kiếm
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
                     )}
                   </tbody>
                 </table>
