@@ -3,37 +3,50 @@ import { MoreVertical } from 'lucide-react';
 import DropdownMenu from '../../components/DropdownMenu';
 import { CreateTask } from '../../components/modals/CreateTask';
 
-export const Tasks = ({ 
-  filteredTasks, 
+export const Tasks = ({
+  filteredTasks,
   searchTerm,
-  setSearchTerm, 
-  selectedIds, 
-  selectAll, 
-  handleSelectAll, 
-  handleCheckboxChange, 
-  activeDropdown, 
-  toggleDropdown, 
-  handleEditTask, 
-  handleMoreOptions, 
-  openModalCreateTask, 
-  setOpenModalCreateTask 
+  setSearchTerm,
+  selectedIds,
+  selectAll,
+  handleSelectAll,
+  handleCheckboxChange,
+  activeDropdown,
+  toggleDropdown,
+  handleEditTask,
+  handleMoreOptions,
+  openModalCreateTask,
+  setOpenModalCreateTask
 }) => {
-  
+
   if (openModalCreateTask) {
     return <CreateTask closeModal={() => setOpenModalCreateTask(false)} />;
   }
-  
+
+  const getStatusClassName = (status) => {
+    switch (status) {
+      case "Done":
+        return "bg-green-100 text-green-600 px-4";
+      case "Pending":
+        return "bg-orange-100 text-orange-600 px-2";
+      case "Rejected":
+        return "bg-pink-100 text-pink-600 px-2";
+      default:
+        return "bg-gray-100 text-gray-600 px-2";
+    }
+  };
+
   return (
     <>
       {/* Text and create task*/}
       <div className="flex items-center mt-4">
-        <p className="text-sm font-bold">
+        <p className="text-xs font-bold">
           {filteredTasks.length > 0
             ? `All Tasks (${filteredTasks.length})`
             : "No tasks found"}
         </p>
         <button
-          className="bg-blue-500 text-white px-6 py-1 rounded-md text-sm hover:bg-blue-600 ml-6"
+          className="bg-blue-500 text-white ml-8 px-6 py-1 rounded-md text-xs hover:bg-blue-600"
           onClick={() => setOpenModalCreateTask((prev) => !prev)}
         >
           {openModalCreateTask ? "Close" : "Create Task"}
@@ -92,9 +105,7 @@ export const Tasks = ({
                     <td className="p-3">{task.AtSetting}</td>
                     <td className="p-3">{task.userId.name}</td>
                     <td className="p-3">
-                      <span className={`px-2 py-1 rounded-full text-xs text-white ${task.status === 'Done' ? 'bg-blue-500 px-4 py-0' :
-                        task.status === 'Pending' ? 'bg-green-500 py-0' : 'bg-red-500 py-0'
-                        }`}>
+                      <span className={` py-0.5 rounded-full text-xs ${getStatusClassName(task.status)}`}>
                         {task.status}
                       </span>
                     </td>

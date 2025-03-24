@@ -13,7 +13,7 @@ export const TaskPages = () => {
   const [openModalCreateTask, setOpenModalCreateTask] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredTasks, setFilteredTasks] = useState(TaskData);
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState('All');
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [moreModalOpen, setMoreModalOpen] = useState(false);
@@ -28,9 +28,9 @@ export const TaskPages = () => {
 
   const filterTasks = () => {
     let results = TaskData;
-
-    // Lọc theo trạng thái nếu không phải 'all'
-    if (activeFilter !== 'all') {
+  
+    // Chỉ lọc nếu activeFilter không phải 'All'
+    if (activeFilter !== 'All') {
       const statusMap = {
         Done: 'Done',
         Pending: 'Pending',
@@ -38,7 +38,7 @@ export const TaskPages = () => {
       };
       results = results.filter(task => task.status === statusMap[activeFilter]);
     }
-
+  
     // Lọc theo từ khóa tìm kiếm
     if (searchTerm.trim() !== '') {
       const term = searchTerm.toLowerCase().trim();
@@ -53,7 +53,7 @@ export const TaskPages = () => {
         (task.userId.name && task.userId.name.toLowerCase().includes(term))
       );
     }
-
+  
     setFilteredTasks(results);
   };
 
@@ -131,25 +131,37 @@ export const TaskPages = () => {
           </div>
           <div className="flex space-x-2">
             <button
-              className={`px-6 rounded-full text-xs ${activeFilter === 'all' ? 'bg-gray-600' : 'bg-gray-500'} text-white hover:bg-gray-600`}
-              onClick={() => handleFilterClick('all')}
+              className={`px-4 py-1 rounded-full text-xs ${activeFilter === 'All'
+                ? 'bg-teal-100 text-teal-600 border border-teal-200'
+                : 'bg-gray-100 text-gray-600 border border-gray-200'
+                } hover:bg-teal-50`}
+              onClick={() => handleFilterClick('All')}
             >
               All
             </button>
             <button
-              className={`px-4 rounded-full text-xs ${activeFilter === 'Done' ? 'bg-blue-600' : 'bg-blue-500'} text-white hover:bg-blue-600`}
+              className={`px-4 py-1 rounded-full text-xs ${activeFilter === 'Done'
+                ? 'bg-green-100 text-green-600 border border-green-200'
+                : 'bg-gray-100 text-gray-600 border border-gray-200'
+                } hover:bg-green-50`}
               onClick={() => handleFilterClick('Done')}
             >
               Done
             </button>
             <button
-              className={`px-3 rounded-full text-xs ${activeFilter === 'Pending' ? 'bg-green-600' : 'bg-green-500'} text-white hover:bg-green-600`}
+              className={`px-4 py-1 rounded-full text-xs ${activeFilter === 'Pending'
+                ? 'bg-pink-100 text-pink-600 border border-pink-200'
+                : 'bg-gray-100 text-gray-600 border border-gray-200'
+                } hover:bg-pink-50`}
               onClick={() => handleFilterClick('Pending')}
             >
               Pending
             </button>
             <button
-              className={`px-3 rounded-full text-xs ${activeFilter === 'rejected' ? 'bg-red-600' : 'bg-red-500'} text-white hover:bg-red-600`}
+              className={`px-4 py-1 rounded-full text-xs ${activeFilter === 'rejected'
+                ? 'bg-yellow-100 text-yellow-600 border border-yellow-200'
+                : 'bg-gray-100 text-gray-600 border border-gray-200'
+                } hover:bg-yellow-50`}
               onClick={() => handleFilterClick('rejected')}
             >
               Rejected
