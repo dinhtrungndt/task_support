@@ -1,5 +1,5 @@
 import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react"
-import { useContext, createContext, useState } from "react"
+import React, { useContext, createContext, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
 
 const SidebarContext = createContext()
@@ -10,44 +10,44 @@ export default function Sidebar({ children }) {
   return (
     <aside className="h-screen">
       <nav className="h-full flex flex-col bg-white border-r shadow-sm">
-        <div className="p-4 pb-2 flex justify-between items-center">
+        <div className="p-2 pb-1 flex justify-between items-center">
           <img
             src={require("../../assets/image/Logomark.png")}
-            className={`overflow-hidden transition-all ${expanded ? "w-9" : "w-0"
+            className={`overflow-hidden transition-all ${expanded ? "w-6" : "w-0"
               }`}
             alt=""
           />
-          <h3 className={`overflow-hidden transition-all ${expanded ? "font-semibold text-base" : "w-0"
+          <h3 className={`overflow-hidden transition-all ${expanded ? "font-semibold text-sm" : "w-0"
             }`}>Task Support</h3>
           <button
             onClick={() => setExpanded((curr) => !curr)}
-            className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100"
+            className="p-1 rounded-lg bg-gray-50 hover:bg-gray-100"
           >
-            {expanded ? <ChevronFirst /> : <ChevronLast />}
+            {expanded ? <ChevronFirst size={16} /> : <ChevronLast size={16} />}
           </button>
         </div>
 
         <SidebarContext.Provider value={{ expanded }}>
-          <ul className="flex-1 px-3">{children}</ul>
+          <ul className="flex-1 px-2">{children}</ul>
         </SidebarContext.Provider>
 
-        <div className="border-t flex p-3">
+        <div className="border-t flex p-2">
           <img
             src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
             alt=""
-            className="w-10 h-10 rounded-md"
+            className="w-8 h-8 rounded-md"
           />
           <div
             className={`
               flex justify-between items-center
-              overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}
+              overflow-hidden transition-all ${expanded ? "w-40 ml-2" : "w-0"}
           `}
           >
-            <div className="leading-4">
-              <h4 className="font-semibold">John Doe</h4>
+            <div className="leading-3">
+              <h4 className="font-semibold text-sm">John Doe</h4>
               <span className="text-xs text-gray-600">johndoe@gmail.com</span>
             </div>
-            <MoreVertical size={20} className="cursor-pointer" />
+            <MoreVertical size={16} className="cursor-pointer" />
           </div>
         </div>
       </nav>
@@ -63,7 +63,7 @@ export function SidebarItem({ icon, text, to, alert }) {
   return (
     <li
       className={`
-        relative flex items-center py-2 px-3 my-1
+        relative flex items-center py-1 px-2 my-1
         font-medium rounded-md cursor-pointer
         transition-colors group
         ${isActive
@@ -73,9 +73,9 @@ export function SidebarItem({ icon, text, to, alert }) {
       `}
     >
       <Link to={to} className="flex items-center">
-        {icon}
+        {icon && React.cloneElement(icon, { size: 16 })}
         <span
-          className={`overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}
+          className={`overflow-hidden transition-all ${expanded ? "w-40 ml-2" : "w-0"}`}
         >
           {text}
         </span>
@@ -84,7 +84,7 @@ export function SidebarItem({ icon, text, to, alert }) {
         {alert && (
           <div
             className={`
-              absolute right-2 w-2 h-2 rounded transition-all
+              absolute right-2 w-1.5 h-1.5 rounded transition-all
               ${isActive ? "bg-red-500 animate-ping" : ""}
             `}
           />
@@ -95,7 +95,7 @@ export function SidebarItem({ icon, text, to, alert }) {
           <div
             className={`
               absolute left-full top-1/2 -translate-y-1/2
-              rounded-md px-2 py-1 ml-2 bg-indigo-100 text-indigo-800 text-sm
+              rounded-md px-2 py-1 ml-2 bg-indigo-100 text-indigo-800 text-xs
               opacity-0 translate-x-[-10px] transition-all duration-300
               group-hover:opacity-100 group-hover:translate-x-0
             `}
