@@ -34,8 +34,8 @@ export const TodayTasks = () => {
           <div className="bg-white rounded-md shadow-sm p-3 pt-0">
             <p className="text-base font-bold pt-1 mb-2">Today's Task</p>
             <div className="space-y-2">
-              {todayTasks.map((task) => (
-                <div key={task.id} className="flex items-center gap-2 text-sm">
+              {todayTasks.map((task, index) => (
+                <div key={index} className="flex items-center gap-2 text-sm">
                   <div className={`rounded-full w-5 h-5 flex items-center justify-center ${task.status === "Done" ? "bg-blue-600" : "bg-blue-600"}`}>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -82,8 +82,8 @@ export const TodayTasks = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200 ">
-              {TaskData.map((project) => (
-                <tr key={project.id}>
+              {TaskData.map((project, index) => (
+                <tr key={index}>
                   <td className="px-3 py-2 whitespace-nowrap text-xs font-medium text-gray-900">{project.name}</td>
                   <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500">{project.projectManager}</td>
                   <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500">{project.dueDate}</td>

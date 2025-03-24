@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { SidebarComponents } from "../components/sidebar";
 import { OverviewPages } from "../pages/Overview";
@@ -7,23 +7,31 @@ import { MessagesPage } from "../pages/messages";
 import { BusinessPages } from "../pages/Business";
 import { UserPages } from "../pages/Users";
 import { SettingPages } from "../pages/Settings";
+import { AuthContext, AuthProvider } from "../contexts/start/AuthContext";
+import Login from "../pages/login";
+import Register from "../pages/register";
+import PrivateRoute from "../components/user/PrivateRoute";
 
 export const Routers = () => {
+  const { user } = useContext(AuthContext);
+
   return (
-    <Router>
-      <div className="flex">
-        <SidebarComponents />
-        <div className="flex-1 p-4 pb-0">
-          <Routes>
+    <div className="flex">
+      {user && <SidebarComponents />}
+      <div className="flex-1 p-4 pb-0">
+        <Routes>
+          <Route element={<PrivateRoute />}>
             <Route path="/" element={<OverviewPages />} />
-            <Route path="/task" element={<TaskPages />} />
-            <Route path="/message" element={<MessagesPage />} />
-            <Route path="/business" element={<BusinessPages />} />
-            <Route path="/users" element={<UserPages />} />
-            <Route path="/settings" element={<SettingPages />} />
-          </Routes>
-        </div>
+          </Route>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/task" element={<TaskPages />} />
+          <Route path="/message" element={<MessagesPage />} />
+          <Route path="/business" element={<BusinessPages />} />
+          <Route path="/users" element={<UserPages />} />
+          <Route path="/settings" element={<SettingPages />} />
+        </Routes>
       </div>
-    </Router>
+    </div>
   );
 };
