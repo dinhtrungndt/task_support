@@ -27,7 +27,7 @@ export const TaskPages = () => {
 
   const filterTasks = () => {
     let results = TaskData;
-    
+
     // Lọc theo trạng thái nếu không phải 'all'
     if (activeFilter !== 'all') {
       const statusMap = {
@@ -37,11 +37,11 @@ export const TaskPages = () => {
       };
       results = results.filter(task => task.status === statusMap[activeFilter]);
     }
-    
+
     // Lọc theo từ khóa tìm kiếm
     if (searchTerm.trim() !== '') {
       const term = searchTerm.toLowerCase().trim();
-      results = results.filter(task => 
+      results = results.filter(task =>
         task.mst.toLowerCase().includes(term) ||
         task.name.toLowerCase().includes(term) ||
         task.address.toLowerCase().includes(term) ||
@@ -52,7 +52,7 @@ export const TaskPages = () => {
         (task.userId.name && task.userId.name.toLowerCase().includes(term))
       );
     }
-    
+
     setFilteredTasks(results);
   };
 
@@ -92,10 +92,10 @@ export const TaskPages = () => {
     //   task.mst === updatedTask.mst ? updatedTask : task
     // );
     // setFilteredTasks(updatedTasks);
-    
+
     setEditModalOpen(false);
   };
-  
+
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedIds([]);
@@ -104,7 +104,7 @@ export const TaskPages = () => {
     }
     setSelectAll(!selectAll);
   };
-  
+
   const handleCheckboxChange = (id) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
@@ -119,35 +119,35 @@ export const TaskPages = () => {
         {/* Search and Filter Buttons */}
         <div className="flex justify-between mt-4">
           <div className="flex w-1/3 border border-gray-400 rounded-lg p-2 text-xs py-1">
-            <input 
-              type="text" 
-              placeholder="Search Task" 
-              className="w-full bg-transparent focus:outline-none" 
+            <input
+              type="text"
+              placeholder="Search Task"
+              className="w-full bg-transparent focus:outline-none"
               value={searchTerm}
               onChange={handleSearchChange}
             />
             <Search className="mr-2 ml-2" color='#9ca3af' size={18} />
           </div>
           <div className="flex space-x-2">
-            <button 
+            <button
               className={`px-6 rounded-full text-xs ${activeFilter === 'all' ? 'bg-gray-600' : 'bg-gray-500'} text-white hover:bg-gray-600`}
               onClick={() => handleFilterClick('all')}
             >
               All
             </button>
-            <button 
+            <button
               className={`px-4 rounded-full text-xs ${activeFilter === 'Done' ? 'bg-blue-600' : 'bg-blue-500'} text-white hover:bg-blue-600`}
               onClick={() => handleFilterClick('Done')}
             >
               Done
             </button>
-            <button 
+            <button
               className={`px-3 rounded-full text-xs ${activeFilter === 'Pending' ? 'bg-green-600' : 'bg-green-500'} text-white hover:bg-green-600`}
               onClick={() => handleFilterClick('Pending')}
             >
               Pending
             </button>
-            <button 
+            <button
               className={`px-3 rounded-full text-xs ${activeFilter === 'rejected' ? 'bg-red-600' : 'bg-red-500'} text-white hover:bg-red-600`}
               onClick={() => handleFilterClick('rejected')}
             >
@@ -162,8 +162,8 @@ export const TaskPages = () => {
             {/* Text and create task*/}
             <div className="flex items-center mt-4">
               <p className="text-sm font-bold">
-                {filteredTasks.length > 0 
-                  ? `All Tasks (${filteredTasks.length})` 
+                {filteredTasks.length > 0
+                  ? `All Tasks (${filteredTasks.length})`
                   : "No tasks found"}
               </p>
               <button
@@ -180,16 +180,16 @@ export const TaskPages = () => {
                 <table className="w-full text-left">
                   <thead className="bg-gray-100 text-gray-600 text-sm sticky top-0">
                     <tr className='text-xs'>
-                    <th scope="col" className="px-3 py-3 text-left">
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          className="h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                          checked={selectAll}
-                          onChange={handleSelectAll}
-                        />
-                      </div>
-                    </th>
+                      <th scope="col" className="px-3 py-3 text-left">
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            className="h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            checked={selectAll}
+                            onChange={handleSelectAll}
+                          />
+                        </div>
+                      </th>
                       <th className="p-3">MST</th>
                       <th className="p-3">Tên công ty</th>
                       <th className="p-3">Địa chỉ</th>
@@ -207,16 +207,16 @@ export const TaskPages = () => {
                     {filteredTasks.length > 0 ? (
                       filteredTasks.map((task, index) => (
                         <tr key={index} className="border-t hover:bg-gray-50 text-xs">
-                        <td className="px-3 py-3 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <input
-                              type="checkbox"
-                              className="h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                              checked={selectedIds.includes(task._id)}
-                              onChange={() => handleCheckboxChange(task._id)}
-                            />
-                          </div>
-                        </td>
+                          <td className="px-3 py-3 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <input
+                                type="checkbox"
+                                className="h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                checked={selectedIds.includes(task._id)}
+                                onChange={() => handleCheckboxChange(task._id)}
+                              />
+                            </div>
+                          </td>
                           <td className="p-3">{task.mst}</td>
                           <td className="p-3">{task.name}</td>
                           <td className="p-3">{task.address}</td>
@@ -227,22 +227,21 @@ export const TaskPages = () => {
                           <td className="p-3">{task.AtSetting}</td>
                           <td className="p-3">{task.userId.name}</td>
                           <td className="p-3">
-                          <span className={`px-2 py-1 rounded-full text-xs text-white ${
-                              task.status === 'Done' ? 'bg-blue-500 px-4 py-0' : 
-                              task.status === 'Pending' ? 'bg-green-500 py-0' : 'bg-red-500 py-0'
-                            }`}>
-                            {task.status}
-                          </span>
+                            <span className={`px-2 py-1 rounded-full text-xs text-white ${task.status === 'Done' ? 'bg-blue-500 px-4 py-0' :
+                                task.status === 'Pending' ? 'bg-green-500 py-0' : 'bg-red-500 py-0'
+                              }`}>
+                              {task.status}
+                            </span>
                           </td>
                           <td className="p-3 text-right relative">
                             <div>
-                              <MoreVertical 
-                                className="cursor-pointer" 
-                                size={18} 
+                              <MoreVertical
+                                className="cursor-pointer"
+                                size={18}
                                 onClick={() => toggleDropdown(index)}
                               />
                               <DropdownMenu
-                                isOpen={activeDropdown === index} 
+                                isOpen={activeDropdown === index}
                                 onClose={() => setActiveDropdown(null)}
                                 onEdit={() => handleEditTask(task)}
                                 onMore={() => handleMoreOptions(task)}
@@ -253,23 +252,23 @@ export const TaskPages = () => {
                       ))
                     ) : (
                       <tr>
-                      <td colSpan={10} className="px-3 py-8 text-center text-sm text-gray-500">
-                        <div className="flex flex-col items-center justify-center">
-                          <svg className="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                          </svg>
-                          <p className="text-gray-500">Không tìm thấy kết quả nào</p>
-                          {searchTerm && (
-                            <button 
-                              className="mt-2 text-blue-600 hover:text-blue-800"
-                              onClick={() => setSearchTerm("")}
-                            >
-                              Xóa tìm kiếm
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
+                        <td colSpan={10} className="px-3 py-8 text-center text-sm text-gray-500">
+                          <div className="flex flex-col items-center justify-center">
+                            <svg className="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p className="text-gray-500">Không tìm thấy kết quả nào</p>
+                            {searchTerm && (
+                              <button
+                                className="mt-2 text-blue-600 hover:text-blue-800"
+                                onClick={() => setSearchTerm("")}
+                              >
+                                Xóa tìm kiếm
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
                     )}
                   </tbody>
                 </table>
@@ -281,20 +280,20 @@ export const TaskPages = () => {
 
       {/* Edit Task Modal */}
       <Modal
-        isOpen={editModalOpen} 
+        isOpen={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         title="Chỉnh sửa thông tin"
       >
         <EditTaskModal
-          task={selectedTask} 
-          onClose={() => setEditModalOpen(false)} 
+          task={selectedTask}
+          onClose={() => setEditModalOpen(false)}
           onSave={handleSaveTask}
         />
       </Modal>
 
       {/* More Details Modal */}
-      <Modal 
-        isOpen={moreModalOpen} 
+      <Modal
+        isOpen={moreModalOpen}
         onClose={() => setMoreModalOpen(false)}
         title="Chi tiết công việc"
       >

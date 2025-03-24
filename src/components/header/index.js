@@ -11,11 +11,11 @@ export const HeaderPages = () => {
                 <p className='text-xs'>Let's finish your task today!</p>
             </div>
             <div className='flex gap-4 items-center'>
-                <BellDot size={24} className='cursor-pointer hover:text-indigo-600' />
+                <BellDot size={22} className='cursor-pointer hover:text-indigo-600' />
                 <img
                     src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
                     alt=""
-                    className="w-10 h-10 rounded-md cursor-pointer"
+                    className="w-8 h-8 rounded-md cursor-pointer"
                 />
                 <Calendar />
             </div>
