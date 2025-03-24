@@ -2,12 +2,12 @@ import React from 'react';
 
 export const UserPages = () => {
   const teamMembers = [
-    { id: 1, name: "Mark Magnum", role: "Project Manager", avatar: "https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=MM", status: "Online" },
-    { id: 2, name: "Emily Korgaard", role: "UI/UX Designer", avatar: "https://ui-avatars.com/api/?background=fecaca&color=991b1b&bold=true&name=EK", status: "Away" },
-    { id: 3, name: "Jason Statham", role: "Frontend Developer", avatar: "https://ui-avatars.com/api/?background=bfdbfe&color=1e40af&bold=true&name=JS", status: "Offline" },
-    { id: 4, name: "Nadia Lauren", role: "Backend Developer", avatar: "https://ui-avatars.com/api/?background=d1fae5&color=065f46&bold=true&name=NL", status: "Online" },
-    { id: 5, name: "Zack Zak", role: "QA Engineer", avatar: "https://ui-avatars.com/api/?background=fef3c7&color=92400e&bold=true&name=ZZ", status: "Online" },
-    { id: 6, name: "Angel Kimberly", role: "Product Owner", avatar: "https://ui-avatars.com/api/?background=e0e7ff&color=3730a3&bold=true&name=AK", status: "Away" },
+    { id: 1, name: "Luân", role: "Project Manager", avatar: "https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=MM", status: "Online" },
+    { id: 2, name: "Dũn", role: "UI/UX Designer", avatar: "https://ui-avatars.com/api/?background=fecaca&color=991b1b&bold=true&name=EK", status: "Away" },
+    { id: 3, name: "Anh đạt", role: "Frontend Developer", avatar: "https://ui-avatars.com/api/?background=bfdbfe&color=1e40af&bold=true&name=JS", status: "Offline" },
+    { id: 4, name: "Kiệt Thái", role: "Backend Developer", avatar: "https://ui-avatars.com/api/?background=d1fae5&color=065f46&bold=true&name=NL", status: "Online" },
+    { id: 5, name: "Công Học", role: "QA Engineer", avatar: "https://ui-avatars.com/api/?background=fef3c7&color=92400e&bold=true&name=ZZ", status: "Online" },
+    { id: 6, name: "Hihi", role: "Product Owner", avatar: "https://ui-avatars.com/api/?background=e0e7ff&color=3730a3&bold=true&name=AK", status: "Away" },
   ];
 
   const projects = [
