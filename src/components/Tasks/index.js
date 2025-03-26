@@ -16,7 +16,8 @@ export const Tasks = ({
   handleEditTask,
   handleMoreOptions,
   openModalCreateTask,
-  setOpenModalCreateTask
+  setOpenModalCreateTask,
+  setActiveDropdown
 }) => {
 
   if (openModalCreateTask) {
@@ -120,6 +121,7 @@ export const Tasks = ({
                           isOpen={activeDropdown === index}
                           onEdit={() => handleEditTask(task)}
                           onMore={() => handleMoreOptions(task)}
+                          onClose={() => setActiveDropdown(null)}
                         />
                       </div>
                     </td>

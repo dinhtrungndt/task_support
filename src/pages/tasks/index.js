@@ -21,7 +21,6 @@ export const TaskPages = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
 
-  // Tìm kiếm và lọc dữ liệu
   useEffect(() => {
     filterTasks();
   }, [searchTerm, activeFilter]);
@@ -29,7 +28,6 @@ export const TaskPages = () => {
   const filterTasks = () => {
     let results = TaskData;
   
-    // Chỉ lọc nếu activeFilter không phải 'All'
     if (activeFilter !== 'All') {
       const statusMap = {
         Done: 'Done',
@@ -39,7 +37,6 @@ export const TaskPages = () => {
       results = results.filter(task => task.status === statusMap[activeFilter]);
     }
   
-    // Lọc theo từ khóa tìm kiếm
     if (searchTerm.trim() !== '') {
       const term = searchTerm.toLowerCase().trim();
       results = results.filter(task =>
@@ -87,12 +84,6 @@ export const TaskPages = () => {
 
   const handleSaveTask = (updatedTask) => {
     console.log('Saving updated task:', updatedTask);
-    // Thực hiện logic cập nhật task
-    // Ví dụ:
-    // const updatedTasks = filteredTasks.map(task => 
-    //   task.mst === updatedTask.mst ? updatedTask : task
-    // );
-    // setFilteredTasks(updatedTasks);
 
     setEditModalOpen(false);
   };
@@ -182,10 +173,10 @@ export const TaskPages = () => {
           handleMoreOptions={handleMoreOptions}
           openModalCreateTask={openModalCreateTask}
           setOpenModalCreateTask={setOpenModalCreateTask}
+          setActiveDropdown={setActiveDropdown}
         />
       </div>
 
-      {/* Edit Task Modal */}
       <Modal
         isOpen={editModalOpen}
         onClose={() => setEditModalOpen(false)}
@@ -198,7 +189,6 @@ export const TaskPages = () => {
         />
       </Modal>
 
-      {/* More Details Modal */}
       <Modal
         isOpen={moreModalOpen}
         onClose={() => setMoreModalOpen(false)}
