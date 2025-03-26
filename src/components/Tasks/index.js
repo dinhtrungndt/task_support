@@ -17,11 +17,12 @@ export const Tasks = ({
   handleMoreOptions,
   openModalCreateTask,
   setOpenModalCreateTask,
-  setActiveDropdown
+  setActiveDropdown,
+  businesses
 }) => {
 
   if (openModalCreateTask) {
-    return <CreateTask closeModal={() => setOpenModalCreateTask(false)} />;
+    return <CreateTask closeModal={() => setOpenModalCreateTask(false)} businesses={businesses}/>;
   }
 
   const getStatusClassName = (status) => {
@@ -50,7 +51,7 @@ export const Tasks = ({
           className="bg-blue-500 text-white ml-8 px-6 py-1 rounded-md text-xs hover:bg-blue-600"
           onClick={() => setOpenModalCreateTask((prev) => !prev)}
         >
-          {openModalCreateTask ? "Close" : "Create Task"}
+          {openModalCreateTask ? "Close" : "Thêm"}
         </button>
       </div>
       {/* Task List */}

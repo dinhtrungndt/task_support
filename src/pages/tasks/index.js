@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { HeaderPages } from '../../components/header';
-import { Search, MoreVertical } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { TaskData } from '../../stores/data/task.task';
-import { CreateTask } from '../../components/modals/CreateTask';
-import DropdownMenu from '../../components/DropdownMenu';
 import Modal from '../../components/modals';
 import EditTaskModal from '../../components/modals/EditTask';
 import MoreDetailsModal from '../../components/modals/MoreTask';
@@ -20,6 +18,29 @@ export const TaskPages = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [businesses, setBusinesses] = useState([]);
+
+  useEffect(() => {
+    const extractBusinesses = () => {
+      const businessMap = new Map();
+
+      TaskData.forEach(task => {
+        if (!businessMap.has(task.mst)) {
+          businessMap.set(task.mst, {
+            id: task.mst,
+            mst: task.mst,
+            name: task.name,
+            address: task.address
+          });
+        }
+      });
+
+      return Array.from(businessMap.values());
+    };
+
+    const processedBusinesses = extractBusinesses();
+    setBusinesses(processedBusinesses);
+  }, []);
 
   useEffect(() => {
     filterTasks();
@@ -174,6 +195,7 @@ export const TaskPages = () => {
           openModalCreateTask={openModalCreateTask}
           setOpenModalCreateTask={setOpenModalCreateTask}
           setActiveDropdown={setActiveDropdown}
+          businesses={businesses}
         />
       </div>
 

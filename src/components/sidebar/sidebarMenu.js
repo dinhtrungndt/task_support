@@ -13,7 +13,7 @@ export default function Sidebar({ children }) {
 
 
   return (
-    <aside className="h-screen">
+    <aside className="h-screen sticky top-0">
       <nav className="h-full flex flex-col bg-white border-r shadow-sm">
         <div className="p-2 pb-1 flex justify-between items-center">
           <img
@@ -36,7 +36,7 @@ export default function Sidebar({ children }) {
           <ul className="flex-1 px-2">{children}</ul>
         </SidebarContext.Provider>
 
-        <div className="border-t flex p-2">
+        <div className="border-t flex p-2 sticky bottom-0 bg-white">
           <img
             src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
             alt=""
@@ -46,11 +46,11 @@ export default function Sidebar({ children }) {
             className={`
               flex justify-between items-center
               overflow-hidden transition-all ${expanded ? "w-40 ml-2" : "w-0"}
-          `}
+            `}
           >
-            <div className="leading-3">
-              <h4 className="font-semibold text-sm">{auth?.user?.name}</h4>
-              <span className="text-xs text-gray-600">{auth?.user?.email}</span>
+            <div className="leading-3 overflow-hidden">
+              <h4 className="font-semibold text-sm truncate">{auth?.user?.name}</h4>
+              <span className="text-xs text-gray-600 truncate">{auth?.user?.email}</span>
             </div>
             <div className="relative">
               <MoreVertical
@@ -59,7 +59,9 @@ export default function Sidebar({ children }) {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               />
               {dropdownOpen && (
-                <DropdownMenuLogout />
+                <div className="absolute bottom-full right-0 z-50">
+                  <DropdownMenuLogout />
+                </div>
               )}
             </div>
           </div>
