@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { HeaderPages } from '../../components/header';
-import { Search, MoreVertical } from 'lucide-react';
+import { Search, MoreVertical, Plus } from 'lucide-react';
 import { TaskData } from '../../stores/data/task.task';
 import Modal from '../../components/modals';
 import DropdownMenu from '../../components/DropdownMenu';
 import EditBusinessModal from '../../components/modals/EditBusiness';
 import MoreDetailsModalBusiness from '../../components/modals/MoreBusiness';
+import CreateBusiness from '../../components/modals/CreateBusiness';
 
 export const BusinessPages = () => {
   const [businesses, setBusinesses] = useState([]);
@@ -74,6 +75,13 @@ export const BusinessPages = () => {
     setFilteredBusinesses(processedBusinesses);
   }, []);
 
+  const handleBusinessCreated = (newBusiness) => {
+    const updatedBusinesses = [...businesses, newBusiness];
+    setBusinesses(updatedBusinesses);
+    setFilteredBusinesses(updatedBusinesses);
+    setOpenModalCreateBusiness(false);
+  };
+
   const handleSearchChange = (e) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
@@ -133,13 +141,14 @@ export const BusinessPages = () => {
         <div className="flex items-center mt-4">
           <p className="text-xs font-bold">
             {filteredBusinesses.length > 0 ? `Tổng (${filteredBusinesses.length}) doanh nghiệp`
-              : "No tasks found"}
+              : "No businesses found"}
           </p>
           <button
-            className="bg-blue-500 text-white ml-8 px-6 py-1 rounded-md text-xs hover:bg-blue-600"
-            onClick={() => setOpenModalCreateBusiness((prev) => !prev)}
+            className="bg-blue-500 text-white ml-8 px-6 py-1 rounded-md text-xs hover:bg-blue-600 flex items-center space-x-1"
+            onClick={() => setOpenModalCreateBusiness(true)}
           >
-            {openModalCreateBusiness ? "Đóng" : "Thêm"}
+            <Plus size={16} />
+            <span>Thêm</span>
           </button>
         </div>
         {/* Business List */}
@@ -217,6 +226,7 @@ export const BusinessPages = () => {
           </div>
         </div>
 
+        {/* Edit Business Modal */}
         <Modal
           isOpen={editModalOpen}
           onClose={() => setEditModalOpen(false)}
@@ -229,12 +239,26 @@ export const BusinessPages = () => {
           />
         </Modal>
 
+        {/* More Details Modal */}
         <Modal
           isOpen={moreModalOpen}
           onClose={() => setMoreModalOpen(false)}
           title="Thông tin chi tiết"
         >
           <MoreDetailsModalBusiness business={selectedBusiness} />
+        </Modal>
+
+        {/* Create Business Modal */}
+        <Modal
+          isOpen={openModalCreateBusiness}
+          onClose={() => setOpenModalCreateBusiness(false)}
+          title="Thêm doanh nghiệp"
+        >
+          <CreateBusiness 
+            closeModal={() => setOpenModalCreateBusiness(false)}
+            businesses={businesses}
+            onBusinessCreated={handleBusinessCreated}
+          />
         </Modal>
       </div>
     </div>
