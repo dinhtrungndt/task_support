@@ -44,15 +44,15 @@ export const CreateTask = ({ closeModal }) => {
                 <input type="text" name="codeData" placeholder="Mã dữ liệu" value={formData.codeData} onChange={handleChange} className="w-full p-1.5 border rounded text-xs" />
                 <select name="typeData" value={formData.typeData} onChange={handleChange} className="w-full p-1.5 border rounded text-xs">
                     <option value="">Chọn loại dữ liệu</option>
-                    <option value="Type 1">Type 1</option>
-                    <option value="Type 2">Type 2</option>
+                    <option value="Type 1">Data</option>
+                    <option value="Type 2">Cloud</option>
                 </select>
                 <input type="date" name="settingDate" value={formData.settingDate} onChange={handleChange} className="w-full p-1.5 border rounded text-xs" />
                 <input type="text" name="creator" placeholder="Người tạo" value={formData.creator} onChange={handleChange} className="w-full p-1.5 border rounded text-xs" />
                 <select name="status" value={formData.status} onChange={handleChange} className="w-full p-1.5 border rounded text-xs">
                     <option value="">Chọn trạng thái</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Approved">Approved</option>
+                    <option value="Pending">Done</option>
+                    <option value="Approved">Pending</option>
                 </select>
             </div>
             <button className="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-600 mt-3 w-full">Create</button>
