@@ -105,7 +105,6 @@ export const TaskPages = () => {
 
   const handleSaveTask = (updatedTask) => {
     console.log('Saving updated task:', updatedTask);
-
     setEditModalOpen(false);
   };
 
@@ -122,6 +121,13 @@ export const TaskPages = () => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
     );
+  };
+
+  const handleDeleteSelected = () => {
+    const tasksToDelete = selectedIds;
+    const remainingTasks = filteredTasks.filter(task => !tasksToDelete.includes(task.id));
+    setFilteredTasks(remainingTasks);
+    setSelectedIds([]);
   };
 
   return (
@@ -196,6 +202,7 @@ export const TaskPages = () => {
           setOpenModalCreateTask={setOpenModalCreateTask}
           setActiveDropdown={setActiveDropdown}
           businesses={businesses}
+          handleDeleteSelected={handleDeleteSelected}
         />
       </div>
 

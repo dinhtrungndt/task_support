@@ -18,11 +18,12 @@ export const Tasks = ({
   openModalCreateTask,
   setOpenModalCreateTask,
   setActiveDropdown,
-  businesses
+  businesses,
+  handleDeleteSelected
 }) => {
 
   if (openModalCreateTask) {
-    return <CreateTask closeModal={() => setOpenModalCreateTask(false)} businesses={businesses}/>;
+    return <CreateTask closeModal={() => setOpenModalCreateTask(false)} businesses={businesses} />;
   }
 
   const getStatusClassName = (status) => {
@@ -53,6 +54,14 @@ export const Tasks = ({
         >
           {openModalCreateTask ? "Close" : "Thêm"}
         </button>
+        {selectedIds.length > 0 && (
+          <button
+            className="bg-red-500 text-white ml-4 px-6 py-1 rounded-md text-xs hover:bg-red-600"
+            onClick={handleDeleteSelected}
+          >
+            Delete Selected
+          </button>
+        )}
       </div>
       {/* Task List */}
       <div className="mt-4 bg-white shadow-md rounded-lg overflow-hidden">
@@ -60,15 +69,13 @@ export const Tasks = ({
           <table className="w-full text-left">
             <thead className="bg-gray-100 text-gray-600 text-sm sticky top-0">
               <tr className='text-xs'>
-                <th scope="col" className="px-3 py-3 text-left">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      checked={selectAll}
-                      onChange={handleSelectAll}
-                    />
-                  </div>
+                <th className="p-3">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4"
+                    onChange={handleSelectAll}
+                    checked={selectAll}
+                  />
                 </th>
                 <th className="p-3">MST</th>
                 <th className="p-3">Tên công ty</th>
@@ -87,15 +94,13 @@ export const Tasks = ({
               {filteredTasks.length > 0 ? (
                 filteredTasks.map((task, index) => (
                   <tr key={index} className="border-t hover:bg-gray-50 text-xs">
-                    <td className="px-3 py-3 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          className="h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                          checked={selectedIds.includes(task._id)}
-                          onChange={() => handleCheckboxChange(task._id)}
-                        />
-                      </div>
+                    <td className="p-3">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4"
+                        checked={selectedIds.includes(task.id)}
+                        onChange={() => handleCheckboxChange(task.id)}
+                      />
                     </td>
                     <td className="p-3">{task.mst}</td>
                     <td className="p-3">{task.name}</td>
