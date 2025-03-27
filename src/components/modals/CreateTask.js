@@ -14,7 +14,8 @@ export const CreateTask = ({ closeModal, businesses = [] }) => {
         typeData: "",
         AtSetting: "",
         userId: { name: "" },
-        status: ""
+        status: "",
+        cancellationReason: ""
     });
 
     const [selectedBusiness, setSelectedBusiness] = useState(null);
@@ -27,7 +28,7 @@ export const CreateTask = ({ closeModal, businesses = [] }) => {
             setFilteredBusinesses(businesses);
         } else {
             const searchTerm = businessSearch.toLowerCase().trim();
-            const filtered = businesses.filter(business => 
+            const filtered = businesses.filter(business =>
                 business.name.toLowerCase().includes(searchTerm) ||
                 business.mst.toLowerCase().includes(searchTerm)
             );
@@ -220,6 +221,20 @@ export const CreateTask = ({ closeModal, businesses = [] }) => {
                     <option value="Pending">Đang làm</option>
                     <option value="Rejected">Từ chối</option>
                 </select>
+
+                {/* Conditionally render cancellation reason input if status is "Rejected" */}
+                {formData.status === "Rejected" && (
+                    <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Lý do hủy</label>
+                        <textarea 
+                            name="cancellationReason"
+                            value={formData.cancellationReason}
+                            onChange={handleChange}
+                            className="w-full p-2 border rounded text-xs"
+                            placeholder="Nhập lý do hủy"
+                        />
+                    </div>
+                )}
             </div>
             <button 
                 className="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-600 mt-3 w-full"
