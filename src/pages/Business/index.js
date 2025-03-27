@@ -145,87 +145,95 @@ export const BusinessPages = () => {
           </p>
           <button
             className="bg-blue-500 text-white ml-8 px-6 py-1 rounded-md text-xs hover:bg-blue-600 flex items-center space-x-1"
-            onClick={() => setOpenModalCreateBusiness(true)}
+            onClick={() => setOpenModalCreateBusiness((prev) => !prev)}
           >
-            <Plus size={16} />
-            <span>Thêm</span>
+            <span>{openModalCreateBusiness ? "- Close" : "+ Thêm"}</span>
           </button>
-        </div>
-        {/* Business List */}
-        <div className="mt-4 bg-white shadow-md rounded-lg overflow-hidden">
-          <div className="max-h-96 overflow-y-auto">
-            <table className="w-full text-left">
-              <thead className="bg-gray-100 text-gray-600 text-sm sticky top-0">
-                <tr className='text-xs'>
-                  <th className="p-3">MST</th>
-                  <th className="p-3">Tên công ty</th>
-                  <th className="p-3">Địa chỉ</th>
-                  <th className="p-3">Số lần</th>
-                  <th className="p-3">Hoàn thành</th>
-                  <th className='p-3'>Đang làm</th>
-                  <th className='p-3'>Từ chối</th>
-                  <th className="p-3">Loại dữ liệu</th>
-                  <th className="p-3">Người lắp đặt</th>
-                  <th className="p-3">Ngày cập nhật</th>
-                  <th className="p-3"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredBusinesses.length > 0 ? (
-                  filteredBusinesses.map((business, index) => (
-                    <tr key={business.id} className="border-t hover:bg-gray-50 text-xs">
-                      <td className="p-3">{business.mst}</td>
-                      <td className="p-3">{business.name}</td>
-                      <td className="p-3">{business.address}</td>
-                      <td className="p-3 bg-cyan-100 text-cyan-600 border border-cyan-200 ">{business.totalTasks}</td>
-                      <td className="p-3 bg-green-100 text-green-600 border border-green-200 ">{business.completedTasks}</td>
-                      <td className="p-3 bg-orange-100 text-orange-600 border border-orange-200">{business.pendingTasks}</td>
-                      <td className="p-3 bg-red-100 text-red-600 border border-red-200">{business.rejectedTasks}</td>
-                      <td className="p-3">{business.dataTypes.join(', ')}</td>
-                      <td className='p-3'>{business.PInstaller}</td>
-                      <td className="p-3">{new Date(business.lastModified).toLocaleDateString()}</td>
-                      <td className="p-3 text-right relative">
-                        <div>
-                          <MoreVertical
-                            className="cursor-pointer"
-                            size={18}
-                            onClick={() => toggleDropdown(index)}
-                          />
-                          <DropdownMenu
-                            isOpen={activeDropdown === index}
-                            onEdit={() => handleEditBusiness(business)}
-                            onMore={() => handleMoreOptions(business)}
-                            onClose={() => setActiveDropdown(null)}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={10} className="px-3 py-8 text-center text-sm text-gray-500">
-                      <div className="flex flex-col items-center justify-center">
-                        <svg className="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <p className="text-gray-500">No businesses found</p>
-                        {searchTerm && (
-                          <button
-                            className="mt-2 text-blue-600 hover:text-blue-800"
-                            onClick={() => setSearchTerm("")}
-                          >
-                            Clear search
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
 
+        </div>
+        {openModalCreateBusiness ? (
+          <CreateBusiness
+            closeModal={() => setOpenModalCreateBusiness(false)}
+            businesses={businesses}
+            onBusinessCreated={handleBusinessCreated}
+          />
+        ) : (
+          <>
+            {/* Business List */}
+            <div className="mt-4 bg-white shadow-md rounded-lg overflow-hidden">
+              <div className="max-h-96 overflow-y-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-gray-100 text-gray-600 text-sm sticky top-0">
+                    <tr className='text-xs'>
+                      <th className="p-3">MST</th>
+                      <th className="p-3">Tên công ty</th>
+                      <th className="p-3">Địa chỉ</th>
+                      <th className="p-3">Số lần</th>
+                      <th className="p-3">Hoàn thành</th>
+                      <th className='p-3'>Đang làm</th>
+                      <th className='p-3'>Từ chối</th>
+                      <th className="p-3">Loại dữ liệu</th>
+                      <th className="p-3">Người lắp đặt</th>
+                      <th className="p-3">Ngày cập nhật</th>
+                      <th className="p-3"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredBusinesses.length > 0 ? (
+                      filteredBusinesses.map((business, index) => (
+                        <tr key={business.id} className="border-t hover:bg-gray-50 text-xs">
+                          <td className="p-3">{business.mst}</td>
+                          <td className="p-3">{business.name}</td>
+                          <td className="p-3">{business.address}</td>
+                          <td className="p-3 bg-cyan-100 text-cyan-600 border border-cyan-200 ">{business.totalTasks}</td>
+                          <td className="p-3 bg-green-100 text-green-600 border border-green-200 ">{business.completedTasks}</td>
+                          <td className="p-3 bg-orange-100 text-orange-600 border border-orange-200">{business.pendingTasks}</td>
+                          <td className="p-3 bg-red-100 text-red-600 border border-red-200">{business.rejectedTasks}</td>
+                          <td className="p-3">{business.dataTypes.join(', ')}</td>
+                          <td className='p-3'>{business.PInstaller}</td>
+                          <td className="p-3">{new Date(business.lastModified).toLocaleDateString()}</td>
+                          <td className="p-3 text-right relative">
+                            <div>
+                              <MoreVertical
+                                className="cursor-pointer"
+                                size={18}
+                                onClick={() => toggleDropdown(index)}
+                              />
+                              <DropdownMenu
+                                isOpen={activeDropdown === index}
+                                onEdit={() => handleEditBusiness(business)}
+                                onMore={() => handleMoreOptions(business)}
+                                onClose={() => setActiveDropdown(null)}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={10} className="px-3 py-8 text-center text-sm text-gray-500">
+                          <div className="flex flex-col items-center justify-center">
+                            <svg className="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p className="text-gray-500">No businesses found</p>
+                            {searchTerm && (
+                              <button
+                                className="mt-2 text-blue-600 hover:text-blue-800"
+                                onClick={() => setSearchTerm("")}
+                              >
+                                Clear search
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>)}
         {/* Edit Business Modal */}
         <Modal
           isOpen={editModalOpen}
@@ -246,19 +254,6 @@ export const BusinessPages = () => {
           title="Thông tin chi tiết"
         >
           <MoreDetailsModalBusiness business={selectedBusiness} />
-        </Modal>
-
-        {/* Create Business Modal */}
-        <Modal
-          isOpen={openModalCreateBusiness}
-          onClose={() => setOpenModalCreateBusiness(false)}
-          title="Thêm doanh nghiệp"
-        >
-          <CreateBusiness 
-            closeModal={() => setOpenModalCreateBusiness(false)}
-            businesses={businesses}
-            onBusinessCreated={handleBusinessCreated}
-          />
         </Modal>
       </div>
     </div>

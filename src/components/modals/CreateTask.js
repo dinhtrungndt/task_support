@@ -1,6 +1,7 @@
 import { X, Search } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { TaskData } from '../../stores/data/task.task';
+import { toast } from 'react-toastify';
 
 export const CreateTask = ({ closeModal, businesses = [] }) => {
     const [formData, setFormData] = useState({
@@ -57,7 +58,7 @@ export const CreateTask = ({ closeModal, businesses = [] }) => {
     const handleSubmit = () => {
         // Basic validation
         if (!formData.mst || !formData.name || !formData.status) {
-            alert("Please fill in required fields");
+            toast.error("Vui lòng điền đầy đủ thông tin");
             return;
         }
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { TaskData } from '../../stores/data/task.task';
 import { HeaderPages } from '../header';
+import { toast } from 'react-toastify';
 
 export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) => {
     const [formData, setFormData] = useState({
@@ -24,7 +25,7 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
 
     const handleSubmit = () => {
         if (!formData.mst || !formData.name) {
-            alert("Vui lòng điền MST và Tên công ty");
+            toast.error("Vui lòng điền đầy đủ thông tin");
             return;
         }
 
@@ -50,100 +51,100 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
     };
 
     return (
-            <div className="container mx-auto p-4 pb-0">
-                <div className="bg-white shadow-md rounded-xl p-6">
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">MST</label>
-                                <input 
-                                    type="text" 
-                                    name="mst" 
-                                    value={formData.mst} 
-                                    onChange={handleChange} 
-                                    className="w-full p-2 border border-gray-300 rounded-md text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all" 
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Tên công ty</label>
-                                <input 
-                                    type="text" 
-                                    name="name" 
-                                    value={formData.name} 
-                                    onChange={handleChange} 
-                                    className="w-full p-2 border border-gray-300 rounded-md text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all" 
-                                    required
-                                />
-                            </div>
-                        </div>
-
+        <div className="container mx-auto p-4 pb-0">
+            <div className="bg-white shadow-lg rounded-lg p-6 max-w-3xl mx-auto">
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Địa chỉ</label>
-                            <input 
-                                type="text" 
-                                name="address" 
-                                value={formData.address} 
-                                onChange={handleChange} 
-                                className="w-full p-2 border border-gray-300 rounded-md text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all" 
+                            <label className="block text-sm font-medium text-gray-700 mb-2">MST</label>
+                            <input
+                                type="text"
+                                name="mst"
+                                value={formData.mst}
+                                onChange={handleChange}
+                                className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                required
                             />
                         </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Người liên hệ</label>
-                                <input 
-                                    type="text" 
-                                    name="contactPerson" 
-                                    value={formData.contactPerson} 
-                                    onChange={handleChange} 
-                                    className="w-full p-2 border border-gray-300 rounded-md text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all" 
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Số điện thoại</label>
-                                <input 
-                                    type="tel" 
-                                    name="phone" 
-                                    value={formData.phone} 
-                                    onChange={handleChange} 
-                                    className="w-full p-2 border border-gray-300 rounded-md text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all" 
-                                />
-                            </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Tên công ty</label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                required
+                            />
                         </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
-                                <input 
-                                    type="email" 
-                                    name="email" 
-                                    value={formData.email} 
-                                    onChange={handleChange} 
-                                    className="w-full p-2 border border-gray-300 rounded-md text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all" 
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Người cài đặt</label>
-                                <input 
-                                    type="text" 
-                                    name="PInstaller" 
-                                    value={formData.PInstaller} 
-                                    onChange={handleChange} 
-                                    className="w-full p-2 border border-gray-300 rounded-md text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all" 
-                                />
-                            </div>
-                        </div>
-
-                        <button 
-                            className="w-full bg-blue-500 text-white py-2.5 rounded-lg text-xs font-semibold hover:bg-blue-600 transition-colors duration-300 ease-in-out"
-                            onClick={handleSubmit}
-                        >
-                            Tạo doanh nghiệp
-                        </button>
                     </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Địa chỉ</label>
+                        <input
+                            type="text"
+                            name="address"
+                            value={formData.address}
+                            onChange={handleChange}
+                            className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Người liên hệ</label>
+                            <input
+                                type="text"
+                                name="contactPerson"
+                                value={formData.contactPerson}
+                                onChange={handleChange}
+                                className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
+                            <input
+                                type="tel"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Người cài đặt</label>
+                            <input
+                                type="text"
+                                name="PInstaller"
+                                value={formData.PInstaller}
+                                onChange={handleChange}
+                                className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        className="w-full bg-blue-500 text-white py-3 rounded-lg text-sm font-semibold hover:bg-blue-600 transition-colors duration-300 ease-in-out"
+                        onClick={handleSubmit}
+                    >
+                        Tạo doanh nghiệp
+                    </button>
                 </div>
             </div>
+        </div>
     );
 };
 
