@@ -1,99 +1,43 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { HeaderPages } from '../../components/header';
-import { Search, MoreVertical, Plus } from 'lucide-react';
-import { TaskData } from '../../stores/data/task.task';
+import { Search, MoreVertical } from 'lucide-react';
 import Modal from '../../components/modals';
 import DropdownMenu from '../../components/DropdownMenu';
 import EditBusinessModal from '../../components/modals/EditBusiness';
 import MoreDetailsModalBusiness from '../../components/modals/MoreBusiness';
 import CreateBusiness from '../../components/modals/CreateBusiness';
+import { fetchBusinesses, deleteBusinesses } from '../../stores/redux/actions/businessActions';
 
 export const BusinessPages = () => {
-  const [businesses, setBusinesses] = useState([]);
+  const dispatch = useDispatch();
+  const { businesses, loading, error } = useSelector(state => state.business);
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredBusinesses, setFilteredBusinesses] = useState([]);
+  const [filteredBusinesses, setFilteredBusinesses] = useState(businesses);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [moreModalOpen, setMoreModalOpen] = useState(false);
   const [openModalCreateBusiness, setOpenModalCreateBusiness] = useState(false);
-  const [selectedBusinessIds, setSelectedBusinessIds] = useState([]); 
+  const [selectedBusinessIds, setSelectedBusinessIds] = useState([]);
 
   useEffect(() => {
-    const extractBusinesses = () => {
-      const businessMap = new Map();
+    dispatch(fetchBusinesses());
+  }, [dispatch]);
 
-      TaskData.forEach(task => {
-        if (!businessMap.has(task.mst)) {
-          businessMap.set(task.mst, {
-            id: task.mst,
-            mst: task.mst,
-            name: task.name,
-            address: task.address,
-            contactPerson: task.userId?.name || 'N/A',
-            PInstaller: task.PInstaller,
-            phone: '',
-            email: '',
-            totalTasks: 0,
-            completedTasks: 0,
-            pendingTasks: 0,
-            rejectedTasks: 0,
-            dataTypes: [],
-            installationHistory: [],
-            lastModified: new Date().toISOString()
-          });
-        }
-
-        const business = businessMap.get(task.mst);
-
-        business.totalTasks++;
-        if (task.status === 'Done') business.completedTasks++;
-        if (task.status === 'Pending') business.pendingTasks++;
-        if (task.status === 'Rejected') business.rejectedTasks++;
-
-        if (!business.dataTypes.includes(task.typeData)) {
-          business.dataTypes.push(task.typeData);
-        }
-
-        business.installationHistory.push({
-          date: task.AtSetting,
-          type: task.typeData,
-          installer: task.PInstaller,
-          connectionType: task.connectionType,
-          PInstaller: task.PInstaller,
-          status: task.status,
-          notes: task.codeData
-        });
-
-        business.lastModified = new Date().toISOString();
-      });
-
-      return Array.from(businessMap.values());
-    };
-
-    const processedBusinesses = extractBusinesses();
-    setBusinesses(processedBusinesses);
-    setFilteredBusinesses(processedBusinesses);
-  }, []);
-
-  const handleBusinessCreated = (newBusiness) => {
-    const updatedBusinesses = [...businesses, newBusiness];
-    setBusinesses(updatedBusinesses);
-    setFilteredBusinesses(updatedBusinesses);
-    setOpenModalCreateBusiness(false);
-  };
+  useEffect(() => {
+    setFilteredBusinesses(
+      businesses.filter(business =>
+        business.mst.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        business.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        business.address.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [businesses, searchTerm]);
 
   const handleSearchChange = (e) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-
-    const filtered = businesses.filter(business =>
-      business.mst.toLowerCase().includes(term) ||
-      business.name.toLowerCase().includes(term) ||
-      business.address.toLowerCase().includes(term)
-    );
-
-    setFilteredBusinesses(filtered);
+    setSearchTerm(e.target.value);
   };
 
   const toggleDropdown = (index) => {
@@ -110,7 +54,6 @@ export const BusinessPages = () => {
     const updatedBusinesses = businesses.map(b =>
       b.id === updatedBusiness.id ? updatedBusiness : b
     );
-    setBusinesses(updatedBusinesses);
     setFilteredBusinesses(updatedBusinesses);
     setEditModalOpen(false);
   };
@@ -121,24 +64,34 @@ export const BusinessPages = () => {
     setActiveDropdown(null);
   };
 
-  // Handle checkbox change
+  const handleSelectAllChange = () => {
+    if (selectedBusinessIds.length === filteredBusinesses.length) {
+      setSelectedBusinessIds([]); 
+    } else {
+      setSelectedBusinessIds(filteredBusinesses.map(business => business._id));
+    }
+  };
+
   const handleCheckboxChange = (businessId) => {
     setSelectedBusinessIds((prevSelectedIds) => {
       if (prevSelectedIds.includes(businessId)) {
         return prevSelectedIds.filter(id => id !== businessId);
       } else {
-        return [...prevSelectedIds, businessId];
+        return [...prevSelectedIds, businessId]; 
       }
     });
   };
 
-  // Handle delete selected businesses
   const handleDeleteSelected = () => {
-    const businessesToDelete = selectedBusinessIds;
-    const remainingBusinesses = businesses.filter(business => !businessesToDelete.includes(business.id));
-    setBusinesses(remainingBusinesses);
-    setFilteredBusinesses(remainingBusinesses);
-    setSelectedBusinessIds([]);
+    if (selectedBusinessIds.length > 0) {
+      const confirmation = window.confirm(`Bạn có chắc chắn muốn xóa ${selectedBusinessIds.length} doanh nghiệp?`);
+      if (confirmation) {
+        dispatch(deleteBusinesses(selectedBusinessIds)).then(() => {
+          setFilteredBusinesses(filteredBusinesses.filter(business => !selectedBusinessIds.includes(business._id)));
+          setSelectedBusinessIds([]);
+        });
+      }
+    }
   };
 
   return (
@@ -158,7 +111,8 @@ export const BusinessPages = () => {
             <Search className="mr-2 ml-2" color='#9ca3af' size={18} />
           </div>
         </div>
-        {/* Text and create business*/}
+
+        {/* Text and create business */}
         <div className="flex items-center mt-4">
           <p className="text-xs font-bold">
             {filteredBusinesses.length > 0 ? `Tổng (${filteredBusinesses.length}) doanh nghiệp`
@@ -182,11 +136,14 @@ export const BusinessPages = () => {
           )}
         </div>
 
+        {/* Modal for creating a business */}
         {openModalCreateBusiness ? (
           <CreateBusiness
             closeModal={() => setOpenModalCreateBusiness(false)}
             businesses={businesses}
-            onBusinessCreated={handleBusinessCreated}
+            onBusinessCreated={(newBusiness) => {
+              setFilteredBusinesses([...businesses, newBusiness]);
+            }}
           />
         ) : (
           <>
@@ -196,18 +153,11 @@ export const BusinessPages = () => {
                 <table className="w-full text-left">
                   <thead className="bg-gray-100 text-gray-600 text-sm sticky top-0">
                     <tr className='text-xs'>
-                      {/* Checkbox Column */}
-                      <th className="p-3">
+                    <th className="p-3">
                         <input
                           type="checkbox"
                           className="h-4 w-4"
-                          onChange={() => {
-                            if (selectedBusinessIds.length === filteredBusinesses.length) {
-                              setSelectedBusinessIds([]); 
-                            } else {
-                              setSelectedBusinessIds(filteredBusinesses.map(business => business.id));
-                            }
-                          }}
+                          onChange={handleSelectAllChange} 
                           checked={selectedBusinessIds.length === filteredBusinesses.length}
                         />
                       </th>
@@ -227,13 +177,13 @@ export const BusinessPages = () => {
                   <tbody>
                     {filteredBusinesses.length > 0 ? (
                       filteredBusinesses.map((business, index) => (
-                        <tr key={business.id} className="border-t hover:bg-gray-50 text-xs">
-                          <td className="p-3">
+                        <tr key={business._id} className="border-t hover:bg-gray-50 text-xs">
+                        <td className="p-3">
                             <input
                               type="checkbox"
                               className="h-4 w-4"
-                              checked={selectedBusinessIds.includes(business.id)}
-                              onChange={() => handleCheckboxChange(business.id)}
+                              checked={selectedBusinessIds.includes(business._id)}
+                              onChange={() => handleCheckboxChange(business._id)}
                             />
                           </td>
                           <td className="p-3">{business.mst}</td>
