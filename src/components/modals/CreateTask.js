@@ -1,9 +1,13 @@
 import { X, Search } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import { TaskData } from '../../stores/data/task.task';
 import { toast } from 'react-toastify';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchBusinesses } from '../../stores/redux/actions/businessActions';
 
-export const CreateTask = ({ closeModal, businesses = [] }) => {
+export const CreateTask = ({ closeModal }) => {
+    const dispatch = useDispatch();
+    const { businesses } = useSelector(state => state.business);
+    
     const [formData, setFormData] = useState({
         mst: "",
         name: "",
@@ -22,7 +26,12 @@ export const CreateTask = ({ closeModal, businesses = [] }) => {
     const [businessSearch, setBusinessSearch] = useState('');
     const [filteredBusinesses, setFilteredBusinesses] = useState(businesses);
 
-    // Search businesses whenever the search term changes
+    useEffect(() => {
+        if (!businesses.length) {
+            dispatch(fetchBusinesses()); 
+        }
+    }, [dispatch, businesses.length]);
+
     useEffect(() => {
         if (businessSearch.trim() === '') {
             setFilteredBusinesses(businesses);
@@ -52,38 +61,32 @@ export const CreateTask = ({ closeModal, businesses = [] }) => {
             name: business.name,
             address: business.address
         }));
-        // Optional: Clear search after selection
         setBusinessSearch('');
     };
 
     const handleSubmit = () => {
-        // Basic validation
         if (!formData.mst || !formData.name || !formData.status) {
             toast.error("Vui lòng điền đầy đủ thông tin");
             return;
         }
 
-        // Add new task to TaskData (in a real app, this would be an API call)
         const newTask = {
             ...formData,
-            _id: Date.now().toString(), // Temporary ID generation
+            _id: Date.now().toString(),
             userId: {
                 name: formData.userId.name || "Current User"
             }
         };
 
-        TaskData.push(newTask);
+        console.log('New Task:', newTask);
         
-        // Reset form or close modal
         closeModal();
     };
 
     return (
         <div className="bg-white shadow-md rounded-lg p-5 text-sm">
             <div className="flex justify-between items-center border-b pb-2">
-                <div className='flex items-center'>
-                    <h2 className="text-base font-semibold">Thêm dịch vụ</h2>
-                </div>
+                <h2 className="text-base font-semibold">Thêm dịch vụ</h2>
                 <button onClick={closeModal}>
                     <X size={18} className="cursor-pointer hover:text-red-500" />
                 </button>
@@ -92,8 +95,6 @@ export const CreateTask = ({ closeModal, businesses = [] }) => {
             {/* Business Selection Section */}
             <div className="mt-3 mb-3 border-b pb-3">
                 <h3 className="text-xs font-semibold mb-2">Chọn doanh nghiệp</h3>
-                
-                {/* Search Input */}
                 <div className="flex items-center border rounded mb-2">
                     <Search className="ml-2 text-gray-400" size={16} />
                     <input 
@@ -105,7 +106,6 @@ export const CreateTask = ({ closeModal, businesses = [] }) => {
                     />
                 </div>
 
-                {/* Business List */}
                 <div className="max-h-32 overflow-y-auto border rounded">
                     {filteredBusinesses.length > 0 ? (
                         filteredBusinesses.map((business) => (
@@ -222,18 +222,14 @@ export const CreateTask = ({ closeModal, businesses = [] }) => {
                     <option value="Rejected">Từ chối</option>
                 </select>
 
-                {/* Conditionally render cancellation reason input if status is "Rejected" */}
                 {formData.status === "Rejected" && (
-                    <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Lý do hủy</label>
-                        <textarea 
-                            name="cancellationReason"
-                            value={formData.cancellationReason}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded text-xs"
-                            placeholder="Nhập lý do hủy"
-                        />
-                    </div>
+                    <textarea 
+                        name="cancellationReason"
+                        value={formData.cancellationReason}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded text-xs"
+                        placeholder="Nhập lý do hủy"
+                    />
                 )}
             </div>
             <button 
