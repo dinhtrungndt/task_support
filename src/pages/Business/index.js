@@ -17,6 +17,7 @@ export const BusinessPages = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [moreModalOpen, setMoreModalOpen] = useState(false);
   const [openModalCreateBusiness, setOpenModalCreateBusiness] = useState(false);
+  const [selectedBusinessIds, setSelectedBusinessIds] = useState([]); 
 
   useEffect(() => {
     const extractBusinesses = () => {
@@ -120,6 +121,26 @@ export const BusinessPages = () => {
     setActiveDropdown(null);
   };
 
+  // Handle checkbox change
+  const handleCheckboxChange = (businessId) => {
+    setSelectedBusinessIds((prevSelectedIds) => {
+      if (prevSelectedIds.includes(businessId)) {
+        return prevSelectedIds.filter(id => id !== businessId);
+      } else {
+        return [...prevSelectedIds, businessId];
+      }
+    });
+  };
+
+  // Handle delete selected businesses
+  const handleDeleteSelected = () => {
+    const businessesToDelete = selectedBusinessIds;
+    const remainingBusinesses = businesses.filter(business => !businessesToDelete.includes(business.id));
+    setBusinesses(remainingBusinesses);
+    setFilteredBusinesses(remainingBusinesses);
+    setSelectedBusinessIds([]);
+  };
+
   return (
     <div>
       <HeaderPages title="Businesses" />
@@ -150,7 +171,17 @@ export const BusinessPages = () => {
             <span>{openModalCreateBusiness ? "- Close" : "+ Thêm"}</span>
           </button>
 
+          {/* Button to delete selected businesses */}
+          {selectedBusinessIds.length > 0 && (
+            <button
+              className="bg-red-500 text-white ml-4 px-6 py-1 rounded-md text-xs hover:bg-red-600"
+              onClick={handleDeleteSelected}
+            >
+              Delete Selected
+            </button>
+          )}
         </div>
+
         {openModalCreateBusiness ? (
           <CreateBusiness
             closeModal={() => setOpenModalCreateBusiness(false)}
@@ -165,6 +196,21 @@ export const BusinessPages = () => {
                 <table className="w-full text-left">
                   <thead className="bg-gray-100 text-gray-600 text-sm sticky top-0">
                     <tr className='text-xs'>
+                      {/* Checkbox Column */}
+                      <th className="p-3">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4"
+                          onChange={() => {
+                            if (selectedBusinessIds.length === filteredBusinesses.length) {
+                              setSelectedBusinessIds([]); 
+                            } else {
+                              setSelectedBusinessIds(filteredBusinesses.map(business => business.id));
+                            }
+                          }}
+                          checked={selectedBusinessIds.length === filteredBusinesses.length}
+                        />
+                      </th>
                       <th className="p-3">MST</th>
                       <th className="p-3">Tên công ty</th>
                       <th className="p-3">Địa chỉ</th>
@@ -182,6 +228,14 @@ export const BusinessPages = () => {
                     {filteredBusinesses.length > 0 ? (
                       filteredBusinesses.map((business, index) => (
                         <tr key={business.id} className="border-t hover:bg-gray-50 text-xs">
+                          <td className="p-3">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4"
+                              checked={selectedBusinessIds.includes(business.id)}
+                              onChange={() => handleCheckboxChange(business.id)}
+                            />
+                          </td>
                           <td className="p-3">{business.mst}</td>
                           <td className="p-3">{business.name}</td>
                           <td className="p-3">{business.address}</td>
