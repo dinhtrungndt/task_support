@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { HeaderPages } from '../../components/header';
 import { Search } from 'lucide-react';
-import { TaskData } from '../../stores/data/task.task';
+import { useDispatch, useSelector } from 'react-redux';
 import Modal from '../../components/modals';
 import EditTaskModal from '../../components/modals/EditTask';
 import MoreDetailsModal from '../../components/modals/MoreTask';
 import { Tasks } from '../../components/Tasks';
+import { fetchBusinesses } from '../../stores/redux/actions/businessActions';
 
 export const TaskPages = () => {
+  const dispatch = useDispatch();
+  const { businesses } = useSelector(state => state.business);
+
   const [openModalCreateTask, setOpenModalCreateTask] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredTasks, setFilteredTasks] = useState(TaskData);
+  const [filteredTasks, setFilteredTasks] = useState([]);
   const [activeFilter, setActiveFilter] = useState('All');
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -18,60 +22,43 @@ export const TaskPages = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [businesses, setBusinesses] = useState([]);
 
   useEffect(() => {
-    const extractBusinesses = () => {
-      const businessMap = new Map();
-
-      TaskData.forEach(task => {
-        if (!businessMap.has(task.mst)) {
-          businessMap.set(task.mst, {
-            id: task.mst,
-            mst: task.mst,
-            name: task.name,
-            address: task.address
-          });
-        }
-      });
-
-      return Array.from(businessMap.values());
-    };
-
-    const processedBusinesses = extractBusinesses();
-    setBusinesses(processedBusinesses);
-  }, []);
+    dispatch(fetchBusinesses());
+  }, [dispatch]);
 
   useEffect(() => {
     filterTasks();
-  }, [searchTerm, activeFilter]);
+  }, [searchTerm, activeFilter, businesses]);
 
   const filterTasks = () => {
-    let results = TaskData;
-  
+    let results = businesses;
+
     if (activeFilter !== 'All') {
       const statusMap = {
         Done: 'Done',
         Pending: 'Pending',
-        rejected: 'Rejected'
+        Rejected: 'Rejected'
       };
-      results = results.filter(task => task.status === statusMap[activeFilter]);
+      results = results.filter(task => task.installationHistory[0].status === statusMap[activeFilter]);
     }
-  
+
     if (searchTerm.trim() !== '') {
-      const term = searchTerm.toLowerCase().trim();
+      const searchTermLower = searchTerm.toLowerCase().trim();
       results = results.filter(task =>
-        task.mst.toLowerCase().includes(term) ||
-        task.name.toLowerCase().includes(term) ||
-        task.address.toLowerCase().includes(term) ||
-        task.connectionType.toLowerCase().includes(term) ||
-        task.PInstaller.toLowerCase().includes(term) ||
-        task.codeData.toLowerCase().includes(term) ||
-        task.typeData.toLowerCase().includes(term) ||
-        (task.userId.name && task.userId.name.toLowerCase().includes(term))
+        task.name.toLowerCase().includes(searchTermLower) ||
+        task.mst.toLowerCase().includes(searchTermLower) ||
+        task.address.toLowerCase().includes(searchTermLower) ||
+        task.connectionType.toLowerCase().includes(searchTermLower) ||
+        task.PInstaller.toLowerCase().includes(searchTermLower) ||
+        task.codeData.toLowerCase().includes(searchTermLower) ||
+        task.installationHistory[0].type.toLowerCase().includes(searchTermLower) ||
+        task.installationHistory[0].date.toLowerCase().includes(searchTermLower) ||
+        task.installationHistory[0].installer.toLowerCase().includes(searchTermLower) ||
+        task.installationHistory[0].status.toLowerCase().includes(searchTermLower)
       );
     }
-  
+
     setFilteredTasks(results);
   };
 
@@ -176,11 +163,11 @@ export const TaskPages = () => {
               Pending
             </button>
             <button
-              className={`px-4 py-1 rounded-full text-xs ${activeFilter === 'rejected'
+              className={`px-4 py-1 rounded-full text-xs ${activeFilter === 'Rejected'
                 ? 'bg-yellow-100 text-yellow-600 border border-yellow-200'
                 : 'bg-gray-100 text-gray-600 border border-gray-200'
                 } hover:bg-yellow-50`}
-              onClick={() => handleFilterClick('rejected')}
+              onClick={() => handleFilterClick('Rejected')}
             >
               Rejected
             </button>

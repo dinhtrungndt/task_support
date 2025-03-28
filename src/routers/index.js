@@ -25,8 +25,6 @@ export const Routers = () => {
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<OverviewPages />} />
           </Route>
-          {/* <Route path="/login"element={user ? <Navigate to="/" /> : <Login />} />
-          <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} /> */}
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

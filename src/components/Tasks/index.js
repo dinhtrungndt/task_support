@@ -85,7 +85,7 @@ export const Tasks = ({
                 <th className="p-3">Mã dữ liệu</th>
                 <th className="p-3">Loại dữ liệu</th>
                 <th className="p-3">Ngày lắp</th>
-                <th className="p-3">Người tạo</th>
+                <th className="p-3">Người cài</th>
                 <th className="p-3">Trạng thái</th>
                 <th className="p-3"></th>
               </tr>
@@ -108,12 +108,12 @@ export const Tasks = ({
                     <td className="p-3">{task.connectionType}</td>
                     <td className="p-3">{task.PInstaller}</td>
                     <td className="p-3">{task.codeData}</td>
-                    <td className="p-3">{task.typeData}</td>
-                    <td className="p-3">{task.AtSetting}</td>
-                    <td className="p-3">{task.userId.name}</td>
+                    <td className="p-3">{task.installationHistory[0].type}</td>
+                    <td className="p-3">{task.installationHistory[0].date}</td>
+                    <td className="p-3">{task.installationHistory[0].installer}</td>
                     <td className="p-3">
-                      <span className={` py-0.5 rounded-full text-xs ${getStatusClassName(task.status)}`}>
-                        {task.status}
+                      <span className={` py-0.5 rounded-full text-xs ${getStatusClassName(task.installationHistory[0].status)}`}>
+                        {task.installationHistory[0].status}
                       </span>
                     </td>
                     <td className="p-3 text-right relative">
