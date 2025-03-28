@@ -1,5 +1,5 @@
 import React from 'react';
-import { MoreVertical } from 'lucide-react';
+import { MoreVertical, AlertTriangle } from 'lucide-react';
 import DropdownMenu from '../../components/DropdownMenu';
 import { CreateTask } from '../../components/modals/CreateTask';
 
@@ -19,7 +19,8 @@ export const Tasks = ({
   setOpenModalCreateTask,
   setActiveDropdown,
   businesses,
-  handleDeleteSelected
+  handleDeleteSelected,
+  loading
 }) => {
 
   if (openModalCreateTask) {
@@ -29,134 +30,132 @@ export const Tasks = ({
   const getStatusClassName = (status) => {
     switch (status) {
       case "Done":
-        return "bg-green-100 text-green-600 px-4";
+        return "bg-green-100 text-green-800";
       case "Pending":
-        return "bg-orange-100 text-orange-600 px-2";
+        return "bg-amber-100 text-amber-800";
       case "Rejected":
-        return "bg-pink-100 text-pink-600 px-2";
+        return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-600 px-2";
+        return "bg-gray-100 text-gray-600";
     }
   };
 
-  return (
-    <>
-      {/* Text and create task*/}
-      <div className="flex items-center mt-4">
-        <p className="text-xs font-bold">
-          {filteredTasks.length > 0
-            ? `All Tasks (${filteredTasks.length})`
-            : "No tasks found"}
-        </p>
-        <button
-          className="bg-blue-500 text-white ml-8 px-6 py-1 rounded-md text-xs hover:bg-blue-600"
-          onClick={() => setOpenModalCreateTask((prev) => !prev)}
-        >
-          {openModalCreateTask ? "Close" : "Thêm"}
-        </button>
-        {selectedIds.length > 0 && (
-          <button
-            className="bg-red-500 text-white ml-4 px-6 py-1 rounded-md text-xs hover:bg-red-600"
-            onClick={handleDeleteSelected}
-          >
-            Delete Selected
-          </button>
-        )}
+  // Function to safely access installation history
+  const getInstallationData = (task, property, defaultValue = 'N/A') => {
+    if (!task || !task.installationHistory || !task.installationHistory[0]) {
+      return defaultValue;
+    }
+    return task.installationHistory[0][property] || defaultValue;
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white shadow-sm rounded-lg p-8 text-center">
+        <div className="flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-3"></div>
+          <p className="text-gray-500">Đang tải dữ liệu...</p>
+        </div>
       </div>
-      {/* Task List */}
-      <div className="mt-4 bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="max-h-96 overflow-y-auto">
-          <table className="w-full text-left">
-            <thead className="bg-gray-100 text-gray-600 text-sm sticky top-0">
-              <tr className='text-xs'>
-                <th className="p-3">
+    );
+  }
+
+  return (
+    <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left">
+          <thead className="bg-gray-50 text-gray-600 text-xs font-medium uppercase tracking-wider">
+            <tr>
+              <th className="p-3 border-b">
+                <div className="flex items-center">
                   <input
                     type="checkbox"
-                    className="h-4 w-4"
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     onChange={handleSelectAll}
-                    checked={selectAll}
+                    checked={selectAll && filteredTasks.length > 0}
                   />
-                </th>
-                <th className="p-3">MST</th>
-                <th className="p-3">Tên công ty</th>
-                <th className="p-3">Địa chỉ</th>
-                <th className="p-3">Loại kết nối</th>
-                <th className="p-3">Người lắp đặt</th>
-                <th className="p-3">Mã dữ liệu</th>
-                <th className="p-3">Loại dữ liệu</th>
-                <th className="p-3">Ngày lắp</th>
-                <th className="p-3">Người cài</th>
-                <th className="p-3">Trạng thái</th>
-                <th className="p-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTasks.length > 0 ? (
-                filteredTasks.map((task, index) => (
-                  <tr key={index} className="border-t hover:bg-gray-50 text-xs">
-                    <td className="p-3">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4"
-                        checked={selectedIds.includes(task.id)}
-                        onChange={() => handleCheckboxChange(task.id)}
+                </div>
+              </th>
+              <th className="p-3 border-b">MST</th>
+              <th className="p-3 border-b">Tên công ty</th>
+              <th className="p-3 border-b">Địa chỉ</th>
+              <th className="p-3 border-b">Loại kết nối</th>
+              <th className="p-3 border-b">Người lắp đặt</th>
+              <th className="p-3 border-b">Mã dữ liệu</th>
+              <th className="p-3 border-b">Loại dữ liệu</th>
+              <th className="p-3 border-b">Ngày lắp</th>
+              <th className="p-3 border-b">Người cài</th>
+              <th className="p-3 border-b">Trạng thái</th>
+              <th className="p-3 border-b text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTasks.length > 0 ? (
+              filteredTasks.map((task, index) => (
+                <tr key={task.id || index} className="hover:bg-gray-50 text-xs">
+                  <td className="p-3 border-b">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      checked={selectedIds.includes(task.id)}
+                      onChange={() => handleCheckboxChange(task.id)}
+                    />
+                  </td>
+                  <td className="p-3 border-b font-medium text-gray-900">{task.mst || 'N/A'}</td>
+                  <td className="p-3 border-b">{task.name || 'N/A'}</td>
+                  <td className="p-3 border-b text-gray-500">{task.address || 'N/A'}</td>
+                  <td className="p-3 border-b">{task.connectionType || 'N/A'}</td>
+                  <td className="p-3 border-b">{task.PInstaller || 'N/A'}</td>
+                  <td className="p-3 border-b">{task.codeData || 'N/A'}</td>
+                  <td className="p-3 border-b">{getInstallationData(task, 'type')}</td>
+                  <td className="p-3 border-b">{getInstallationData(task, 'date')}</td>
+                  <td className="p-3 border-b">{getInstallationData(task, 'installer')}</td>
+                  <td className="p-3 border-b">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClassName(getInstallationData(task, 'status'))}`}>
+                      {getInstallationData(task, 'status')}
+                    </span>
+                  </td>
+                  <td className="p-3 border-b text-right relative">
+                    <div>
+                      <button 
+                        className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                        onClick={() => toggleDropdown(index)}
+                      >
+                        <MoreVertical className="text-gray-500" size={16} />
+                      </button>
+                      <DropdownMenu
+                        isOpen={activeDropdown === index}
+                        onEdit={() => handleEditTask(task)}
+                        onMore={() => handleMoreOptions(task)}
+                        onClose={() => setActiveDropdown(null)}
                       />
-                    </td>
-                    <td className="p-3">{task.mst}</td>
-                    <td className="p-3">{task.name}</td>
-                    <td className="p-3">{task.address}</td>
-                    <td className="p-3">{task.connectionType}</td>
-                    <td className="p-3">{task.PInstaller}</td>
-                    <td className="p-3">{task.codeData}</td>
-                    <td className="p-3">{task.installationHistory[0].type}</td>
-                    <td className="p-3">{task.installationHistory[0].date}</td>
-                    <td className="p-3">{task.installationHistory[0].installer}</td>
-                    <td className="p-3">
-                      <span className={` py-0.5 rounded-full text-xs ${getStatusClassName(task.installationHistory[0].status)}`}>
-                        {task.installationHistory[0].status}
-                      </span>
-                    </td>
-                    <td className="p-3 text-right relative">
-                      <div>
-                        <MoreVertical
-                          className="cursor-pointer"
-                          size={18}
-                          onClick={() => toggleDropdown(index)}
-                        />
-                        <DropdownMenu
-                          isOpen={activeDropdown === index}
-                          onEdit={() => handleEditTask(task)}
-                          onMore={() => handleMoreOptions(task)}
-                          onClose={() => setActiveDropdown(null)}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={10} className="px-3 py-8 text-center text-sm text-gray-500">
-                    <div className="flex flex-col items-center justify-center">
-                      <svg className="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                      <p className="text-gray-500">Không tìm thấy kết quả nào</p>
-                      {searchTerm && (
-                        <button
-                          className="mt-2 text-blue-600 hover:text-blue-800"
-                          onClick={() => setSearchTerm("")}
-                        >
-                          Xóa tìm kiếm
-                        </button>
-                      )}
                     </div>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={12} className="px-3 py-8 text-center text-sm text-gray-500">
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-3">
+                      <AlertTriangle size={28} />
+                    </div>
+                    <p className="text-gray-500 mb-1">Không tìm thấy kết quả nào</p>
+                    <p className="text-gray-400 text-xs mb-3">Hãy thay đổi tiêu chí tìm kiếm hoặc thử lại</p>
+                    {searchTerm && (
+                      <button
+                        className="px-4 py-2 bg-blue-50 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-100 transition-colors"
+                        onClick={() => setSearchTerm("")}
+                      >
+                        Xóa tìm kiếm
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
-    </>
+    </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HeaderPages } from '../../components/header';
-import { Search } from 'lucide-react';
+import { Search, Plus, Filter, Download, Calendar, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import Modal from '../../components/modals';
 import EditTaskModal from '../../components/modals/EditTask';
@@ -10,8 +10,7 @@ import { fetchBusinesses } from '../../stores/redux/actions/businessActions';
 
 export const TaskPages = () => {
   const dispatch = useDispatch();
-  const { businesses } = useSelector(state => state.business);
-
+  const { businesses, loading } = useSelector(state => state.business);
   const [openModalCreateTask, setOpenModalCreateTask] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredTasks, setFilteredTasks] = useState([]);
@@ -33,32 +32,40 @@ export const TaskPages = () => {
 
   const filterTasks = () => {
     let results = businesses;
-
     if (activeFilter !== 'All') {
       const statusMap = {
         Done: 'Done',
         Pending: 'Pending',
         Rejected: 'Rejected'
       };
-      results = results.filter(task => task.installationHistory[0].status === statusMap[activeFilter]);
-    }
-
-    if (searchTerm.trim() !== '') {
-      const searchTermLower = searchTerm.toLowerCase().trim();
-      results = results.filter(task =>
-        task.name.toLowerCase().includes(searchTermLower) ||
-        task.mst.toLowerCase().includes(searchTermLower) ||
-        task.address.toLowerCase().includes(searchTermLower) ||
-        task.connectionType.toLowerCase().includes(searchTermLower) ||
-        task.PInstaller.toLowerCase().includes(searchTermLower) ||
-        task.codeData.toLowerCase().includes(searchTermLower) ||
-        task.installationHistory[0].type.toLowerCase().includes(searchTermLower) ||
-        task.installationHistory[0].date.toLowerCase().includes(searchTermLower) ||
-        task.installationHistory[0].installer.toLowerCase().includes(searchTermLower) ||
-        task.installationHistory[0].status.toLowerCase().includes(searchTermLower)
+      results = results.filter(task => 
+        task.installationHistory && 
+        task.installationHistory[0] && 
+        task.installationHistory[0].status === statusMap[activeFilter]
       );
     }
-
+    
+    if (searchTerm.trim() !== '') {
+      const searchTermLower = searchTerm.toLowerCase().trim();
+      results = results.filter(task => {
+        // Guard against missing properties
+        if (!task.installationHistory || !task.installationHistory[0]) return false;
+        
+        return (
+          (task.name || '').toLowerCase().includes(searchTermLower) ||
+          (task.mst || '').toLowerCase().includes(searchTermLower) ||
+          (task.address || '').toLowerCase().includes(searchTermLower) ||
+          (task.connectionType || '').toLowerCase().includes(searchTermLower) ||
+          (task.PInstaller || '').toLowerCase().includes(searchTermLower) ||
+          (task.codeData || '').toLowerCase().includes(searchTermLower) ||
+          (task.installationHistory[0].type || '').toLowerCase().includes(searchTermLower) ||
+          (task.installationHistory[0].date || '').toLowerCase().includes(searchTermLower) ||
+          (task.installationHistory[0].installer || '').toLowerCase().includes(searchTermLower) ||
+          (task.installationHistory[0].status || '').toLowerCase().includes(searchTermLower)
+        );
+      });
+    }
+    
     setFilteredTasks(results);
   };
 
@@ -117,62 +124,174 @@ export const TaskPages = () => {
     setSelectedIds([]);
   };
 
+  // Get counts for each status
+  const getCounts = () => {
+    if (!businesses || !Array.isArray(businesses)) return { all: 0, done: 0, pending: 0, rejected: 0 };
+    
+    const counts = {
+      all: 0,
+      done: 0,
+      pending: 0,
+      rejected: 0
+    };
+    
+    businesses.forEach(business => {
+      if (business.installationHistory && business.installationHistory.length > 0) {
+        counts.all++;
+        const status = business.installationHistory[0].status;
+        if (status === 'Done') counts.done++;
+        else if (status === 'Pending') counts.pending++;
+        else if (status === 'Rejected') counts.rejected++;
+      }
+    });
+    
+    return counts;
+  };
+  
+  const counts = getCounts();
+
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <HeaderPages title="Tasks" />
-      <div className="container mx-auto p-4 pb-0">
-        {/* Search and Filter Buttons */}
-        <div className="flex justify-between mt-4">
-          <div className="flex w-1/3 border border-gray-400 rounded-lg p-2 text-xs py-1">
-            <input
-              type="text"
-              placeholder="Search Task"
-              className="w-full bg-transparent focus:outline-none"
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-            <Search className="mr-2 ml-2" color='#9ca3af' size={18} />
-          </div>
-          <div className="flex space-x-2">
-            <button
-              className={`px-4 py-1 rounded-full text-xs ${activeFilter === 'All'
-                ? 'bg-teal-100 text-teal-600 border border-teal-200'
-                : 'bg-gray-100 text-gray-600 border border-gray-200'
-                } hover:bg-teal-50`}
-              onClick={() => handleFilterClick('All')}
-            >
-              All
-            </button>
-            <button
-              className={`px-4 py-1 rounded-full text-xs ${activeFilter === 'Done'
-                ? 'bg-green-100 text-green-600 border border-green-200'
-                : 'bg-gray-100 text-gray-600 border border-gray-200'
-                } hover:bg-green-50`}
-              onClick={() => handleFilterClick('Done')}
-            >
-              Done
-            </button>
-            <button
-              className={`px-4 py-1 rounded-full text-xs ${activeFilter === 'Pending'
-                ? 'bg-pink-100 text-pink-600 border border-pink-200'
-                : 'bg-gray-100 text-gray-600 border border-gray-200'
-                } hover:bg-pink-50`}
-              onClick={() => handleFilterClick('Pending')}
-            >
-              Pending
-            </button>
-            <button
-              className={`px-4 py-1 rounded-full text-xs ${activeFilter === 'Rejected'
-                ? 'bg-yellow-100 text-yellow-600 border border-yellow-200'
-                : 'bg-gray-100 text-gray-600 border border-gray-200'
-                } hover:bg-yellow-50`}
-              onClick={() => handleFilterClick('Rejected')}
-            >
-              Rejected
-            </button>
+      <HeaderPages title="Quản lý công việc" />
+      <div className="container mx-auto p-4 pb-6">
+        {/* Top Controls */}
+        <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            {/* Search Bar */}
+            <div className="relative w-full sm:w-1/3">
+              <input
+                type="text"
+                placeholder="Tìm kiếm công việc..."
+                className="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-2">
+              <button 
+                className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                onClick={() => setOpenModalCreateTask(true)}
+              >
+                <Plus size={16} className="mr-1.5" />
+                Thêm công việc
+              </button>
+              
+              {selectedIds.length > 0 && (
+                <button
+                  className="inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+                  onClick={handleDeleteSelected}
+                >
+                  <XCircle size={16} className="mr-1.5" />
+                  Xóa ({selectedIds.length})
+                </button>
+              )}
+              
+              <button 
+                className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              >
+                <Filter size={16} className="mr-1.5" />
+                Lọc
+              </button>
+              
+              <button 
+                className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              >
+                <Download size={16} className="mr-1.5" />
+                Xuất
+              </button>
+            </div>
           </div>
         </div>
+        
+        {/* Status Filters */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div 
+            className={`bg-white p-4 rounded-lg border cursor-pointer transition-all ${
+              activeFilter === 'All' ? 'border-blue-500 shadow-sm' : 'border-gray-200 hover:border-blue-200'
+            }`}
+            onClick={() => handleFilterClick('All')}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-sm text-gray-500">Tất cả công việc</span>
+                <span className="text-2xl font-semibold mt-1">{counts.all}</span>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                <Calendar size={20} />
+              </div>
+            </div>
+          </div>
+          
+          <div 
+            className={`bg-white p-4 rounded-lg border cursor-pointer transition-all ${
+              activeFilter === 'Done' ? 'border-green-500 shadow-sm' : 'border-gray-200 hover:border-green-200'
+            }`}
+            onClick={() => handleFilterClick('Done')}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-sm text-gray-500">Hoàn thành</span>
+                <span className="text-2xl font-semibold mt-1 text-green-600">{counts.done}</span>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                <CheckCircle size={20} />
+              </div>
+            </div>
+          </div>
+          
+          <div 
+            className={`bg-white p-4 rounded-lg border cursor-pointer transition-all ${
+              activeFilter === 'Pending' ? 'border-amber-500 shadow-sm' : 'border-gray-200 hover:border-amber-200'
+            }`}
+            onClick={() => handleFilterClick('Pending')}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-sm text-gray-500">Đang xử lý</span>
+                <span className="text-2xl font-semibold mt-1 text-amber-600">{counts.pending}</span>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                <Clock size={20} />
+              </div>
+            </div>
+          </div>
+          
+          <div 
+            className={`bg-white p-4 rounded-lg border cursor-pointer transition-all ${
+              activeFilter === 'Rejected' ? 'border-red-500 shadow-sm' : 'border-gray-200 hover:border-red-200'
+            }`}
+            onClick={() => handleFilterClick('Rejected')}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-sm text-gray-500">Từ chối</span>
+                <span className="text-2xl font-semibold mt-1 text-red-600">{counts.rejected}</span>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                <XCircle size={20} />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Status Line */}
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm text-gray-600">
+            {filteredTasks.length > 0 
+              ? <span className="font-medium">Tổng <span className="text-blue-600 font-semibold">{filteredTasks.length}</span> công việc</span>
+              : "Không tìm thấy công việc nào"}
+          </p>
+          <p className="text-sm text-gray-500">
+            {activeFilter !== 'All' && 
+              `Hiển thị: ${activeFilter === 'Done' ? 'Hoàn thành' : activeFilter === 'Pending' ? 'Đang xử lý' : 'Từ chối'}`
+            }
+          </p>
+        </div>
+
         <Tasks
           filteredTasks={filteredTasks}
           searchTerm={searchTerm}
@@ -190,13 +309,15 @@ export const TaskPages = () => {
           setActiveDropdown={setActiveDropdown}
           businesses={businesses}
           handleDeleteSelected={handleDeleteSelected}
+          loading={loading}
         />
       </div>
 
+      {/* Edit Task Modal */}
       <Modal
         isOpen={editModalOpen}
         onClose={() => setEditModalOpen(false)}
-        title="Chỉnh sửa thông tin"
+        title="Chỉnh sửa thông tin công việc"
       >
         <EditTaskModal
           task={selectedTask}
@@ -205,6 +326,7 @@ export const TaskPages = () => {
         />
       </Modal>
 
+      {/* More Details Modal */}
       <Modal
         isOpen={moreModalOpen}
         onClose={() => setMoreModalOpen(false)}
