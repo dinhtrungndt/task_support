@@ -42,22 +42,30 @@ export const Tasks = ({
 
   // Function to safely access installation history
   const getInstallationData = (task, property, defaultValue = 'N/A') => {
+    if (property.includes('.')) {
+      const [firstKey, ...restKeys] = property.split('.');
+      try {
+        let value = task;
+        if (task.installationHistory && task.installationHistory[0]) {
+          value = task.installationHistory[0];
+        }
+        return restKeys.reduce((obj, key) => 
+          obj && obj[key] !== undefined ? obj[key] : defaultValue, 
+          value[firstKey]
+        );
+      } catch (error) {
+        console.error(`Error accessing property ${property}:`, error);
+        return defaultValue;
+      }
+    }
     if (!task || !task.installationHistory || !task.installationHistory[0]) {
       return defaultValue;
     }
-    return task.installationHistory[0][property] || defaultValue;
+    if (task.installationHistory[0].hasOwnProperty(property)) {
+      return task.installationHistory[0][property] || defaultValue;
+    }
+    return task[property] || defaultValue;
   };
-
-  if (loading) {
-    return (
-      <div className="bg-white shadow-sm rounded-lg p-8 text-center">
-        <div className="flex flex-col items-center justify-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-3"></div>
-          <p className="text-gray-500">Đang tải dữ liệu...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
@@ -106,8 +114,8 @@ export const Tasks = ({
                   <td className="p-3 border-b">{task.connectionType || 'N/A'}</td>
                   <td className="p-3 border-b">{task.PInstaller || 'N/A'}</td>
                   <td className="p-3 border-b">{task.codeData || 'N/A'}</td>
-                  <td className="p-3 border-b">{getInstallationData(task, 'type')}</td>
-                  <td className="p-3 border-b">{getInstallationData(task, 'date')}</td>
+                  <td className="p-3 border-b">{getInstallationData(task, 'typeData')}</td>
+                  <td className="p-3 border-b">{getInstallationData(task, 'AtSetting')}</td>
                   <td className="p-3 border-b">{getInstallationData(task, 'installer')}</td>
                   <td className="p-3 border-b">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClassName(getInstallationData(task, 'status'))}`}>

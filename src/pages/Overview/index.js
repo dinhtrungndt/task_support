@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { HeaderPages } from '../../components/header';
-import { TaskData } from '../../stores/data/task.task';
 import Modal from '../../components/modals';
 import EditTaskModal from '../../components/modals/EditTask';
 import MoreDetailsModal from '../../components/modals/MoreTask';
 import { TodayTasks } from './todayTask';
 import { Tasks } from '../../components/Tasks';
 import { ClipboardCheck, CheckCircle, Clock, XCircle, Search, Filter } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchBusinesses } from '../../stores/redux/actions/businessActions';
 
 export const OverviewPages = () => {
+  const dispatch = useDispatch();
+  const { businesses, loading } = useSelector(state => state.business);
   const [activeFilter, setActiveFilter] = useState('Assigned');
-  const [filteredTasks, setFilteredTasks] = useState(TaskData);
+  const [filteredTasks, setFilteredTasks] = useState(businesses);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
@@ -19,26 +22,25 @@ export const OverviewPages = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [moreModalOpen, setMoreModalOpen] = useState(false);
-  
+  const bnInstallHistory = businesses.map(bn => bn.installationHistory[0]);
+
   useEffect(() => {
-    filterTasks();
-  }, [activeFilter]);
-  
-  const filterTasks = () => {
-    let results = TaskData;
-    if (activeFilter !== 'Assigned') {
-      const statusMap = {
-        Done: 'Done',
-        Pending: 'Pending',
-        rejected: 'Rejected',
-        Assigned: 'Assigned'
-      };
-      if (statusMap[activeFilter]) {
-        results = results.filter(task => task.status === statusMap[activeFilter]);
-      }
+    dispatch(fetchBusinesses());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (activeFilter === 'Assigned') {
+      setFilteredTasks(businesses);  
+    } else {
+      setFilteredTasks(
+        businesses.filter((task) =>
+          task.installationHistory.some(
+            (history) => history.status === activeFilter
+          )
+        )
+      );
     }
-    setFilteredTasks(results);
-  };
+  }, [activeFilter, businesses]);
   
   const handleFilterClick = (filter) => {
     setActiveFilter(filter);
@@ -87,10 +89,10 @@ export const OverviewPages = () => {
 
   // Count tasks by status
   const taskCounts = {
-    total: TaskData.length,
-    done: TaskData.filter(task => task.status === 'Done').length,
-    pending: TaskData.filter(task => task.status === 'Pending').length,
-    rejected: TaskData.filter(task => task.status === 'Rejected').length,
+    total: bnInstallHistory.length,
+    done: bnInstallHistory.filter(task => task.status === 'Done').length,
+    pending: bnInstallHistory.filter(task => task.status === 'Pending').length,
+    rejected: bnInstallHistory.filter(task => task.status === 'Rejected').length,
   };
   
   return (
@@ -170,11 +172,11 @@ export const OverviewPages = () => {
           
           <div 
             className={`rounded-lg border shadow-sm overflow-hidden transition-all ${
-              activeFilter === 'rejected' 
+              activeFilter === 'Rejected' 
                 ? 'border-red-500 ring-1 ring-red-500 bg-white' 
                 : 'border-gray-200 bg-white hover:border-red-200'
             }`}
-            onClick={() => handleFilterClick('rejected')}
+            onClick={() => handleFilterClick('Rejected')}
           >
             <div className="p-5">
               <div className="flex justify-between items-center">
@@ -187,7 +189,7 @@ export const OverviewPages = () => {
                 </div>
               </div>
             </div>
-            <div className={`h-1 w-full ${activeFilter === 'rejected' ? 'bg-red-500' : 'bg-transparent'}`}></div>
+            <div className={`h-1 w-full ${activeFilter === 'Rejected' ? 'bg-red-500' : 'bg-transparent'}`}></div>
           </div>
         </div>
 
@@ -199,7 +201,7 @@ export const OverviewPages = () => {
                 <h2 className="text-lg font-semibold">
                   {activeFilter === 'Done' ? 'Công việc hoàn thành' : 
                    activeFilter === 'Pending' ? 'Công việc đang thực hiện' : 
-                   activeFilter === 'rejected' ? 'Công việc bị từ chối' : 'Tất cả công việc'}
+                   activeFilter === 'Rejected' ? 'Công việc bị từ chối' : 'Tất cả công việc'}
                 </h2>
                 <span className="ml-2 px-2 py-1 bg-gray-100 rounded-full text-sm text-gray-600">
                   {filteredTasks.length}
@@ -229,10 +231,9 @@ export const OverviewPages = () => {
         {/* Content based on active filter */}
         {activeFilter === 'Assigned' ? (
           <TodayTasks />
-        ) : activeFilter === 'all' ? (
+        ) : activeFilter === 'All' ? (
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-xl font-bold mb-4">Today's Action</h2>
-            {/* Content for all filter */}
           </div>
         ) : (
           <Tasks

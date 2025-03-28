@@ -2,8 +2,8 @@ import axios from 'axios';
 
 const axiosClient = axios.create({
   // baseURL: 'http://192.168.2.209:8080',
-  baseURL: 'http://192.168.1.13:8080',
-  // baseURL: 'https://api-ithelp.onrender.com',
+  // baseURL: 'http://192.168.1.13:8080',
+  baseURL: 'https://api-ithelp.onrender.com',
   headers: {
     'Content-Type': 'application/json',
   },
