@@ -106,7 +106,7 @@ export const CreateTask = ({ closeModal }) => {
             }
         };
 
-        console.log('New Task:', newTask);
+        // console.log('New Task:', newTask);
         toast.success("Tạo công việc thành công!");
         closeModal();
     };
