@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { HeaderPages } from '../../components/header';
-import { Search, MoreVertical } from 'lucide-react';
+import { Search, Plus, Trash2, Filter, MoreVertical, Download } from 'lucide-react';
 import Modal from '../../components/modals';
 import DropdownMenu from '../../components/DropdownMenu';
 import EditBusinessModal from '../../components/modals/EditBusiness';
@@ -29,9 +29,9 @@ export const BusinessPages = () => {
   useEffect(() => {
     setFilteredBusinesses(
       businesses.filter(business =>
-        business.mst.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        business.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        business.address.toLowerCase().includes(searchTerm.toLowerCase())
+        business.mst?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        business.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        business.address?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
   }, [businesses, searchTerm]);
@@ -94,155 +94,214 @@ export const BusinessPages = () => {
     }
   };
 
+  const handleBusinessCreated = (newBusiness) => {
+    setFilteredBusinesses([...businesses, newBusiness]);
+    setOpenModalCreateBusiness(false);
+  };
+
   return (
-    <div>
-      <HeaderPages title="Businesses" />
-      <div className="container mx-auto p-4 pb-0">
-        {/* Search Bar */}
-        <div className="flex justify-between mt-4">
-          <div className="flex w-1/3 border border-gray-400 rounded-lg p-2 text-xs py-1">
-            <input
-              type="text"
-              placeholder="Search Business"
-              className="w-full bg-transparent focus:outline-none"
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-            <Search className="mr-2 ml-2" color='#9ca3af' size={18} />
+    <div className="min-h-screen bg-gray-50">
+      <HeaderPages title="Quản lý doanh nghiệp" />
+      <div className="container mx-auto p-4 pb-6">
+        {/* Top Controls */}
+        <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            {/* Search Bar */}
+            <div className="relative w-full sm:w-1/3">
+              <input
+                type="text"
+                placeholder="Tìm kiếm doanh nghiệp..."
+                className="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-2">
+              <button 
+                className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                onClick={() => setOpenModalCreateBusiness(true)}
+              >
+                <Plus size={16} className="mr-1.5" />
+                Thêm doanh nghiệp
+              </button>
+              
+              {selectedBusinessIds.length > 0 && (
+                <button
+                  className="inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+                  onClick={handleDeleteSelected}
+                >
+                  <Trash2 size={16} className="mr-1.5" />
+                  Xóa ({selectedBusinessIds.length})
+                </button>
+              )}
+              
+              <button 
+                className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              >
+                <Filter size={16} className="mr-1.5" />
+                Lọc
+              </button>
+              
+              <button 
+                className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              >
+                <Download size={16} className="mr-1.5" />
+                Xuất
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Status Line */}
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm text-gray-600">
+            {filteredBusinesses.length > 0 
+              ? <span className="font-medium">Tổng <span className="text-blue-600 font-semibold">{filteredBusinesses.length}</span> doanh nghiệp</span>
+              : "Không tìm thấy doanh nghiệp nào"}
+          </p>
+        </div>
+
+        {/* Business List */}
+        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-gray-50 text-gray-600 text-xs font-medium uppercase tracking-wider">
+                <tr>
+                  <th className="p-3 border-b">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        onChange={handleSelectAllChange} 
+                        checked={selectedBusinessIds.length === filteredBusinesses.length && filteredBusinesses.length > 0}
+                      />
+                    </div>
+                  </th>
+                  <th className="p-3 border-b">MST</th>
+                  <th className="p-3 border-b">Tên công ty</th>
+                  <th className="p-3 border-b">Địa chỉ</th>
+                  <th className="p-3 border-b">Tổng</th>
+                  <th className="p-3 border-b">Hoàn thành</th>
+                  <th className="p-3 border-b">Đang làm</th>
+                  <th className="p-3 border-b">Từ chối</th>
+                  <th className="p-3 border-b">Loại dữ liệu</th>
+                  <th className="p-3 border-b">Người lắp đặt</th>
+                  <th className="p-3 border-b">Ngày cập nhật</th>
+                  <th className="p-3 border-b"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={12} className="p-8 text-center text-sm text-gray-500">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-3"></div>
+                        <p>Đang tải dữ liệu...</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredBusinesses.length > 0 ? (
+                  filteredBusinesses.map((business, index) => (
+                    <tr key={business._id || index} className="hover:bg-gray-50 text-xs">
+                      <td className="p-3 border-b">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          checked={selectedBusinessIds.includes(business._id)}
+                          onChange={() => handleCheckboxChange(business._id)}
+                        />
+                      </td>
+                      <td className="p-3 border-b font-medium text-gray-900">{business.mst}</td>
+                      <td className="p-3 border-b">{business.name}</td>
+                      <td className="p-3 border-b text-gray-500">{business.address}</td>
+                      <td className="p-3 border-b">
+                        <span className="inline-flex items-center justify-center px-2 py-1 bg-cyan-100 text-cyan-800 text-xs font-medium rounded-full">
+                          {business.totalTasks}
+                        </span>
+                      </td>
+                      <td className="p-3 border-b">
+                        <span className="inline-flex items-center justify-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                          {business.completedTasks}
+                        </span>
+                      </td>
+                      <td className="p-3 border-b">
+                        <span className="inline-flex items-center justify-center px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-full">
+                          {business.pendingTasks}
+                        </span>
+                      </td>
+                      <td className="p-3 border-b">
+                        <span className="inline-flex items-center justify-center px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+                          {business.rejectedTasks}
+                        </span>
+                      </td>
+                      <td className="p-3 border-b">
+                        {business.dataTypes && business.dataTypes.length > 0 
+                          ? business.dataTypes.join(', ')
+                          : <span className="text-gray-400">-</span>
+                        }
+                      </td>
+                      <td className="p-3 border-b">{business.PInstaller || <span className="text-gray-400">-</span>}</td>
+                      <td className="p-3 border-b">{business.lastModified ? new Date(business.lastModified).toLocaleDateString() : <span className="text-gray-400">-</span>}</td>
+                      <td className="p-3 border-b text-right relative">
+                        <div>
+                          <button 
+                            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                            onClick={() => toggleDropdown(index)}
+                          >
+                            <MoreVertical className="text-gray-500" size={16} />
+                          </button>
+                          <DropdownMenu
+                            isOpen={activeDropdown === index}
+                            onEdit={() => handleEditBusiness(business)}
+                            onMore={() => handleMoreOptions(business)}
+                            onClose={() => setActiveDropdown(null)}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={12} className="px-3 py-8 text-center text-sm text-gray-500">
+                      <div className="flex flex-col items-center justify-center">
+                        <svg className="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p className="text-gray-500 mb-1">Không tìm thấy doanh nghiệp nào</p>
+                        {searchTerm && (
+                          <button
+                            className="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                            onClick={() => setSearchTerm("")}
+                          >
+                            Xóa tìm kiếm
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Text and create business */}
-        <div className="flex items-center mt-4">
-          <p className="text-xs font-bold">
-            {filteredBusinesses.length > 0 ? `Tổng (${filteredBusinesses.length}) doanh nghiệp`
-              : "No businesses found"}
-          </p>
-          <button
-            className="bg-blue-500 text-white ml-8 px-6 py-1 rounded-md text-xs hover:bg-blue-600 flex items-center space-x-1"
-            onClick={() => setOpenModalCreateBusiness((prev) => !prev)}
-          >
-            <span>{openModalCreateBusiness ? "- Close" : "+ Thêm"}</span>
-          </button>
-
-          {/* Button to delete selected businesses */}
-          {selectedBusinessIds.length > 0 && (
-            <button
-              className="bg-red-500 text-white ml-4 px-6 py-1 rounded-md text-xs hover:bg-red-600"
-              onClick={handleDeleteSelected}
-            >
-              Delete Selected
-            </button>
-          )}
-        </div>
-
-        {/* Modal for creating a business */}
-        {openModalCreateBusiness ? (
+        {/* Create Business Modal */}
+        {openModalCreateBusiness && (
           <CreateBusiness
             closeModal={() => setOpenModalCreateBusiness(false)}
             businesses={businesses}
-            onBusinessCreated={(newBusiness) => {
-              setFilteredBusinesses([...businesses, newBusiness]);
-            }}
+            onBusinessCreated={handleBusinessCreated}
           />
-        ) : (
-          <>
-            {/* Business List */}
-            <div className="mt-4 bg-white shadow-md rounded-lg overflow-hidden">
-              <div className="max-h-96 overflow-y-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-gray-100 text-gray-600 text-sm sticky top-0">
-                    <tr className='text-xs'>
-                    <th className="p-3">
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4"
-                          onChange={handleSelectAllChange} 
-                          checked={selectedBusinessIds.length === filteredBusinesses.length}
-                        />
-                      </th>
-                      <th className="p-3">MST</th>
-                      <th className="p-3">Tên công ty</th>
-                      <th className="p-3">Địa chỉ</th>
-                      <th className="p-3">Số lần</th>
-                      <th className="p-3">Hoàn thành</th>
-                      <th className='p-3'>Đang làm</th>
-                      <th className='p-3'>Từ chối</th>
-                      <th className="p-3">Loại dữ liệu</th>
-                      <th className="p-3">Người lắp đặt</th>
-                      <th className="p-3">Ngày cập nhật</th>
-                      <th className="p-3"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredBusinesses.length > 0 ? (
-                      filteredBusinesses.map((business, index) => (
-                        <tr key={business._id} className="border-t hover:bg-gray-50 text-xs">
-                        <td className="p-3">
-                            <input
-                              type="checkbox"
-                              className="h-4 w-4"
-                              checked={selectedBusinessIds.includes(business._id)}
-                              onChange={() => handleCheckboxChange(business._id)}
-                            />
-                          </td>
-                          <td className="p-3">{business.mst}</td>
-                          <td className="p-3">{business.name}</td>
-                          <td className="p-3">{business.address}</td>
-                          <td className="p-3 bg-cyan-100 text-cyan-600 border border-cyan-200 ">{business.totalTasks}</td>
-                          <td className="p-3 bg-green-100 text-green-600 border border-green-200 ">{business.completedTasks}</td>
-                          <td className="p-3 bg-orange-100 text-orange-600 border border-orange-200">{business.pendingTasks}</td>
-                          <td className="p-3 bg-red-100 text-red-600 border border-red-200">{business.rejectedTasks}</td>
-                          <td className="p-3">{business.dataTypes.join(', ')}</td>
-                          <td className='p-3'>{business.PInstaller}</td>
-                          <td className="p-3">{new Date(business.lastModified).toLocaleDateString()}</td>
-                          <td className="p-3 text-right relative">
-                            <div>
-                              <MoreVertical
-                                className="cursor-pointer"
-                                size={18}
-                                onClick={() => toggleDropdown(index)}
-                              />
-                              <DropdownMenu
-                                isOpen={activeDropdown === index}
-                                onEdit={() => handleEditBusiness(business)}
-                                onMore={() => handleMoreOptions(business)}
-                                onClose={() => setActiveDropdown(null)}
-                              />
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={10} className="px-3 py-8 text-center text-sm text-gray-500">
-                          <div className="flex flex-col items-center justify-center">
-                            <svg className="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <p className="text-gray-500">No businesses found</p>
-                            {searchTerm && (
-                              <button
-                                className="mt-2 text-blue-600 hover:text-blue-800"
-                                onClick={() => setSearchTerm("")}
-                              >
-                                Clear search
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </>)}
+        )}
+
         {/* Edit Business Modal */}
         <Modal
           isOpen={editModalOpen}
           onClose={() => setEditModalOpen(false)}
-          title="Edit Business Information"
+          title="Chỉnh sửa thông tin doanh nghiệp"
         >
           <EditBusinessModal
             business={selectedBusiness}
