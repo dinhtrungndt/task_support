@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom";
 import React from "react";
 import { toast } from "react-toastify";
 import { register } from "../../services/user";
+import { Eye, EyeOff } from "lucide-react";
 
 const Register = () => {
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -99,13 +102,18 @@ const Register = () => {
   };
   
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br to-teal-100">
-      <div className="w-full max-w-md bg-slate-400 p-2 shadow-md rounded-lg border border-gray-200">
-        <div className="bg-white p-8 shadow-lg rounded-xl border border-gray-100">
-            <h1 className="text-xl font-bold text-gray-800">Tạo Tài Khoản</h1>
-          <form onSubmit={handleSubmit} className="space-y-2">
+    <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <div className="w-full max-w-md p-6">
+        <div className="bg-white p-8 shadow-lg rounded-lg border border-gray-200">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-800">Tạo Tài Khoản</h1>
+            <p className="text-gray-500 mt-2 text-sm">Đăng ký để bắt đầu sử dụng dịch vụ</p>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Họ và tên */}
             <div>
-              <label className="block text-gray-700 font-medium mb-1" htmlFor="name">
+              <label className="block text-gray-700 font-medium mb-2" htmlFor="name">
                 Họ và tên
               </label>
               <div className="relative">
@@ -121,16 +129,17 @@ const Register = () => {
                   value={form.name}
                   placeholder="Nhập tên của bạn"
                   className={`w-full pl-10 pr-4 py-2 border ${
-                    errors.name ? "border-red-500" : "border-gray-200"
-                  } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all`}
+                    errors.name ? "border-red-500" : "border-gray-300"
+                  } rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all`}
                   onChange={handleChange}
                 />
               </div>
               {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
             </div>
             
+            {/* Email */}
             <div>
-              <label className="block text-gray-700 font-medium mb-1" htmlFor="email">
+              <label className="block text-gray-700 font-medium mb-2" htmlFor="email">
                 Email
               </label>
               <div className="relative">
@@ -147,16 +156,17 @@ const Register = () => {
                   value={form.email}
                   placeholder="Email của bạn"
                   className={`w-full pl-10 pr-4 py-2 border ${
-                    errors.email ? "border-red-500" : "border-gray-200"
-                  } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all`}
+                    errors.email ? "border-red-500" : "border-gray-300"
+                  } rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all`}
                   onChange={handleChange}
                 />
               </div>
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
             
+            {/* Mật khẩu */}
             <div>
-              <label className="block text-gray-700 font-medium mb-1" htmlFor="password">
+              <label className="block text-gray-700 font-medium mb-2" htmlFor="password">
                 Mật khẩu
               </label>
               <div className="relative">
@@ -167,21 +177,37 @@ const Register = () => {
                 </div>
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={form.password}
                   placeholder="Tạo mật khẩu"
-                  className={`w-full pl-10 pr-4 py-2 border ${
-                    errors.password ? "border-red-500" : "border-gray-200"
-                  } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all`}
+                  className={`w-full pl-10 pr-10 py-2 border ${
+                    errors.password ? "border-red-500" : "border-gray-300"
+                  } rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all`}
                   onChange={handleChange}
                 />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  {showPassword ? (
+                    <EyeOff 
+                      size={18} 
+                      className="text-gray-400 cursor-pointer" 
+                      onClick={() => setShowPassword(false)} 
+                    />
+                  ) : (
+                    <Eye 
+                      size={18} 
+                      className="text-gray-400 cursor-pointer" 
+                      onClick={() => setShowPassword(true)} 
+                    />
+                  )}
+                </div>
               </div>
               {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
             </div>
             
+            {/* Xác nhận mật khẩu */}
             <div>
-              <label className="block text-gray-700 font-medium mb-1" htmlFor="confirmPassword">
+              <label className="block text-gray-700 font-medium mb-2" htmlFor="confirmPassword">
                 Xác nhận mật khẩu
               </label>
               <div className="relative">
@@ -192,34 +218,51 @@ const Register = () => {
                 </div>
                 <input
                   id="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
                   value={form.confirmPassword}
                   placeholder="Nhập lại mật khẩu"
-                  className={`w-full pl-10 pr-4 py-2 border ${
-                    errors.confirmPassword ? "border-red-500" : "border-gray-200"
-                  } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all`}
+                  className={`w-full pl-10 pr-10 py-2 border ${
+                    errors.confirmPassword ? "border-red-500" : "border-gray-300"
+                  } rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all`}
                   onChange={handleChange}
                 />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  {showConfirmPassword ? (
+                    <EyeOff 
+                      size={18} 
+                      className="text-gray-400 cursor-pointer" 
+                      onClick={() => setShowConfirmPassword(false)} 
+                    />
+                  ) : (
+                    <Eye 
+                      size={18} 
+                      className="text-gray-400 cursor-pointer" 
+                      onClick={() => setShowConfirmPassword(true)} 
+                    />
+                  )}
+                </div>
               </div>
               {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
             </div>
             
+            {/* Điều khoản */}
             <div className="flex items-center">
               <input
                 id="terms"
                 type="checkbox"
-                className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                Tôi đồng ý với <a href="#" className="text-green-600 hover:text-green-800">điều khoản</a> và <a href="#" className="text-green-600 hover:text-green-800">chính sách bảo mật</a>
+                Tôi đồng ý với <a href="#" className="text-blue-600 hover:underline">điều khoản</a> và <a href="#" className="text-blue-600 hover:underline">chính sách bảo mật</a>
               </label>
             </div>
             
+            {/* Nút đăng ký */}
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all ${
+              className={`w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all ${
                 isLoading ? "opacity-70 cursor-not-allowed" : ""
               }`}
             >
@@ -237,11 +280,12 @@ const Register = () => {
             </button>
           </form>
           
+          {/* Đường dẫn đăng nhập */}
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Bạn đã có tài khoản?{" "}
               <span 
-                className="text-green-600 font-medium hover:text-green-800 cursor-pointer transition-all" 
+                className="text-blue-600 font-medium hover:underline cursor-pointer" 
                 onClick={() => navigate("/login")}
               >
                 Đăng nhập ngay

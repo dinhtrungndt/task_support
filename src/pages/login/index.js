@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import React from "react";
-import { Eye } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { AuthContext } from "../../contexts/start/AuthContext.js";
 import { login } from "../../services/user.js";
 import { useNavigate } from "react-router-dom";
@@ -37,17 +37,18 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br to-indigo-100">
-      <div className="w-full max-w-md bg-slate-400 p-2 shadow-md rounded-lg border border-gray-200">
-        <div className="bg-white p-8 shadow-lg rounded-xl border border-gray-100">
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-800">Đăng Nhập</h1>
-            <p className="text-gray-500 mt-2">Đăng nhập để truy cập vào tài khoản của bạn</p>
+    <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <div className="w-full max-w-md p-6">
+        <div className="bg-white p-8 shadow-lg rounded-lg border border-gray-200">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-800">Đăng Nhập</h1>
+            <p className="text-gray-500 mt-2 text-sm">Đăng nhập để truy cập vào tài khoản của bạn</p>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email field */}
             <div>
-              <label className="block text-gray-700 font-medium" htmlFor="email">
+              <label className="block text-gray-700 font-medium mb-2" htmlFor="email">
                 Email
               </label>
               <div className="relative">
@@ -61,20 +62,22 @@ const Login = () => {
                   id="email"
                   type="email"
                   name="email"
+                  value={form.email}
                   placeholder="Email của bạn"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                   onChange={handleChange}
                   required
                 />
               </div>
             </div>
             
+            {/* Password field */}
             <div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-2">
                 <label className="text-gray-700 font-medium" htmlFor="password">
                   Mật khẩu
                 </label>
-                <a href="#" className="text-xs text-blue-600 hover:text-blue-800 transition-all">
+                <a href="#" className="text-sm text-blue-600 hover:underline">
                   Quên mật khẩu?
                 </a>
               </div>
@@ -88,17 +91,31 @@ const Login = () => {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   name="password"
+                  value={form.password}
                   placeholder="Mật khẩu của bạn"
-                  className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                   required
-                    onChange={handleChange}
+                  onChange={handleChange}
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                    <Eye size={18} className="text-gray-400 cursor-pointer" onClick={() => setShowPassword(!showPassword)} />
+                  {showPassword ? (
+                    <EyeOff 
+                      size={18} 
+                      className="text-gray-400 cursor-pointer" 
+                      onClick={() => setShowPassword(false)} 
+                    />
+                  ) : (
+                    <Eye 
+                      size={18} 
+                      className="text-gray-400 cursor-pointer" 
+                      onClick={() => setShowPassword(true)} 
+                    />
+                  )}
                 </div>
               </div>
             </div>
             
+            {/* Remember me checkbox */}
             <div className="flex items-center">
               <input
                 id="remember"
@@ -110,10 +127,11 @@ const Login = () => {
               </label>
             </div>
             
+            {/* Submit button */}
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all ${
+              className={`w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all ${
                 isLoading ? "opacity-70 cursor-not-allowed" : ""
               }`}
             >
@@ -129,14 +147,14 @@ const Login = () => {
                 "Đăng nhập"
               )}
             </button>
-        
           </form>
           
+          {/* Register link */}
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Bạn chưa có tài khoản?{" "}
               <span 
-                className="text-blue-600 font-medium hover:text-blue-800 cursor-pointer transition-all" 
+                className="text-blue-600 font-medium hover:underline cursor-pointer" 
                 onClick={() => navigate("/register")}
               >
                 Đăng ký ngay
