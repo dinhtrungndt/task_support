@@ -48,7 +48,7 @@ export const addTask = (taskData, userId) => async (dispatch) => {
       userAdd: userId // Add the user ID passed from the component
     };
 
-    console.log("Sending task data:", taskToAdd);
+    // console.log("Sending task data:", taskToAdd);
 
     // Changed from '/tasks/add' to '/tasks'
     const response = await axiosClient.post('/tasks', [taskToAdd]); // Notice we wrap in array for POST /tasks

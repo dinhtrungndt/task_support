@@ -46,7 +46,7 @@ export const addBusiness = (business) => async (dispatch) => {
 // Update an existing business
 export const updateBusiness = (business) => async (dispatch) => {
   try {
-    console.log("Updating business with ID:", business._id);
+    // console.log("Updating business with ID:", business._id);
     
     if (!business._id) {
       console.error("Business object is missing _id:", business);

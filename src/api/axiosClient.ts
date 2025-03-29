@@ -3,7 +3,8 @@ import axios from 'axios';
 const axiosClient = axios.create({
   // baseURL: 'http://192.168.2.209:8080',
   // baseURL: 'http://192.168.1.12:8080',
-  baseURL: 'https://api-ithelp.onrender.com',
+  baseURL: process.env.REACT_APP_API_URL,
+  // baseURL: 'https://api-ithelp.onrender.com',
   headers: {
     'Content-Type': 'application/json',
   },

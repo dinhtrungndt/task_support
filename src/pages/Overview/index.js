@@ -80,7 +80,7 @@ export const OverviewPages = () => {
   };
   
   const handleSaveTask = (updatedTask) => {
-    console.log('Saving updated task:', updatedTask);
+    // console.log('Saving updated task:', updatedTask);
     setEditModalOpen(false);
   };
 
