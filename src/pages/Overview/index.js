@@ -8,12 +8,14 @@ import { Tasks } from '../../components/Tasks';
 import { ClipboardCheck, CheckCircle, Clock, XCircle, Search, Filter } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchBusinesses } from '../../stores/redux/actions/businessActions';
+import { fetchTasks } from '../../stores/redux/actions/taskActions';
 
 export const OverviewPages = () => {
   const dispatch = useDispatch();
-  const { businesses, loading } = useSelector(state => state.business);
+  const { businesses } = useSelector(state => state.business);
+  const { tasks, loading } = useSelector(state => state.tasks);
   const [activeFilter, setActiveFilter] = useState('Assigned');
-  const [filteredTasks, setFilteredTasks] = useState(businesses);
+  const [filteredTasks, setFilteredTasks] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
@@ -22,25 +24,22 @@ export const OverviewPages = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [moreModalOpen, setMoreModalOpen] = useState(false);
-  const bnInstallHistory = businesses.map(bn => bn.installationHistory[0]);
 
   useEffect(() => {
+    // Fetch both businesses and tasks data
     dispatch(fetchBusinesses());
+    dispatch(fetchTasks());
   }, [dispatch]);
 
   useEffect(() => {
     if (activeFilter === 'Assigned') {
-      setFilteredTasks(businesses);  
+      setFilteredTasks(tasks);  
     } else {
       setFilteredTasks(
-        businesses.filter((task) =>
-          task.installationHistory.some(
-            (history) => history.status === activeFilter
-          )
-        )
+        tasks.filter((task) => task.status === activeFilter)
       );
     }
-  }, [activeFilter, businesses]);
+  }, [activeFilter, tasks]);
   
   const handleFilterClick = (filter) => {
     setActiveFilter(filter);
@@ -70,7 +69,7 @@ export const OverviewPages = () => {
     if (selectAll) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredTasks.map(task => task.id));
+      setSelectedIds(filteredTasks.map(task => task._id));
     }
     setSelectAll(!selectAll);
   };
@@ -89,10 +88,10 @@ export const OverviewPages = () => {
 
   // Count tasks by status
   const taskCounts = {
-    total: bnInstallHistory.length,
-    done: bnInstallHistory.filter(task => task.status === 'Done').length,
-    pending: bnInstallHistory.filter(task => task.status === 'Pending').length,
-    rejected: bnInstallHistory.filter(task => task.status === 'Rejected').length,
+    total: tasks.length,
+    done: tasks.filter(task => task.status === 'Done').length,
+    pending: tasks.filter(task => task.status === 'Pending').length,
+    rejected: tasks.filter(task => task.status === 'Rejected').length,
   };
   
   return (
@@ -231,10 +230,6 @@ export const OverviewPages = () => {
         {/* Content based on active filter */}
         {activeFilter === 'Assigned' ? (
           <TodayTasks />
-        ) : activeFilter === 'All' ? (
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-bold mb-4">Today's Action</h2>
-          </div>
         ) : (
           <Tasks
             filteredTasks={filteredTasks}
@@ -250,6 +245,7 @@ export const OverviewPages = () => {
             handleMoreOptions={handleMoreOptions}
             openModalCreateTask={openModalCreateTask}
             setOpenModalCreateTask={setOpenModalCreateTask}
+            loading={loading}
           />
         )}
       </div>

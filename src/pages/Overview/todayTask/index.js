@@ -1,15 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { CheckCircle, ChevronDown, MoreVertical, CheckSquare, Clock, AlertTriangle, FileText, Users, Calendar } from 'lucide-react';
-import { TaskData } from '../../../stores/data/task.task';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchTasks } from '../../../stores/redux/actions/taskActions';
 
 export const TodayTasks = () => {
-  const todayTasks = [
-    { id: 1, title: "Create a user flow of social application design", status: "Done" },
-    { id: 2, title: "Create a user flow of social application design", status: "Pending" },
-    { id: 3, title: "Landing page design for Fintech project of singapore", status: "Pending" },
-    { id: 4, title: "Interactive prototype for app screens of deltamine project", status: "Rejected" },
-    { id: 5, title: "Interactive prototype for app screens of deltamine project", status: "Done" },
-  ];
+  const dispatch = useDispatch();
+  const { tasks, loading } = useSelector(state => state.tasks);
+  const [todayTasks, setTodayTasks] = useState([]);
+  
+  useEffect(() => {
+    // Nếu tasks chưa được tải, gọi API để lấy dữ liệu
+    if (!tasks.length) {
+      dispatch(fetchTasks());
+    }
+    
+    // Lọc ra các công việc hôm nay
+    // Bạn có thể điều chỉnh logic này theo nhu cầu (ví dụ: lọc theo ngày, trạng thái, v.v.)
+    const latestTasks = [...tasks]
+      .sort((a, b) => new Date(b.createdAt || b.installDate) - new Date(a.createdAt || a.installDate))
+      .slice(0, 5);
+    
+    setTodayTasks(latestTasks);
+  }, [tasks, dispatch]);
 
   const getStatusClassName = (status) => {
     switch (status) {
@@ -40,8 +52,8 @@ export const TodayTasks = () => {
   // Get project statistics
   const projectStats = {
     weeklyActivity: 80,
-    totalTasksDone: 40,
-    projectsWorked: 105
+    totalTasksDone: tasks.filter(task => task.status === 'Done').length,
+    projectsWorked: tasks.length
   };
 
   return (
@@ -55,30 +67,44 @@ export const TodayTasks = () => {
           </div>
           
           <div className="p-5">
-            <div className="space-y-3">
-              {todayTasks.map((task, index) => (
-                <div 
-                  key={index} 
-                  className="flex items-center p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
-                >
-                  <div className={`rounded-full w-6 h-6 flex items-center justify-center mr-3 ${
-                    task.status === "Done" ? "bg-blue-600" : 
-                    task.status === "Pending" ? "bg-amber-500" : "bg-red-500"
-                  } text-white flex-shrink-0`}>
-                    <CheckSquare size={14} />
+            {loading ? (
+              <div className="flex justify-center py-6">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            ) : todayTasks.length > 0 ? (
+              <div className="space-y-3">
+                {todayTasks.map((task, index) => (
+                  <div 
+                    key={task._id || index} 
+                    className="flex items-center p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className={`rounded-full w-6 h-6 flex items-center justify-center mr-3 ${
+                      task.status === "Done" ? "bg-blue-600" : 
+                      task.status === "Pending" ? "bg-amber-500" : "bg-red-500"
+                    } text-white flex-shrink-0`}>
+                      <CheckSquare size={14} />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-800 font-medium truncate">{task.companyName || 'Công việc không có tên'}</p>
+                      <p className="text-xs text-gray-500 truncate">{task.connectionType || 'Không có loại kết nối'}</p>
+                    </div>
+                    
+                    <span className={`ml-3 px-2.5 py-1 rounded-full text-xs flex items-center ${getStatusClassName(task.status)}`}>
+                      {getStatusIcon(task.status)}
+                      {task.status}
+                    </span>
                   </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-800 font-medium truncate">{task.title}</p>
-                  </div>
-                  
-                  <span className={`ml-3 px-2.5 py-1 rounded-full text-xs flex items-center ${getStatusClassName(task.status)}`}>
-                    {getStatusIcon(task.status)}
-                    {task.status}
-                  </span>
+                ))}
+              </div>
+            ) : (
+              <div className="py-6 text-center">
+                <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-3">
+                  <FileText size={24} />
                 </div>
-              ))}
-            </div>
+                <p className="text-gray-500 text-sm">Không có công việc nào cho hôm nay</p>
+              </div>
+            )}
           </div>
         </div>
         
@@ -109,50 +135,63 @@ export const TodayTasks = () => {
           </div>
           
           <div className="max-h-96 overflow-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50 sticky top-0">
-                <tr>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên dự án</th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quản lý</th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hạn chót</th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {TaskData.map((project, index) => (
-                  <tr key={index} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-md bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
-                          <FileText size={16} />
-                        </div>
-                        <span className="text-sm font-medium text-gray-900">{project.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200 mr-2">
-                          <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(project.projectManager)}&background=random`} alt={project.projectManager} />
-                        </div>
-                        <span className="text-sm text-gray-600">{project.projectManager}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Calendar size={14} className="mr-1.5 text-gray-400" />
-                        {project.dueDate}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClassName(project.status)}`}>
-                        {getStatusIcon(project.status)}
-                        {project.status}
-                      </span>
-                    </td>
+            {loading ? (
+              <div className="flex justify-center py-10">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            ) : tasks.length > 0 ? (
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên công ty</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Người lắp đặt</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày lắp</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {tasks.map((task, index) => (
+                    <tr key={task._id || index} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 rounded-md bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+                            <FileText size={16} />
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">{task.companyName || 'N/A'}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200 mr-2">
+                            <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(task.installer || 'N/A')}&background=random`} alt={task.installer || 'N/A'} />
+                          </div>
+                          <span className="text-sm text-gray-600">{task.installer || 'N/A'}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Calendar size={14} className="mr-1.5 text-gray-400" />
+                          {task.installDate ? new Date(task.installDate).toLocaleDateString() : 'N/A'}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClassName(task.status)}`}>
+                          {getStatusIcon(task.status)}
+                          {task.status || 'Pending'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="py-10 text-center">
+                <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-4">
+                  <FileText size={32} />
+                </div>
+                <p className="text-gray-500">Không có dữ liệu để hiển thị</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -231,7 +270,7 @@ export const TodayTasks = () => {
             <div className="flex-1">
               <span className="text-3xl font-bold text-gray-800">{projectStats.projectsWorked}</span>
               <div className="mt-2 flex items-center">
-                <span className="text-green-600 text-sm font-medium">+5 dự án</span>
+                <span className="text-green-600 text-sm font-medium">+{Math.min(5, projectStats.projectsWorked)} dự án</span>
                 <span className="mx-2 text-gray-400">|</span>
                 <span className="text-gray-500 text-sm">Tháng này</span>
               </div>
