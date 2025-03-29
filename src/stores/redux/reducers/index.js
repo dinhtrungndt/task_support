@@ -1,8 +1,12 @@
 import { combineReducers } from 'redux';
 import businessReducer from './businessReducer';
 import taskReducer from './taskReducer';
+import userReducer from './userReducer';
 
-export default combineReducers({
+const rootReducer = combineReducers({
   business: businessReducer,
-  tasks: taskReducer, 
+  tasks: taskReducer,
+  users: userReducer
 });
+
+export default rootReducer;

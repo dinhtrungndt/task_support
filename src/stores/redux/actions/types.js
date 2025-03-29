@@ -1,3 +1,7 @@
+// USERS
+export const FETCH_USERS = 'FETCH_USERS';
+export const FETCH_USERS_ERROR = 'FETCH_USERS_ERROR';
+
 // TASKS
 export const FETCH_TASKS = 'FETCH_TASKS';
 export const FETCH_TASKS_ERROR = 'FETCH_TASKS_ERROR';

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Code, FileText, MapPin, Link, User, Calendar, Database, CheckCircle, AlertTriangle, Info } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
 
 const EditTaskModal = ({ task, onClose, onSave }) => {
+  const { users } = useSelector(state => state.users || { users: [] }); // Access users from Redux store
   const [formData, setFormData] = useState({
     _id: '',
     mst: '',
@@ -14,11 +16,13 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
     typeData: '',
     installDate: '',
     status: 'Pending',
-    notes: ''
+    notes: '',
+    userAdd: ''
   });
   
   const [hasChanges, setHasChanges] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [taskCreator, setTaskCreator] = useState(null);
 
   useEffect(() => {
     if (task) {
@@ -34,13 +38,20 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
         typeData: task.typeData || 'Data',
         installDate: task.installDate ? new Date(task.installDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         status: task.status || 'Pending',
-        notes: task.notes || ''
+        notes: task.notes || '',
+        userAdd: task.userAdd || ''
       });
       
       // Reset change tracking
       setHasChanges(false);
+      
+      // Find user details if users are available
+      if (task.userAdd && users?.length) {
+        const creator = users.find(user => user._id === task.userAdd);
+        setTaskCreator(creator);
+      }
     }
-  }, [task]);
+  }, [task, users]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -81,30 +92,63 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
     }
   };
   
+  // Format creator name
+  const getCreatorName = () => {
+    if (taskCreator) {
+      return taskCreator.name || taskCreator.email || 'Người dùng';
+    }
+    
+    if (typeof task.userAdd === 'object') {
+      return task.userAdd.name || task.userAdd.email || 'Người dùng';
+    }
+    
+    return 'Người dùng';
+  };
+  
   // If no task is provided, don't render
   if (!task) return null;
 
   return (
-    <div className="bg-white rounded-lg overflow-hidden max-h-[70vh] flex flex-col">
+    <div className="bg-white rounded-lg overflow-hidden max-h-[70vh] flex flex-col overflow-y-auto ">
       <form onSubmit={handleSubmit} className="flex flex-col h-full">
         {/* Scrollable content area */}
         <div className="p-3 overflow-y-auto flex-grow space-y-3">
-          {/* Company Info Card (compact) */}
+          {/* User Info Card */}
           <div className="bg-blue-50 p-2 rounded-lg">
-            <h3 className="text-xs font-medium text-blue-800 mb-2">Thông tin doanh nghiệp</h3>
+            <h3 className="text-xs font-medium text-blue-800 mb-2">Người tạo công việc</h3>
+            <div className="flex items-center bg-white p-2 rounded-md border border-blue-100">
+              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-2">
+                <User size={14} />
+              </div>
+              <div>
+                <p className="text-xs font-medium">{getCreatorName()}</p>
+                {taskCreator?.email && (
+                  <p className="text-xs text-gray-500">{taskCreator.email}</p>
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-blue-600 mt-1 italic">
+              <Info size={12} className="inline mr-1" />
+              Không thể thay đổi người tạo công việc
+            </p>
+          </div>
+          
+          {/* Company Info Card (compact) */}
+          <div className="bg-gray-50 p-2 rounded-lg">
+            <h3 className="text-xs font-medium text-gray-700 mb-2">Thông tin doanh nghiệp</h3>
             
             <div className="grid grid-cols-2 gap-2 mb-2">
               <div>
                 <label className="block text-xs font-medium text-gray-700">
                   MST
                 </label>
-                <div className="flex items-center h-8 bg-gray-50 border border-gray-300 rounded-md">
+                <div className="flex items-center h-8 bg-gray-100 border border-gray-300 rounded-md">
                   <Code size={12} className="text-gray-400 ml-2 mr-1" />
                   <input
                     type="text"
                     value={formData.mst}
                     readOnly
-                    className="w-full py-1 px-1 bg-gray-50 text-gray-700 text-xs focus:outline-none cursor-not-allowed"
+                    className="w-full py-1 px-1 bg-gray-100 text-gray-700 text-xs focus:outline-none cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -113,13 +157,13 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                 <label className="block text-xs font-medium text-gray-700">
                   Tên công ty
                 </label>
-                <div className="flex items-center h-8 bg-gray-50 border border-gray-300 rounded-md">
+                <div className="flex items-center h-8 bg-gray-100 border border-gray-300 rounded-md">
                   <FileText size={12} className="text-gray-400 ml-2 mr-1" />
                   <input
                     type="text"
                     value={formData.companyName}
                     readOnly
-                    className="w-full py-1 px-1 bg-gray-50 text-gray-700 text-xs focus:outline-none cursor-not-allowed truncate"
+                    className="w-full py-1 px-1 bg-gray-100 text-gray-700 text-xs focus:outline-none cursor-not-allowed truncate"
                   />
                 </div>
               </div>
@@ -129,13 +173,13 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
               <label className="block text-xs font-medium text-gray-700">
                 Địa chỉ
               </label>
-              <div className="flex items-center h-8 bg-gray-50 border border-gray-300 rounded-md">
+              <div className="flex items-center h-8 bg-gray-100 border border-gray-300 rounded-md">
                 <MapPin size={12} className="text-gray-400 ml-2 mr-1 flex-shrink-0" />
                 <input
                   type="text"
                   value={formData.address}
                   readOnly
-                  className="w-full py-1 px-1 bg-gray-50 text-gray-700 text-xs focus:outline-none cursor-not-allowed truncate"
+                  className="w-full py-1 px-1 bg-gray-100 text-gray-700 text-xs focus:outline-none cursor-not-allowed truncate"
                 />
               </div>
             </div>

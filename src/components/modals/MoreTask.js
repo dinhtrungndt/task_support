@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Building, FileText, MapPin, Calendar, User, Link, Database, Clock, CheckCircle, XCircle, AlertTriangle, BarChart, Info } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
 const MoreDetailsModal = ({ task }) => {
   const [activeTab, setActiveTab] = useState('details');
+  const { users } = useSelector(state => state.users || { users: [] }); 
+  const [taskCreator, setTaskCreator] = useState(null);
+  
+  useEffect(() => {
+    // Find the user who created this task
+    if (task?.userAdd && users?.length) {
+      const creator = users.find(user => user._id === task.userAdd);
+      setTaskCreator(creator);
+    } else if (task?.userAdd && typeof task.userAdd === 'object') {
+      // If userAdd is already an object with user data
+      setTaskCreator(task.userAdd);
+    }
+  }, [task, users]);
   
   if (!task) return null;
   
@@ -20,6 +34,20 @@ const MoreDetailsModal = ({ task }) => {
     } catch (e) {
       return dateString;
     }
+  };
+  
+  // Get creator name safely
+  const getCreatorName = () => {
+    if (taskCreator) {
+      return taskCreator.name || taskCreator.email || 'Người dùng';
+    }
+    
+    if (typeof task.userAdd === 'object' && task.userAdd !== null) {
+      return task.userAdd.name || task.userAdd.email || 'Người dùng';
+    }
+    
+    // If userAdd is a string (ID)
+    return typeof task.userAdd === 'string' ? task.userAdd : 'Người dùng';
   };
   
   // Get status badge style
@@ -70,6 +98,26 @@ const MoreDetailsModal = ({ task }) => {
         <div className="bg-white border border-gray-200 rounded-md p-2 text-center">
           <p className="text-xs text-gray-500">Loại dữ liệu</p>
           <p className="text-xs font-medium">{task.typeData || 'N/A'}</p>
+        </div>
+      </div>
+      
+      {/* Creator Information */}
+      <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+        <h3 className="text-xs font-medium text-blue-800 mb-2 flex items-center">
+          <User size={14} className="mr-1 text-blue-500" />
+          Người tạo task
+        </h3>
+        
+        <div className="bg-white p-2 rounded-md border border-blue-200 shadow-sm">
+          <p className="text-xs font-medium">
+            {getCreatorName()}
+          </p>
+          {taskCreator?.email && (
+            <p className="text-xs text-gray-500 mt-0.5">{taskCreator.email}</p>
+          )}
+          <p className="text-xs text-gray-500 mt-0.5">
+            Ngày tạo: {formatDate(task.createdAt)}
+          </p>
         </div>
       </div>
       
@@ -141,6 +189,12 @@ const MoreDetailsModal = ({ task }) => {
           </p>
         </div>
       )}
+      
+      {/* Last Modified Info */}
+      <div className="mt-2 text-xs text-gray-500 flex justify-end">
+        <Clock size={12} className="mr-1" />
+        Cập nhật lần cuối: {formatDate(task.lastModified)}
+      </div>
     </div>
   );
   
@@ -149,10 +203,11 @@ const MoreDetailsModal = ({ task }) => {
     const simulatedHistory = [
       {
         status: task.status || 'Pending',
-        date: task.installDate || task.createdAt || new Date().toISOString(),
+        date: task.lastModified || task.installDate || task.createdAt || new Date().toISOString(),
         installer: task.installer || 'N/A',
         type: task.typeData || 'N/A',
-        notes: task.notes || ''
+        notes: task.notes || '',
+        user: getCreatorName()
       }
     ];
     
@@ -201,6 +256,10 @@ const MoreDetailsModal = ({ task }) => {
                           <div className="flex items-center">
                             <User size={12} className="mr-1 text-gray-400" />
                             <span className="truncate">Người thực hiện: {record.installer || 'N/A'}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <User size={12} className="mr-1 text-gray-400" />
+                            <span className="truncate">Người tạo: {record.user}</span>
                           </div>
                           <div className="flex items-center">
                             <Database size={12} className="mr-1 text-gray-400" />
@@ -265,63 +324,71 @@ const MoreDetailsModal = ({ task }) => {
   );
   
   return (
-    <div className="bg-gray-50 rounded-lg overflow-hidden max-h-[70vh] flex flex-col">
-      {/* Task Header */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-2.5 text-white">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium truncate max-w-[70%]">{task.companyName || 'N/A'}</h2>
-          {getStatusBadge(task.status || 'Pending')}
+    <div className="bg-gray-50 rounded-lg overflow-hidden overflow-y-auto" style={{ maxHeight: '85vh', width: '100%' }}>
+      <div className="flex flex-col h-full">
+        {/* Task Header */}
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 text-white">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-medium truncate max-w-[70%]">{task.companyName || 'N/A'}</h2>
+            {getStatusBadge(task.status || 'Pending')}
+          </div>
+          <p className="text-xs text-blue-100 mt-0.5 flex items-center">
+            <MapPin size={12} className="mr-1" />
+            <span className="truncate">{task.address || 'Chưa có địa chỉ'}</span>
+          </p>
+          <div className="flex items-center mt-1.5">
+            <div className="bg-blue-400 bg-opacity-30 rounded-md px-2 py-0.5 flex items-center text-xs text-white">
+              <User size={10} className="mr-1" />
+              Người tạo: {getCreatorName()}
+            </div>
+          </div>
         </div>
-        <p className="text-xs text-blue-100 mt-0.5 flex items-center">
-          <MapPin size={12} className="mr-1" />
-          <span className="truncate">{task.address || 'Chưa có địa chỉ'}</span>
-        </p>
-      </div>
-      
-      {/* Tabs */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="flex">
-          <button
-            className={`flex items-center px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
-              activeTab === 'details' 
-                ? 'border-blue-600 text-blue-600' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-            onClick={() => setActiveTab('details')}
-          >
-            <FileText size={14} className="mr-1" />
-            Chi tiết
-          </button>
-          <button
-            className={`flex items-center px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
-              activeTab === 'history' 
-                ? 'border-blue-600 text-blue-600' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-            onClick={() => setActiveTab('history')}
-          >
-            <Clock size={14} className="mr-1" />
-            Lịch sử
-          </button>
-          <button
-            className={`flex items-center px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
-              activeTab === 'analytics' 
-                ? 'border-blue-600 text-blue-600' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-            onClick={() => setActiveTab('analytics')}
-          >
-            <BarChart size={14} className="mr-1" />
-            Phân tích
-          </button>
+        
+        {/* Tabs */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="flex">
+            <button
+              className={`flex items-center px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+                activeTab === 'details' 
+                  ? 'border-blue-600 text-blue-600' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              onClick={() => setActiveTab('details')}
+            >
+              <FileText size={14} className="mr-1" />
+              Chi tiết
+            </button>
+            <button
+              className={`flex items-center px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+                activeTab === 'history' 
+                  ? 'border-blue-600 text-blue-600' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              onClick={() => setActiveTab('history')}
+            >
+              <Clock size={14} className="mr-1" />
+              Lịch sử
+            </button>
+            <button
+              className={`flex items-center px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+                activeTab === 'analytics' 
+                  ? 'border-blue-600 text-blue-600' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              onClick={() => setActiveTab('analytics')}
+            >
+              <BarChart size={14} className="mr-1" />
+              Phân tích
+            </button>
+          </div>
         </div>
-      </div>
-      
-      {/* Tab content with scrollable area */}
-      <div className="p-3 overflow-y-auto flex-grow">
-        {activeTab === 'details' && renderDetailsTab()}
-        {activeTab === 'history' && renderHistoryTab()}
-        {activeTab === 'analytics' && renderAnalyticsTab()}
+        
+        {/* Tab content with scrollable area */}
+        <div className="p-4 overflow-y-auto flex-grow">
+          {activeTab === 'details' && renderDetailsTab()}
+          {activeTab === 'history' && renderHistoryTab()}
+          {activeTab === 'analytics' && renderAnalyticsTab()}
+        </div>
       </div>
     </div>
   );

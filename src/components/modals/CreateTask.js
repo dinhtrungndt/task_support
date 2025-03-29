@@ -1,26 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { X, Search, Building, MapPin, FileText, Link, Database, Calendar, User, CheckCircle, Info } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchBusinesses } from '../../stores/redux/actions/businessActions';
 import { addTask } from '../../stores/redux/actions/taskActions';
+import { AuthContext } from '../../contexts/start/AuthContext';
 
 export const CreateTask = ({ closeModal }) => {
     const dispatch = useDispatch();
     const { businesses } = useSelector(state => state.business);
-    
+    const auth = useContext(AuthContext);
+    const { user } = auth;
+    const isMounted = useRef(true);
+
     const [formData, setFormData] = useState({
         companyId: "",
         companyName: "",
         mst: "",
         address: "",
         connectionType: "",
-        installer: "",
-        codeData: "",
+        installer: "N/A", // Default value for required field
+        codeData: "N/A", // Default value for required field
         typeData: "Data",
         installDate: new Date().toISOString().split('T')[0],
         status: "Pending",
         notes: ""
+        // userAdd will be added when dispatching the action
     });
 
     const [selectedBusiness, setSelectedBusiness] = useState(null);
@@ -33,6 +38,11 @@ export const CreateTask = ({ closeModal }) => {
         if (!businesses.length) {
             dispatch(fetchBusinesses()); 
         }
+        
+        // Cleanup function to prevent state updates on unmounted component
+        return () => {
+            isMounted.current = false;
+        };
     }, [dispatch, businesses.length]);
 
     useEffect(() => {
@@ -89,20 +99,38 @@ export const CreateTask = ({ closeModal }) => {
             toast.error("Vui lòng nhập lý do từ chối");
             return;
         }
+        
+        // Check if user is logged in
+        if (!user || !user._id) {
+            toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+            return;
+        }
 
         try {
             setIsSubmitting(true);
             
-            // Dispatch action to add task
-            await dispatch(addTask(formData));
+            // Make sure we have values for required fields
+            const dataToSubmit = {
+                ...formData,
+                installer: formData.installer || "N/A",
+                codeData: formData.codeData || "N/A"
+            };
+            
+            // Pass the user ID directly to the action
+            await dispatch(addTask(dataToSubmit, user._id));
             
             toast.success("Tạo công việc thành công!");
-            closeModal();
+            
+            // Force reset submitting state and close modal
+            setIsSubmitting(false);
+            window.setTimeout(() => closeModal(), 500);
+            
+            return true; // Ensure the function returns something
         } catch (error) {
             console.error("Error creating task:", error);
             toast.error("Lỗi khi tạo công việc: " + (error.message || "Vui lòng thử lại"));
-        } finally {
             setIsSubmitting(false);
+            return false;
         }
     };
 
@@ -137,7 +165,12 @@ export const CreateTask = ({ closeModal }) => {
                         )}
                     </h2>
                     <button 
-                        onClick={closeModal}
+                        onClick={() => {
+                            if (!isSubmitting) {
+                                const result = closeModal();
+                                console.log("closeModal result:", result);
+                            }
+                        }}
                         className="p-1 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
                         disabled={isSubmitting}
                     >
@@ -252,6 +285,17 @@ export const CreateTask = ({ closeModal }) => {
                                     </div>
                                 )}
                             </div>
+                            
+                            {/* Current user info */}
+                            <div className="mt-4 p-2 bg-gray-50 border border-gray-200 rounded-md">
+                                <div className="flex items-center text-sm text-gray-600">
+                                    <User size={14} className="mr-1 text-gray-400" />
+                                    <span>Người tạo: </span>
+                                    <span className="font-medium ml-1">
+                                        {user?.name || 'Không xác định'}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     ) : (
                         /* Step 2: Task Details */
@@ -259,6 +303,13 @@ export const CreateTask = ({ closeModal }) => {
                             <div className="bg-gray-50 p-3 rounded-md mb-4">
                                 <p className="text-sm font-medium text-gray-700">Doanh nghiệp: <span className="text-blue-600">{formData.companyName}</span></p>
                                 <p className="text-xs text-gray-500 mt-1">MST: {formData.mst}</p>
+                                <div className="flex items-center mt-2 text-xs text-gray-600">
+                                    <User size={14} className="mr-1 text-gray-400" />
+                                    <span>Người tạo: </span>
+                                    <span className="font-medium ml-1">
+                                        {user?.name || 'Không xác định'}
+                                    </span>
+                                </div>
                             </div>
                             
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -273,9 +324,9 @@ export const CreateTask = ({ closeModal }) => {
                                             className="w-full py-2.5 px-3 border-none focus:outline-none text-sm"
                                         >
                                             <option value="">Chọn loại kết nối</option>
-                                            <option value="Fiber">Fiber</option>
-                                            <option value="Cable">Cable</option>
-                                            <option value="Wireless">Wireless</option>
+                                            <option value="Mạng">Mạng</option>
+                                            <option value="Data">Data</option>
+                                            <option value="Cloud">Cloud</option>
                                         </select>
                                     </div>
                                 </div>
@@ -287,7 +338,7 @@ export const CreateTask = ({ closeModal }) => {
                                         <input
                                             type="text"
                                             name="installer"
-                                            placeholder="Nhập tên người lắp đặt"
+                                            placeholder="Nhập tên người lắp đặt (mặc định: N/A)"
                                             value={formData.installer}
                                             onChange={handleChange}
                                             className="w-full py-2.5 px-3 border-none focus:outline-none text-sm"
@@ -302,7 +353,7 @@ export const CreateTask = ({ closeModal }) => {
                                         <input
                                             type="text"
                                             name="codeData"
-                                            placeholder="Nhập mã dữ liệu"
+                                            placeholder="Nhập mã dữ liệu (mặc định: N/A)"
                                             value={formData.codeData}
                                             onChange={handleChange}
                                             className="w-full py-2.5 px-3 border-none focus:outline-none text-sm"
@@ -380,7 +431,11 @@ export const CreateTask = ({ closeModal }) => {
                     {step === 1 ? (
                         <>
                             <button
-                                onClick={closeModal}
+                                onClick={() => {
+                                    if (!isSubmitting) {
+                                        closeModal();
+                                    }
+                                }}
                                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                                 disabled={isSubmitting}
                             >

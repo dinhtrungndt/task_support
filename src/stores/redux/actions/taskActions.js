@@ -25,34 +25,42 @@ export const fetchTasks = () => async (dispatch) => {
   }
 };
 
-// Add a new task
-export const addTask = (taskData) => async (dispatch) => {
+// Add a new task with user ID directly passed from component
+export const addTask = (taskData, userId) => async (dispatch) => {
   try {
-    // Format data for the updated Task model
+    if (!userId) {
+      throw new Error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+    }
+    
+    // Make sure installer and codeData have values since they're required
     const taskToAdd = {
       mst: taskData.mst || '',
       companyName: taskData.name || taskData.companyName || '', 
       address: taskData.address || '',
       connectionType: taskData.connectionType || '',
-      installer: taskData.PInstaller || taskData.installer || '', 
-      codeData: taskData.codeData || '',
+      installer: taskData.PInstaller || taskData.installer || 'N/A', // Default value for required field
+      codeData: taskData.codeData || 'N/A', // Default value for required field
       typeData: taskData.typeData || 'Data',
       installDate: taskData.AtSetting || taskData.installDate || new Date().toISOString(), 
       status: taskData.status || 'Pending',
       notes: taskData.cancellationReason || taskData.notes || '',
-      companyId: taskData.companyId || taskData.businessId // Make sure the company ID is passed
+      companyId: taskData.companyId || taskData.businessId, // Make sure the company ID is passed
+      userAdd: userId // Add the user ID passed from the component
     };
 
-    // Use the updated endpoint
-    const response = await axiosClient.post('/tasks/add', taskToAdd);
+    console.log("Sending task data:", taskToAdd);
+
+    // Changed from '/tasks/add' to '/tasks'
+    const response = await axiosClient.post('/tasks', [taskToAdd]); // Notice we wrap in array for POST /tasks
     
     dispatch({
       type: ADD_TASK,
-      payload: response.data,
+      payload: response.data[0], // Get the first item from the array response
     });
     
-    return response.data;
+    return response.data[0]; // Return the first created task
   } catch (error) {
+    console.error("Add task error details:", error.response?.data || error);
     dispatch({
       type: FETCH_TASKS_ERROR,
       payload: error.message,
@@ -74,12 +82,13 @@ export const updateTask = (taskData) => async (dispatch) => {
       companyName: taskData.name || taskData.companyName || '', 
       address: taskData.address || '',
       connectionType: taskData.connectionType || '',
-      installer: taskData.PInstaller || taskData.installer || '', 
-      codeData: taskData.codeData || '',
+      installer: taskData.PInstaller || taskData.installer || 'N/A', // Default value 
+      codeData: taskData.codeData || 'N/A', // Default value
       typeData: taskData.typeData || 'Data',
       installDate: taskData.AtSetting || taskData.installDate || new Date().toISOString(), 
       status: taskData.status || 'Pending',
-      notes: taskData.cancellationReason || taskData.notes || ''
+      notes: taskData.cancellationReason || taskData.notes || '',
+      userAdd: taskData.userAdd // Keep the original user who created the task
     };
 
     // Use the updated endpoint

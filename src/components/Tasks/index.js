@@ -1,5 +1,5 @@
 import React from 'react';
-import {MoreVertical, AlertTriangle } from 'lucide-react';
+import { MoreVertical, AlertTriangle, User } from 'lucide-react';
 import CreateTask from '../modals/CreateTask';
 import DropdownMenu from '../DropdownMenu';
 
@@ -49,6 +49,15 @@ export const Tasks = ({
     }
   };
 
+  // Format user display name
+  const formatUserName = (user) => {
+    if (!user) return 'N/A';
+    if (typeof user === 'object') {
+      return user.name || user.email || 'N/A';
+    }
+    return user;
+  };
+
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
@@ -74,13 +83,14 @@ export const Tasks = ({
               <th className="p-3 border-b">Loại dữ liệu</th>
               <th className="p-3 border-b">Ngày lắp</th>
               <th className="p-3 border-b">Trạng thái</th>
+              <th className="p-3 border-b">Người tạo</th>
               <th className="p-3 border-b text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={11} className="p-8 text-center text-sm text-gray-500">
+                <td colSpan={12} className="p-8 text-center text-sm text-gray-500">
                   <div className="flex flex-col items-center justify-center">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-3"></div>
                     <p>Đang tải dữ liệu...</p>
@@ -111,6 +121,16 @@ export const Tasks = ({
                       {task.status || 'Pending'}
                     </span>
                   </td>
+                  <td className="p-3 border-b">
+                    <div className="flex items-center">
+                      <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-1.5">
+                        <User size={12} />
+                      </div>
+                      <span className="truncate max-w-[100px]">
+                        {formatUserName(task.userAdd)}
+                      </span>
+                    </div>
+                  </td>
                   <td className="p-3 border-b text-right relative">
                     <div>
                       <button 
@@ -131,7 +151,7 @@ export const Tasks = ({
               ))
             ) : (
               <tr>
-                <td colSpan={11} className="px-3 py-8 text-center text-sm text-gray-500">
+                <td colSpan={12} className="px-3 py-8 text-center text-sm text-gray-500">
                   <div className="flex flex-col items-center justify-center">
                     <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-3">
                       <AlertTriangle size={28} />
