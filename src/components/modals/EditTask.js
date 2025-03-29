@@ -1,46 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Code, FileText, MapPin, Link, User, Calendar, Database, CheckCircle, AlertTriangle, Info } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const EditTaskModal = ({ task, onClose, onSave }) => {
   const [formData, setFormData] = useState({
+    _id: '',
     mst: '',
-    name: '',
+    companyName: '',
     address: '',
     connectionType: '',
-    PInstaller: '',
+    installer: '',
     codeData: '',
     typeData: '',
-    AtSetting: '',
-    status: 'Pending'
+    installDate: '',
+    status: 'Pending',
+    notes: ''
   });
   
   const [hasChanges, setHasChanges] = useState(false);
-  const [cancellationReason, setCancellationReason] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (task) {
       // Initialize form with task data
       setFormData({
+        _id: task._id || '',
         mst: task.mst || '',
-        name: task.name || '',
+        companyName: task.companyName || '',
         address: task.address || '',
         connectionType: task.connectionType || '',
-        PInstaller: task.PInstaller || '',
+        installer: task.installer || '',
         codeData: task.codeData || '',
-        typeData: task.installationHistory && task.installationHistory[0] ? task.installationHistory[0].type : '',
-        AtSetting: task.installationHistory && task.installationHistory[0] ? task.installationHistory[0].date : '',
-        status: task.installationHistory && task.installationHistory[0] ? task.installationHistory[0].status : 'Pending'
+        typeData: task.typeData || 'Data',
+        installDate: task.installDate ? new Date(task.installDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        status: task.status || 'Pending',
+        notes: task.notes || ''
       });
       
       // Reset change tracking
       setHasChanges(false);
-      
-      // Set cancellation reason if available
-      if (task.installationHistory && task.installationHistory[0] && task.installationHistory[0].notes) {
-        setCancellationReason(task.installationHistory[0].notes);
-      } else {
-        setCancellationReason('');
-      }
     }
   }, [task]);
 
@@ -53,41 +51,34 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
     setHasChanges(true);
   };
 
-  const handleCancellationReasonChange = (e) => {
-    setCancellationReason(e.target.value);
-    setHasChanges(true);
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validate form - check required fields
-    if (!formData.mst || !formData.name || !formData.status) {
-      alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    if (!formData._id || !formData.status) {
+      toast.error('Vui lòng điền đầy đủ các trường bắt buộc');
       return;
     }
     
-    // Validate cancellation reason for rejected status
-    if (formData.status === 'Rejected' && !cancellationReason) {
-      alert('Vui lòng nhập lý do từ chối');
+    // Validate notes for rejected status
+    if (formData.status === 'Rejected' && !formData.notes) {
+      toast.error('Vui lòng nhập lý do từ chối');
       return;
     }
     
-    // Create updated task object with installation history
-    const updatedTask = {
-      ...task,
-      ...formData,
-      installationHistory: [{
-        ...(task.installationHistory && task.installationHistory[0] ? task.installationHistory[0] : {}),
-        type: formData.typeData,
-        date: formData.AtSetting,
-        status: formData.status,
-        notes: formData.status === 'Rejected' ? cancellationReason : 
-               (task.installationHistory && task.installationHistory[0] ? task.installationHistory[0].notes : '')
-      }]
-    };
-    
-    onSave(updatedTask);
+    try {
+      setIsSubmitting(true);
+      
+      // Call onSave callback with the updated task
+      await onSave(formData);
+      
+      toast.success('Cập nhật công việc thành công');
+    } catch (error) {
+      console.error('Error updating task:', error);
+      toast.error('Lỗi khi cập nhật công việc: ' + (error.message || 'Đã xảy ra lỗi'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   // If no task is provided, don't render
@@ -125,8 +116,8 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                 <FileText size={16} className="text-gray-400 ml-3 mr-2" />
                 <input
                   type="text"
-                  name="name"
-                  value={formData.name}
+                  name="companyName"
+                  value={formData.companyName}
                   readOnly
                   className="w-full py-2.5 px-3 bg-gray-50 text-gray-700 focus:outline-none text-sm cursor-not-allowed"
                 />
@@ -181,8 +172,8 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                 <User size={16} className="text-gray-400 ml-3 mr-2" />
                 <input
                   type="text"
-                  name="PInstaller"
-                  value={formData.PInstaller}
+                  name="installer"
+                  value={formData.installer}
                   onChange={handleChange}
                   className="w-full py-2.5 px-3 focus:outline-none text-sm"
                   placeholder="Nhập người lắp đặt"
@@ -219,9 +210,8 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                   onChange={handleChange}
                   className="w-full py-2.5 px-3 focus:outline-none text-sm border-none"
                 >
-                  <option value="">Chọn loại dữ liệu</option>
-                  <option value="Cloud">Cloud</option>
                   <option value="Data">Data</option>
+                  <option value="Cloud">Cloud</option>
                 </select>
               </div>
             </div>
@@ -234,8 +224,8 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                 <Calendar size={16} className="text-gray-400 ml-3 mr-2" />
                 <input
                   type="date"
-                  name="AtSetting"
-                  value={formData.AtSetting}
+                  name="installDate"
+                  value={formData.installDate}
                   onChange={handleChange}
                   className="w-full py-2.5 px-3 focus:outline-none text-sm"
                 />
@@ -262,7 +252,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
             </div>
           </div>
           
-          {/* Cancellation Reason - only show when status is Rejected */}
+          {/* Rejection Reason - only show when status is Rejected */}
           {formData.status === 'Rejected' && (
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -271,8 +261,9 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
               <div className="flex items-start">
                 <AlertTriangle size={16} className="text-red-400 mr-2 mt-2.5" />
                 <textarea
-                  value={cancellationReason}
-                  onChange={handleCancellationReasonChange}
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleChange}
                   className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Vui lòng nhập lý do từ chối công việc"
                   rows={3}
@@ -301,6 +292,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
             type="button"
             onClick={onClose}
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            disabled={isSubmitting}
           >
             Hủy
           </button>
@@ -310,10 +302,20 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
               hasChanges 
                 ? 'bg-blue-600 hover:bg-blue-700' 
                 : 'bg-gray-400 cursor-not-allowed'
-            }`}
-            disabled={!hasChanges}
+            } ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+            disabled={!hasChanges || isSubmitting}
           >
-            Lưu thay đổi
+            {isSubmitting ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Đang lưu...
+              </span>
+            ) : (
+              "Lưu thay đổi"
+            )}
           </button>
         </div>
       </form>

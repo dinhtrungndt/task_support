@@ -6,11 +6,13 @@ import Modal from '../../components/modals';
 import EditTaskModal from '../../components/modals/EditTask';
 import MoreDetailsModal from '../../components/modals/MoreTask';
 import { Tasks } from '../../components/Tasks';
-import { fetchBusinesses } from '../../stores/redux/actions/businessActions';
+import { fetchTasks, deleteTasks, updateTask } from '../../stores/redux/actions/taskActions';
+import { toast } from 'react-toastify';
+import * as XLSX from 'xlsx';
 
 export const TaskPages = () => {
   const dispatch = useDispatch();
-  const { businesses, loading } = useSelector(state => state.business);
+  const { tasks, loading, error } = useSelector(state => state.tasks);
   const [openModalCreateTask, setOpenModalCreateTask] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredTasks, setFilteredTasks] = useState([]);
@@ -21,47 +23,48 @@ export const TaskPages = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchBusinesses());
+    dispatch(fetchTasks());
   }, [dispatch]);
 
   useEffect(() => {
     filterTasks();
-  }, [searchTerm, activeFilter, businesses]);
+  }, [searchTerm, activeFilter, tasks]);
+
+  // Display error notifications
+  useEffect(() => {
+    if (error) {
+      toast.error("Lỗi khi tải dữ liệu: " + error);
+    }
+  }, [error]);
 
   const filterTasks = () => {
-    let results = businesses;
+    let results = tasks || [];
+    
+    // Apply status filter
     if (activeFilter !== 'All') {
-      const statusMap = {
-        Done: 'Done',
-        Pending: 'Pending',
-        Rejected: 'Rejected'
-      };
       results = results.filter(task => 
-        task.installationHistory && 
-        task.installationHistory[0] && 
-        task.installationHistory[0].status === statusMap[activeFilter]
+        task.status === activeFilter
       );
     }
     
+    // Apply search filter
     if (searchTerm.trim() !== '') {
       const searchTermLower = searchTerm.toLowerCase().trim();
       results = results.filter(task => {
         // Guard against missing properties
-        if (!task.installationHistory || !task.installationHistory[0]) return false;
+        if (!task) return false;
         
         return (
-          (task.name || '').toLowerCase().includes(searchTermLower) ||
+          (task.companyName || '').toLowerCase().includes(searchTermLower) ||
           (task.mst || '').toLowerCase().includes(searchTermLower) ||
           (task.address || '').toLowerCase().includes(searchTermLower) ||
           (task.connectionType || '').toLowerCase().includes(searchTermLower) ||
-          (task.PInstaller || '').toLowerCase().includes(searchTermLower) ||
+          (task.installer || '').toLowerCase().includes(searchTermLower) ||
           (task.codeData || '').toLowerCase().includes(searchTermLower) ||
-          (task.installationHistory[0].type || '').toLowerCase().includes(searchTermLower) ||
-          (task.installationHistory[0].date || '').toLowerCase().includes(searchTermLower) ||
-          (task.installationHistory[0].installer || '').toLowerCase().includes(searchTermLower) ||
-          (task.installationHistory[0].status || '').toLowerCase().includes(searchTermLower)
+          (task.typeData || '').toLowerCase().includes(searchTermLower)
         );
       });
     }
@@ -97,16 +100,23 @@ export const TaskPages = () => {
     setActiveDropdown(null);
   };
 
-  const handleSaveTask = (updatedTask) => {
-    console.log('Saving updated task:', updatedTask);
-    setEditModalOpen(false);
+  const handleSaveTask = async (updatedTask) => {
+    try {
+      // Update task in backend through Redux action
+      await dispatch(updateTask(updatedTask));
+      
+      setEditModalOpen(false);
+      toast.success("Cập nhật công việc thành công");
+    } catch (error) {
+      toast.error("Lỗi khi cập nhật công việc: " + (error.message || "Đã xảy ra lỗi"));
+    }
   };
 
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredTasks.map(task => task.id));
+      setSelectedIds(filteredTasks.map(task => task._id));
     }
     setSelectAll(!selectAll);
   };
@@ -117,33 +127,89 @@ export const TaskPages = () => {
     );
   };
 
-  const handleDeleteSelected = () => {
-    const tasksToDelete = selectedIds;
-    const remainingTasks = filteredTasks.filter(task => !tasksToDelete.includes(task.id));
-    setFilteredTasks(remainingTasks);
-    setSelectedIds([]);
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) return;
+    
+    const confirmMessage = selectedIds.length === 1 
+      ? "Bạn có chắc chắn muốn xóa công việc này?" 
+      : `Bạn có chắc chắn muốn xóa ${selectedIds.length} công việc?`;
+    
+    const confirmation = window.confirm(confirmMessage);
+    
+    if (confirmation) {
+      try {
+        setIsDeleting(true);
+        
+        // Call API through Redux action
+        await dispatch(deleteTasks(selectedIds));
+        
+        setSelectedIds([]);
+        setSelectAll(false);
+        toast.success(`Đã xóa ${selectedIds.length} công việc thành công`);
+      } catch (error) {
+        toast.error("Lỗi khi xóa công việc: " + (error.message || "Đã xảy ra lỗi"));
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+  };
+
+  // Handle export to Excel
+  const handleExportToExcel = () => {
+    let dataToExport = filteredTasks;
+    
+    if (selectedIds.length > 0) {
+      dataToExport = filteredTasks.filter(task => 
+        selectedIds.includes(task._id)
+      );
+    }
+    
+    // Prepare data for Excel
+    const exportData = dataToExport.map((task) => {
+      return {
+        'MST': task.mst || '',
+        'Tên công ty': task.companyName || '',
+        'Địa chỉ': task.address || '',
+        'Loại kết nối': task.connectionType || '',
+        'Người lắp đặt': task.installer || '',
+        'Mã dữ liệu': task.codeData || '',
+        'Loại dữ liệu': task.typeData || '',
+        'Ngày lắp đặt': task.installDate ? new Date(task.installDate).toLocaleDateString() : '',
+        'Trạng thái': task.status || 'Pending',
+        'Ghi chú': task.notes || '',
+        'Ngày cập nhật': task.lastModified ? new Date(task.lastModified).toLocaleDateString() : ''
+      };
+    });
+    
+    // Create workbook
+    const workbook = XLSX.utils.book_new();
+    
+    // Create worksheet
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Công việc');
+    
+    // Generate file name with current date
+    const date = new Date();
+    const fileName = `danh_sach_cong_viec_${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}.xlsx`;
+    
+    // Export file
+    XLSX.writeFile(workbook, fileName);
+    
+    toast.success(`Đã xuất ${exportData.length} công việc ra file Excel`);
   };
 
   // Get counts for each status
   const getCounts = () => {
-    if (!businesses || !Array.isArray(businesses)) return { all: 0, done: 0, pending: 0, rejected: 0 };
+    if (!tasks || !Array.isArray(tasks)) return { all: 0, done: 0, pending: 0, rejected: 0 };
     
     const counts = {
-      all: 0,
-      done: 0,
-      pending: 0,
-      rejected: 0
+      all: tasks.length,
+      done: tasks.filter(task => task.status === 'Done').length,
+      pending: tasks.filter(task => task.status === 'Pending').length,
+      rejected: tasks.filter(task => task.status === 'Rejected').length
     };
-    
-    businesses.forEach(business => {
-      if (business.installationHistory && business.installationHistory.length > 0) {
-        counts.all++;
-        const status = business.installationHistory[0].status;
-        if (status === 'Done') counts.done++;
-        else if (status === 'Pending') counts.pending++;
-        else if (status === 'Rejected') counts.rejected++;
-      }
-    });
     
     return counts;
   };
@@ -182,11 +248,24 @@ export const TaskPages = () => {
               
               {selectedIds.length > 0 && (
                 <button
-                  className="inline-flex items-center justify-center px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-500 focus:ring-offset-1 transition-colors"
+                  className="inline-flex items-center justify-center px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-500 focus:ring-offset-1 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                   onClick={handleDeleteSelected}
+                  disabled={isDeleting}
                 >
-                  <XCircle size={14} className="mr-1" />
-                  Xóa ({selectedIds.length})
+                  {isDeleting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Đang xóa...
+                    </>
+                  ) : (
+                    <>
+                      <XCircle size={14} className="mr-1" />
+                      Xóa ({selectedIds.length})
+                    </>
+                  )}
                 </button>
               )}
               
@@ -199,9 +278,10 @@ export const TaskPages = () => {
               
               <button 
                 className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 bg-white text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
+                onClick={handleExportToExcel}
               >
                 <Download size={14} className="mr-1" />
-                Xuất
+                Xuất{selectedIds.length > 0 ? ` (${selectedIds.length})` : ''}
               </button>
             </div>
           </div>
@@ -307,7 +387,6 @@ export const TaskPages = () => {
           openModalCreateTask={openModalCreateTask}
           setOpenModalCreateTask={setOpenModalCreateTask}
           setActiveDropdown={setActiveDropdown}
-          businesses={businesses}
           handleDeleteSelected={handleDeleteSelected}
           loading={loading}
         />
@@ -337,3 +416,5 @@ export const TaskPages = () => {
     </div>
   );
 };
+
+export default TaskPages;

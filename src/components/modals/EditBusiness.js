@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar } from 'lucide-react';
-import { useDispatch } from 'react-redux';
-import { updateBusiness } from '../../stores/redux/actions/businessActions';
+import { X } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 export const EditBusinessModal = ({ 
@@ -9,17 +7,15 @@ export const EditBusinessModal = ({
   onClose, 
   onSave 
 }) => {
-  const dispatch = useDispatch();
   const [editedBusiness, setEditedBusiness] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (business) {
-      const formattedBusiness = {
-        ...business,
-        AtSetting: business.AtSetting ? new Date(business.AtSetting).toISOString().split('T')[0] : '',
-      };
-      setEditedBusiness(formattedBusiness);
+      // Initialize the form with the business data
+      setEditedBusiness({
+        ...business
+      });
     }
   }, [business]);
 
@@ -36,15 +32,10 @@ export const EditBusinessModal = ({
     if (!editedBusiness) return;
     
     // Validate required fields
-    if (!editedBusiness.mst || !editedBusiness.name || !editedBusiness.address || 
-        !editedBusiness.connectionType || !editedBusiness.PInstaller || 
-        !editedBusiness.codeData || !editedBusiness.typeData || !editedBusiness.AtSetting) {
+    if (!editedBusiness.mst || !editedBusiness.name || !editedBusiness.address) {
       toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
     }
-    
-    // Debug to confirm ID is present
-    console.log("Saving business with ID:", editedBusiness._id);
     
     try {
       setIsSubmitting(true);
@@ -55,18 +46,15 @@ export const EditBusinessModal = ({
         return;
       }
       
-      const result = await dispatch(updateBusiness({
-        ...editedBusiness,
-        _id: editedBusiness._id
-      }));
+      // Only pass fields that are accepted by the backend API
+      const businessToUpdate = {
+        _id: editedBusiness._id,
+        mst: editedBusiness.mst,
+        name: editedBusiness.name,
+        address: editedBusiness.address
+      };
       
-      if (result) {
-        onSave({
-          ...result,
-          _id: editedBusiness._id 
-        });
-        toast.success("Cập nhật thông tin doanh nghiệp thành công");
-      }
+      await onSave(businessToUpdate);
     } catch (error) {
       console.error("Error in handleSave:", error);
       toast.error("Lỗi khi cập nhật: " + (error.message || "Đã xảy ra lỗi"));
@@ -133,142 +121,51 @@ export const EditBusinessModal = ({
               required
             />
           </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Loại dịch vụ <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="connectionType"
-              value={editedBusiness.connectionType || ''}
-              onChange={handleInputChange}
-              className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Nhập loại dịch vụ"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Người cài đặt <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="PInstaller"
-              value={editedBusiness.PInstaller || ''}
-              onChange={handleInputChange}
-              className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Nhập tên người cài đặt"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mã dữ liệu <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="codeData"
-              value={editedBusiness.codeData || ''}
-              onChange={handleInputChange}
-              className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Nhập mã dữ liệu"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Loại dữ liệu <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="typeData"
-              value={editedBusiness.typeData || 'Data'}
-              onChange={handleInputChange}
-              className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              required
-            >
-              <option value="Data">Data</option>
-              <option value="Cloud">Cloud</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Ngày cài đặt <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type="date"
-                name="AtSetting"
-                value={editedBusiness.AtSetting || ''}
-                onChange={handleInputChange}
-                className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pl-10"
-                required
-              />
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+        </div>
+        
+        {/* Read-only information */}
+        {editedBusiness.typeData && editedBusiness.typeData.length > 0 && (
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Thông tin khác (chỉ đọc)</h3>
+            
+            <div className="grid grid-cols-1 gap-4">
+              <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                <p className="text-xs text-gray-500 mb-1">Loại dữ liệu</p>
+                <div className="flex flex-wrap gap-1">
+                  {editedBusiness.typeData.map((type, index) => (
+                    <span key={index} className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                      {type}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                  <p className="text-xs text-gray-500 mb-1">Tổng công việc</p>
+                  <p className="text-sm font-medium">{editedBusiness.totalTasks || 0}</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                  <p className="text-xs text-gray-500 mb-1">Hoàn thành</p>
+                  <p className="text-sm font-medium text-green-600">{editedBusiness.completedTasks || 0}</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                  <p className="text-xs text-gray-500 mb-1">Đang làm</p>
+                  <p className="text-sm font-medium text-amber-600">{editedBusiness.pendingTasks || 0}</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+                  <p className="text-xs text-gray-500 mb-1">Từ chối</p>
+                  <p className="text-sm font-medium text-red-600">{editedBusiness.rejectedTasks || 0}</p>
+                </div>
+              </div>
             </div>
           </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Người liên hệ
-            </label>
-            <input
-              type="text"
-              name="contactPerson"
-              value={editedBusiness.contactPerson || ''}
-              onChange={handleInputChange}
-              className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Nhập tên người liên hệ"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
-            <input
-              type="text"
-              name="phone"
-              value={editedBusiness.phone || ''}
-              onChange={handleInputChange}
-              className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Nhập số điện thoại"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={editedBusiness.email || ''}
-              onChange={handleInputChange}
-              className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Nhập email"
-            />
-          </div>
-          
-          <div className="col-span-1 sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Loại dữ liệu (bổ sung)</label>
-            <input
-              type="text"
-              name="dataTypes"
-              value={editedBusiness.dataTypes && Array.isArray(editedBusiness.dataTypes) ? editedBusiness.dataTypes.join(', ') : ''}
-              onChange={(e) => {
-                if (editedBusiness) {
-                  setEditedBusiness({
-                    ...editedBusiness,
-                    dataTypes: e.target.value.split(',').map(type => type.trim()).filter(type => type !== '')
-                  });
-                }
-              }}
-              className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Nhập loại dữ liệu, phân cách bằng dấu phẩy"
-            />
-            <p className="mt-1 text-xs text-gray-500">Ví dụ: SQL, Oracle, MySQL</p>
-          </div>
+        )}
+        
+        <div className="mt-6 pt-4 border-t border-gray-200">
+          <p className="text-sm text-gray-500 italic">
+            Lưu ý: Các trường khác như loại dữ liệu và thống kê công việc sẽ được cập nhật tự động khi bạn thêm hoặc cập nhật các task.
+          </p>
         </div>
       </div>
       

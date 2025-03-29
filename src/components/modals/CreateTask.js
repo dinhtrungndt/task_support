@@ -3,29 +3,31 @@ import { X, Search, Building, MapPin, FileText, Link, Database, Calendar, User, 
 import { toast } from 'react-toastify';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchBusinesses } from '../../stores/redux/actions/businessActions';
+import { addTask } from '../../stores/redux/actions/taskActions';
 
 export const CreateTask = ({ closeModal }) => {
     const dispatch = useDispatch();
     const { businesses } = useSelector(state => state.business);
     
     const [formData, setFormData] = useState({
+        companyId: "",
+        companyName: "",
         mst: "",
-        name: "",
         address: "",
         connectionType: "",
-        PInstaller: "",
+        installer: "",
         codeData: "",
-        typeData: "",
-        AtSetting: "",
-        userId: { name: "" },
-        status: "",
-        cancellationReason: ""
+        typeData: "Data",
+        installDate: new Date().toISOString().split('T')[0],
+        status: "Pending",
+        notes: ""
     });
 
     const [selectedBusiness, setSelectedBusiness] = useState(null);
     const [businessSearch, setBusinessSearch] = useState('');
     const [filteredBusinesses, setFilteredBusinesses] = useState(businesses);
     const [step, setStep] = useState(1);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (!businesses.length) {
@@ -39,8 +41,8 @@ export const CreateTask = ({ closeModal }) => {
         } else {
             const searchTerm = businessSearch.toLowerCase().trim();
             const filtered = businesses.filter(business =>
-                business.name.toLowerCase().includes(searchTerm) ||
-                business.mst.toLowerCase().includes(searchTerm)
+                (business.name && business.name.toLowerCase().includes(searchTerm)) ||
+                (business.mst && business.mst.toLowerCase().includes(searchTerm))
             );
             setFilteredBusinesses(filtered);
         }
@@ -48,37 +50,27 @@ export const CreateTask = ({ closeModal }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        
-        if (name === 'userId.name') {
-            setFormData(prev => ({
-                ...prev,
-                userId: {
-                    ...prev.userId,
-                    name: value
-                }
-            }));
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                [name]: value
-            }));
-        }
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
     };
 
     const handleBusinessSelect = (business) => {
         setSelectedBusiness(business);
         setFormData(prev => ({
             ...prev,
+            companyId: business._id,
             mst: business.mst,
-            name: business.name,
+            companyName: business.name,
             address: business.address
         }));
         setBusinessSearch('');
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         // Validate form data
-        if (!formData.mst || !formData.name) {
+        if (!formData.companyId) {
             toast.error("Vui lòng chọn doanh nghiệp");
             return;
         }
@@ -93,26 +85,29 @@ export const CreateTask = ({ closeModal }) => {
             return;
         }
         
-        if (formData.status === "Rejected" && !formData.cancellationReason) {
+        if (formData.status === "Rejected" && !formData.notes) {
             toast.error("Vui lòng nhập lý do từ chối");
             return;
         }
 
-        const newTask = {
-            ...formData,
-            _id: Date.now().toString(),
-            userId: {
-                name: formData.userId.name || "Current User"
-            }
-        };
-
-        // console.log('New Task:', newTask);
-        toast.success("Tạo công việc thành công!");
-        closeModal();
+        try {
+            setIsSubmitting(true);
+            
+            // Dispatch action to add task
+            await dispatch(addTask(formData));
+            
+            toast.success("Tạo công việc thành công!");
+            closeModal();
+        } catch (error) {
+            console.error("Error creating task:", error);
+            toast.error("Lỗi khi tạo công việc: " + (error.message || "Vui lòng thử lại"));
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleNextStep = () => {
-        if (!formData.mst || !formData.name) {
+        if (!formData.companyId) {
             toast.error("Vui lòng chọn doanh nghiệp trước khi tiếp tục");
             return;
         }
@@ -144,6 +139,7 @@ export const CreateTask = ({ closeModal }) => {
                     <button 
                         onClick={closeModal}
                         className="p-1 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
+                        disabled={isSubmitting}
                     >
                         <X size={20} />
                     </button>
@@ -221,9 +217,9 @@ export const CreateTask = ({ closeModal }) => {
                                     <div className="divide-y divide-gray-200">
                                         {filteredBusinesses.map((business) => (
                                             <div 
-                                                key={business.id || business._id} 
+                                                key={business._id} 
                                                 className={`p-3 cursor-pointer hover:bg-gray-50 transition-colors ${
-                                                    selectedBusiness?.id === business.id ? 'bg-blue-50' : ''
+                                                    selectedBusiness?._id === business._id ? 'bg-blue-50' : ''
                                                 }`}
                                                 onClick={() => handleBusinessSelect(business)}
                                             >
@@ -235,7 +231,7 @@ export const CreateTask = ({ closeModal }) => {
                                                             <span>MST: {business.mst}</span>
                                                         </div>
                                                     </div>
-                                                    {selectedBusiness?.id === business.id && (
+                                                    {selectedBusiness?._id === business._id && (
                                                         <div className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">
                                                             Đã chọn
                                                         </div>
@@ -261,7 +257,7 @@ export const CreateTask = ({ closeModal }) => {
                         /* Step 2: Task Details */
                         <div className="space-y-4">
                             <div className="bg-gray-50 p-3 rounded-md mb-4">
-                                <p className="text-sm font-medium text-gray-700">Doanh nghiệp: <span className="text-blue-600">{formData.name}</span></p>
+                                <p className="text-sm font-medium text-gray-700">Doanh nghiệp: <span className="text-blue-600">{formData.companyName}</span></p>
                                 <p className="text-xs text-gray-500 mt-1">MST: {formData.mst}</p>
                             </div>
                             
@@ -290,9 +286,9 @@ export const CreateTask = ({ closeModal }) => {
                                         <User className="ml-3 text-gray-400" size={16} />
                                         <input
                                             type="text"
-                                            name="PInstaller"
+                                            name="installer"
                                             placeholder="Nhập tên người lắp đặt"
-                                            value={formData.PInstaller}
+                                            value={formData.installer}
                                             onChange={handleChange}
                                             className="w-full py-2.5 px-3 border-none focus:outline-none text-sm"
                                         />
@@ -324,7 +320,6 @@ export const CreateTask = ({ closeModal }) => {
                                             onChange={handleChange}
                                             className="w-full py-2.5 px-3 border-none focus:outline-none text-sm"
                                         >
-                                            <option value="">Chọn loại dữ liệu</option>
                                             <option value="Data">Data</option>
                                             <option value="Cloud">Cloud</option>
                                         </select>
@@ -337,23 +332,8 @@ export const CreateTask = ({ closeModal }) => {
                                         <Calendar className="ml-3 text-gray-400" size={16} />
                                         <input
                                             type="date"
-                                            name="AtSetting"
-                                            value={formData.AtSetting}
-                                            onChange={handleChange}
-                                            className="w-full py-2.5 px-3 border-none focus:outline-none text-sm"
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Người tạo</label>
-                                    <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
-                                        <User className="ml-3 text-gray-400" size={16} />
-                                        <input
-                                            type="text"
-                                            name="userId.name"
-                                            placeholder="Nhập tên người tạo"
-                                            value={formData.userId.name}
+                                            name="installDate"
+                                            value={formData.installDate}
                                             onChange={handleChange}
                                             className="w-full py-2.5 px-3 border-none focus:outline-none text-sm"
                                         />
@@ -370,9 +350,8 @@ export const CreateTask = ({ closeModal }) => {
                                             onChange={handleChange}
                                             className="w-full py-2.5 px-3 border-none focus:outline-none text-sm"
                                         >
-                                            <option value="">Chọn trạng thái</option>
-                                            <option value="Done">Hoàn thành</option>
                                             <option value="Pending">Đang làm</option>
+                                            <option value="Done">Hoàn thành</option>
                                             <option value="Rejected">Từ chối</option>
                                         </select>
                                     </div>
@@ -383,8 +362,8 @@ export const CreateTask = ({ closeModal }) => {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Lý do từ chối <span className="text-red-500">*</span></label>
                                     <textarea
-                                        name="cancellationReason"
-                                        value={formData.cancellationReason}
+                                        name="notes"
+                                        value={formData.notes}
                                         onChange={handleChange}
                                         className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         placeholder="Nhập lý do từ chối công việc"
@@ -403,13 +382,14 @@ export const CreateTask = ({ closeModal }) => {
                             <button
                                 onClick={closeModal}
                                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                                disabled={isSubmitting}
                             >
                                 Hủy
                             </button>
                             <button
                                 onClick={handleNextStep}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                                disabled={!selectedBusiness}
+                                disabled={!selectedBusiness || isSubmitting}
                             >
                                 Tiếp tục
                             </button>
@@ -419,14 +399,26 @@ export const CreateTask = ({ closeModal }) => {
                             <button
                                 onClick={handlePrevStep}
                                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                                disabled={isSubmitting}
                             >
                                 Quay lại
                             </button>
                             <button
                                 onClick={handleSubmit}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                                disabled={isSubmitting}
                             >
-                                Tạo công việc
+                                {isSubmitting ? (
+                                    <span className="flex items-center">
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Đang tạo...
+                                    </span>
+                                ) : (
+                                    "Tạo công việc"
+                                )}
                             </button>
                         </>
                     )}
@@ -435,3 +427,5 @@ export const CreateTask = ({ closeModal }) => {
         </div>
     );
 };
+
+export default CreateTask;

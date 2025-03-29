@@ -48,16 +48,16 @@ export const MoreDetailsModalBusiness = ({ business }) => {
           </div>
           <div className="space-y-2">
             <div className="bg-white p-3 rounded-md border border-gray-100 shadow-sm">
-              <p className="text-xs text-gray-500">Người liên hệ</p>
-              <p className="text-sm font-medium text-gray-900">{business.contactPerson || 'N/A'}</p>
+              <p className="text-xs text-gray-500">Ngày tạo</p>
+              <p className="text-sm font-medium text-gray-900">{formatDate(business.createdAt)}</p>
             </div>
             <div className="bg-white p-3 rounded-md border border-gray-100 shadow-sm">
-              <p className="text-xs text-gray-500">Điện thoại</p>
-              <p className="text-sm font-medium text-gray-900">{business.phone || 'N/A'}</p>
+              <p className="text-xs text-gray-500">Cập nhật cuối</p>
+              <p className="text-sm font-medium text-gray-900">{formatDate(business.lastModified)}</p>
             </div>
             <div className="bg-white p-3 rounded-md border border-gray-100 shadow-sm">
-              <p className="text-xs text-gray-500">Email</p>
-              <p className="text-sm font-medium text-gray-900">{business.email || 'N/A'}</p>
+              <p className="text-xs text-gray-500">ID</p>
+              <p className="text-sm font-medium text-gray-900">{business._id || 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -66,12 +66,12 @@ export const MoreDetailsModalBusiness = ({ business }) => {
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
         <h3 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
           <Calendar size={16} className="mr-1.5" />
-          Thống kê cài đặt
+          Thống kê công việc
         </h3>
         
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
-            <p className="text-xs text-gray-500">Tổng lần cài đặt</p>
+            <p className="text-xs text-gray-500">Tổng số</p>
             <p className="text-2xl font-semibold text-blue-600">{business.totalTasks || 0}</p>
           </div>
           <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
@@ -79,7 +79,7 @@ export const MoreDetailsModalBusiness = ({ business }) => {
             <p className="text-2xl font-semibold text-green-600">{business.completedTasks || 0}</p>
           </div>
           <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
-            <p className="text-xs text-gray-500">Đang cài đặt</p>
+            <p className="text-xs text-gray-500">Đang xử lý</p>
             <p className="text-2xl font-semibold text-amber-600">{business.pendingTasks || 0}</p>
           </div>
           <div className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
@@ -92,8 +92,8 @@ export const MoreDetailsModalBusiness = ({ business }) => {
           <div className="bg-white p-3 rounded-md border border-gray-100 shadow-sm">
             <p className="text-xs text-gray-500">Loại dữ liệu</p>
             <div className="mt-1 flex flex-wrap gap-1">
-              {business.dataTypes && business.dataTypes.length > 0 ? 
-                business.dataTypes.map((type, index) => (
+              {business.typeData && business.typeData.length > 0 ? 
+                business.typeData.map((type, index) => (
                   <span 
                     key={index} 
                     className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700"
@@ -106,164 +106,209 @@ export const MoreDetailsModalBusiness = ({ business }) => {
             </div>
           </div>
           <div className="bg-white p-3 rounded-md border border-gray-100 shadow-sm">
-            <p className="text-xs text-gray-500">Cập nhật cuối</p>
-            <p className="text-sm font-medium text-gray-900">{formatDate(business.lastModified)}</p>
+            <p className="text-xs text-gray-500">Tỷ lệ hoàn thành</p>
+            <p className="text-sm font-medium text-gray-900">
+              {business.totalTasks > 0 
+                ? `${((business.completedTasks / business.totalTasks) * 100).toFixed(1)}%`
+                : 'N/A'}
+            </p>
+            {business.totalTasks > 0 && (
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div 
+                  className="bg-green-600 h-2 rounded-full"
+                  style={{ width: `${(business.completedTasks / business.totalTasks) * 100}%` }}
+                ></div>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 
-  const renderInstallationHistoryTab = () => {
-    // Make sure installation history exists and is an array
-    const history = Array.isArray(business.installationHistory) ? business.installationHistory : [];
-    
-    return (
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {history.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
-                <tr>
-                  <th className="px-4 py-3 border-b">Ngày cài</th>
-                  <th className="px-4 py-3 border-b">Loại dữ liệu</th>
-                  <th className="px-4 py-3 border-b">Người cài</th>
-                  <th className="px-4 py-3 border-b">Loại kết nối</th>
-                  <th className="px-4 py-3 border-b">Trạng thái</th>
-                  <th className="px-4 py-3 border-b">Mã Data</th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.map((record, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 border-b text-xs text-gray-900">{formatDate(record.date)}</td>
-                    <td className="px-4 py-3 border-b text-xs text-gray-900">{record.type || 'N/A'}</td>
-                    <td className="px-4 py-3 border-b text-xs text-gray-900">{record.installer || 'N/A'}</td>
-                    <td className="px-4 py-3 border-b text-xs text-gray-900">{record.connectionType || 'N/A'}</td>
-                    <td className="px-4 py-3 border-b text-xs">
-                      <span className={`
-                        inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
-                        ${record.status === 'Done' ? 'bg-green-100 text-green-800' : 
-                          record.status === 'Pending' ? 'bg-amber-100 text-amber-800' : 
-                          'bg-red-100 text-red-800'}
-                      `}>
-                        {record.status || 'N/A'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 border-b text-xs text-gray-900">{record.notes || 'N/A'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="py-8 text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 text-gray-400 mb-3">
-              <Calendar size={24} />
-            </div>
-            <p className="text-gray-500 text-sm">Chưa có lịch sử cài đặt</p>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderProblemAnalysisTab = () => {
-    // Handle missing or invalid installation history
-    const history = Array.isArray(business.installationHistory) ? business.installationHistory : [];
-    const rejectedTasks = history.filter(record => record.status === 'Rejected');
-    
-    const problemTypes = {};
-    rejectedTasks.forEach(task => {
-      if (task.notes) {
-        const problemKey = task.notes.toLowerCase();
-        problemTypes[problemKey] = (problemTypes[problemKey] || 0) + 1;
-      }
-    });
-
-    return (
-      <div className="space-y-6">
-        <div className="bg-red-50 p-4 rounded-lg border border-red-100">
-          <h3 className="text-sm font-medium text-red-800 mb-2 flex items-center">
-            <AlertCircle size={16} className="mr-1.5" />
-            Thống kê lỗi
-          </h3>
-          
-          <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-gray-700">Tổng số lần từ chối</span>
-              <span className="text-xl font-bold text-red-600">{rejectedTasks.length}</span>
-            </div>
-            <div className="h-2 w-full bg-gray-200 rounded-full mb-2">
-              <div 
-                className="h-2 bg-red-600 rounded-full" 
-                style={{ width: `${(rejectedTasks.length / (business.totalTasks || 1)) * 100}%` }}
-              ></div>
-            </div>
-            <p className="text-xs text-gray-500">
-              {((rejectedTasks.length / (business.totalTasks || 1)) * 100).toFixed(1)}% tổng số lần cài đặt
-            </p>
-          </div>
+  const renderTasksTab = () => (
+    <div className="space-y-4">
+      <div className="bg-white border border-gray-200 rounded-lg">
+        <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-sm font-medium text-gray-700">Thống kê trạng thái công việc</h3>
         </div>
-
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <h3 className="text-sm font-medium text-gray-800 mb-3">Lỗi thường gặp</h3>
-          
-          {Object.entries(problemTypes).length > 0 ? (
-            <div className="space-y-3">
-              {Object.entries(problemTypes)
-                .sort((a, b) => b[1] - a[1])
-                .map(([problem, count], index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border border-gray-100 rounded-md hover:bg-gray-50">
-                    <div className="flex items-center">
-                      <div className="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center mr-3 flex-shrink-0">
-                        {index + 1}
-                      </div>
-                      <span className="text-sm text-gray-700">{problem}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-900 mr-1">{count}</span>
-                      <span className="text-xs text-gray-500">lần</span>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          ) : (
-            <div className="py-6 text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 text-gray-400 mb-3">
-                <Info size={24} />
+        <div className="p-4">
+          {business.totalTasks > 0 ? (
+            <>
+              <div className="mb-6">
+                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>Hoàn thành ({business.completedTasks || 0})</span>
+                  <span>{business.totalTasks > 0 ? `${((business.completedTasks / business.totalTasks) * 100).toFixed(1)}%` : '0%'}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-green-500 h-2 rounded-full"
+                    style={{ width: `${business.totalTasks > 0 ? (business.completedTasks / business.totalTasks) * 100 : 0}%` }}
+                  ></div>
+                </div>
               </div>
-              <p className="text-gray-500 text-sm">Không có thông tin lỗi</p>
+              
+              <div className="mb-6">
+                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>Đang xử lý ({business.pendingTasks || 0})</span>
+                  <span>{business.totalTasks > 0 ? `${((business.pendingTasks / business.totalTasks) * 100).toFixed(1)}%` : '0%'}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-amber-500 h-2 rounded-full"
+                    style={{ width: `${business.totalTasks > 0 ? (business.pendingTasks / business.totalTasks) * 100 : 0}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>Từ chối ({business.rejectedTasks || 0})</span>
+                  <span>{business.totalTasks > 0 ? `${((business.rejectedTasks / business.totalTasks) * 100).toFixed(1)}%` : '0%'}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-red-500 h-2 rounded-full"
+                    style={{ width: `${business.totalTasks > 0 ? (business.rejectedTasks / business.totalTasks) * 100 : 0}%` }}
+                  ></div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="py-8 text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 text-gray-400 mb-3">
+                <Calendar size={24} />
+              </div>
+              <p className="text-gray-500 text-sm">Chưa có dữ liệu về công việc</p>
             </div>
           )}
         </div>
+      </div>
 
-        <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
-          <h3 className="text-sm font-medium text-amber-800 mb-3">Khuyến nghị xử lý</h3>
-          <ul className="space-y-2">
-            <li className="flex items-start p-3 bg-white rounded-md border border-gray-100">
-              <ChevronRight size={16} className="text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
-              <span className="text-sm text-gray-700">Xem lại quy trình cài đặt và đảm bảo tuân thủ các hướng dẫn kỹ thuật</span>
-            </li>
-            <li className="flex items-start p-3 bg-white rounded-md border border-gray-100">
-              <ChevronRight size={16} className="text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
-              <span className="text-sm text-gray-700">Cung cấp đào tạo bổ sung cho người cài đặt về các vấn đề thường gặp</span>
-            </li>
-            <li className="flex items-start p-3 bg-white rounded-md border border-gray-100">
-              <ChevronRight size={16} className="text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
-              <span className="text-sm text-gray-700">Kiểm tra tương thích của thiết bị và loại kết nối trước khi cài đặt</span>
-            </li>
-          </ul>
+      <div className="bg-white border border-gray-200 rounded-lg">
+        <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-sm font-medium text-gray-700">Phân loại dữ liệu</h3>
+        </div>
+        <div className="p-4">
+          {business.typeData && business.typeData.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {business.typeData.map((type, index) => (
+                <div 
+                  key={index}
+                  className="flex items-center p-3 bg-blue-50 rounded-lg border border-blue-100"
+                >
+                  <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3">
+                    {type.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{type}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 text-gray-400 mb-3">
+                <Info size={24} />
+              </div>
+              <p className="text-gray-500 text-sm">Chưa có dữ liệu về loại dữ liệu</p>
+            </div>
+          )}
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+
+  const renderRecommendationsTab = () => (
+    <div className="space-y-4">
+      <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
+        <h3 className="text-sm font-medium text-amber-800 mb-3 flex items-center">
+          <AlertCircle size={16} className="mr-1.5" />
+          Đề xuất hành động
+        </h3>
+        
+        <ul className="space-y-2">
+          {business.totalTasks === 0 && (
+            <li className="flex items-start p-3 bg-white rounded-md border border-gray-100">
+              <ChevronRight size={16} className="text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-gray-700">Thêm công việc mới cho doanh nghiệp này</span>
+            </li>
+          )}
+          
+          {business.pendingTasks > 0 && (
+            <li className="flex items-start p-3 bg-white rounded-md border border-gray-100">
+              <ChevronRight size={16} className="text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-gray-700">Có {business.pendingTasks} công việc đang xử lý cần cập nhật</span>
+            </li>
+          )}
+          
+          {business.rejectedTasks > 0 && (
+            <li className="flex items-start p-3 bg-white rounded-md border border-gray-100">
+              <ChevronRight size={16} className="text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-gray-700">Kiểm tra lý do từ chối của {business.rejectedTasks} công việc</span>
+            </li>
+          )}
+          
+          {business.totalTasks > 0 && business.completedTasks === 0 && (
+            <li className="flex items-start p-3 bg-white rounded-md border border-gray-100">
+              <ChevronRight size={16} className="text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-gray-700">Chưa có công việc nào được hoàn thành. Cần kiểm tra tiến độ</span>
+            </li>
+          )}
+          
+          {!business.typeData || business.typeData.length === 0 && (
+            <li className="flex items-start p-3 bg-white rounded-md border border-gray-100">
+              <ChevronRight size={16} className="text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-gray-700">Cập nhật loại dữ liệu cho doanh nghiệp</span>
+            </li>
+          )}
+          
+          {/* Nếu không có đề xuất nào */}
+          {(business.totalTasks > 0 && business.pendingTasks === 0 && business.rejectedTasks === 0 && business.completedTasks > 0 && business.typeData && business.typeData.length > 0) && (
+            <li className="flex items-start p-3 bg-white rounded-md border border-gray-100">
+              <ChevronRight size={16} className="text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
+              <span className="text-sm text-gray-700">Mọi thứ đang hoạt động tốt. Không có vấn đề cần giải quyết</span>
+            </li>
+          )}
+        </ul>
+      </div>
+      
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+        <h3 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
+          <Info size={16} className="mr-1.5" />
+          Tóm tắt tình trạng
+        </h3>
+        
+        <div className="bg-white p-4 rounded-md border border-gray-100 shadow-sm">
+          <p className="text-sm text-gray-700">
+            {business.totalTasks === 0 ? (
+              "Doanh nghiệp chưa có công việc nào được tạo. Bạn cần tạo công việc để bắt đầu quản lý."
+            ) : business.completedTasks === business.totalTasks ? (
+              "Tất cả công việc đã hoàn thành. Doanh nghiệp đang hoạt động tốt."
+            ) : business.pendingTasks > business.completedTasks ? (
+              `Đa số công việc (${business.pendingTasks}/${business.totalTasks}) đang trong trạng thái xử lý. Cần theo dõi tiến độ.`
+            ) : business.rejectedTasks > 0 ? (
+              `Có ${business.rejectedTasks} công việc bị từ chối. Cần xem xét lý do và giải quyết vấn đề.`
+            ) : (
+              `Doanh nghiệp có ${business.totalTasks} công việc, trong đó ${business.completedTasks} đã hoàn thành (${((business.completedTasks / business.totalTasks) * 100).toFixed(1)}%).`
+            )}
+          </p>
+          
+          {business.typeData && business.typeData.length > 0 && (
+            <p className="text-sm text-gray-700 mt-2">
+              Doanh nghiệp đang sử dụng các loại dữ liệu: {business.typeData.join(', ')}.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="bg-gray-50 rounded-lg overflow-hidden">
       {/* Tabs */}
       <div className="bg-white border-b border-gray-200">
-        <div className="flex">
+        <div className="flex overflow-x-auto">
           <button
             className={`flex items-center px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'Tổng quan' 
@@ -277,25 +322,25 @@ export const MoreDetailsModalBusiness = ({ business }) => {
           </button>
           <button
             className={`flex items-center px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'Lịch sử' 
+              activeTab === 'Công việc' 
                 ? 'border-blue-600 text-blue-600' 
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
-            onClick={() => setActiveTab('Lịch sử')}
+            onClick={() => setActiveTab('Công việc')}
           >
             <Calendar size={16} className="mr-1.5" />
-            Lịch sử cài đặt
+            Công việc
           </button>
           <button
             className={`flex items-center px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'Lý do' 
+              activeTab === 'Đề xuất' 
                 ? 'border-blue-600 text-blue-600' 
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
-            onClick={() => setActiveTab('Lý do')}
+            onClick={() => setActiveTab('Đề xuất')}
           >
             <AlertCircle size={16} className="mr-1.5" />
-            Phân tích lỗi
+            Đề xuất
           </button>
         </div>
       </div>
@@ -303,8 +348,8 @@ export const MoreDetailsModalBusiness = ({ business }) => {
       {/* Tab Content */}
       <div className="p-4">
         {activeTab === 'Tổng quan' && renderOverviewTab()}
-        {activeTab === 'Lịch sử' && renderInstallationHistoryTab()}
-        {activeTab === 'Lý do' && renderProblemAnalysisTab()}
+        {activeTab === 'Công việc' && renderTasksTab()}
+        {activeTab === 'Đề xuất' && renderRecommendationsTab()}
       </div>
     </div>
   );

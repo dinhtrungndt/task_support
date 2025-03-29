@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { HeaderPages } from '../../components/header';
-import { Search, Plus, Trash2, Filter, MoreVertical, Download, ChevronUp, Calendar } from 'lucide-react';
+import { Search, Plus, Trash2, Filter, MoreVertical, Download, ChevronUp } from 'lucide-react';
 import Modal from '../../components/modals';
 import DropdownMenu from '../../components/DropdownMenu';
 import EditBusinessModal from '../../components/modals/EditBusiness';
 import MoreDetailsModalBusiness from '../../components/modals/MoreBusiness';
 import CreateBusiness from '../../components/modals/CreateBusiness';
 import { fetchBusinesses, deleteBusinesses, updateBusiness } from '../../stores/redux/actions/businessActions';
-import * as XLSX from 'xlsx'; // Import thư viện XLSX
+import * as XLSX from 'xlsx';
 import { toast } from 'react-toastify';
 
 export const BusinessPages = () => {
@@ -27,15 +27,14 @@ export const BusinessPages = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Lấy danh sách doanh nghiệp khi component mount
+  // Fetch businesses when component mounts
   useEffect(() => {
     dispatch(fetchBusinesses());
   }, [dispatch]);
   
-  // Xử lý hiển thị nút scroll top
+  // Handle scroll top button visibility
   useEffect(() => {
     const handleScroll = () => {
-      // Hiển thị nút khi cuộn xuống hơn 300px
       if (window.scrollY > 300) {
         setShowScrollTop(true);
       } else {
@@ -45,41 +44,40 @@ export const BusinessPages = () => {
     
     window.addEventListener('scroll', handleScroll);
     
-    // Cleanup event listener khi component unmount
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
-  // Cập nhật danh sách doanh nghiệp đã lọc khi danh sách gốc hoặc từ khóa tìm kiếm thay đổi
+  // Update filtered businesses when the original list or search term changes
   useEffect(() => {
     setFilteredBusinesses(
       businesses.filter(business =>
         business.mst?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         business.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        business.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (business.PInstaller && business.PInstaller.toLowerCase().includes(searchTerm.toLowerCase()))
+        business.address?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
   }, [businesses, searchTerm]);
 
-  // Xử lý thay đổi trong ô tìm kiếm
+  // Handle search input change
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  // Hiển thị/ẩn dropdown menu
+  // Toggle dropdown menu
   const toggleDropdown = (index) => {
     setActiveDropdown(activeDropdown === index ? null : index);
   };
 
-  // Mở modal chỉnh sửa doanh nghiệp
+  // Open edit business modal
   const handleEditBusiness = (business) => {
     setSelectedBusiness(business);
     setEditModalOpen(true);
     setActiveDropdown(null);
   };
 
+  // Save business changes
   const handleSaveBusiness = async (updatedBusiness) => {
     try {
       if (!updatedBusiness._id) {
@@ -102,23 +100,23 @@ export const BusinessPages = () => {
     }
   };
 
-  // Mở modal hiển thị chi tiết
+  // Open more details modal
   const handleMoreOptions = (business) => {
     setSelectedBusiness(business);
     setMoreModalOpen(true);
     setActiveDropdown(null);
   };
 
-  // Xử lý chọn/bỏ chọn tất cả doanh nghiệp
+  // Handle select all businesses
   const handleSelectAllChange = () => {
     if (selectedBusinessIds.length === filteredBusinesses.length) {
-      setSelectedBusinessIds([]); // Bỏ chọn tất cả
+      setSelectedBusinessIds([]); // Unselect all
     } else {
-      setSelectedBusinessIds(filteredBusinesses.map(business => business._id)); // Chọn tất cả
+      setSelectedBusinessIds(filteredBusinesses.map(business => business._id)); // Select all
     }
   };
 
-  // Xử lý chọn/bỏ chọn một doanh nghiệp
+  // Handle individual business selection
   const handleCheckboxChange = (businessId) => {
     setSelectedBusinessIds((prevSelectedIds) => {
       if (prevSelectedIds.includes(businessId)) {
@@ -129,7 +127,7 @@ export const BusinessPages = () => {
     });
   };
 
-  // Xử lý xóa các doanh nghiệp đã chọn
+  // Delete selected businesses
   const handleDeleteSelected = async () => {
     if (selectedBusinessIds.length === 0) return;
     
@@ -143,10 +141,8 @@ export const BusinessPages = () => {
       try {
         setIsDeleting(true);
         
-        // Gọi API xóa thông qua Redux action
         await dispatch(deleteBusinesses(selectedBusinessIds));
         
-        // Cập nhật UI
         setFilteredBusinesses(prevBusinesses => 
           prevBusinesses.filter(business => !selectedBusinessIds.includes(business._id))
         );
@@ -161,13 +157,14 @@ export const BusinessPages = () => {
     }
   };
 
-  // Xử lý sau khi tạo doanh nghiệp mới
+  // Handle business created callback
   const handleBusinessCreated = (newBusiness) => {
     setFilteredBusinesses([...businesses, newBusiness]);
     setOpenModalCreateBusiness(false);
     toast.success("Tạo doanh nghiệp thành công");
   };
 
+  // Scroll to top
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -175,6 +172,7 @@ export const BusinessPages = () => {
     });
   };
   
+  // Export to Excel
   const handleExportToExcel = () => {
     let dataToExport = filteredBusinesses;
     
@@ -188,17 +186,13 @@ export const BusinessPages = () => {
       'MST': business.mst || '',
       'Tên công ty': business.name || '',
       'Địa chỉ': business.address || '',
-      'Loại dịch vụ': business.connectionType || '',
-      'Người cài đặt': business.PInstaller || '',
-      'Mã dữ liệu': business.codeData || '',
-      'Loại dữ liệu': business.typeData || '',
-      'Ngày cài đặt': business.AtSetting ? new Date(business.AtSetting).toLocaleDateString() : '',
       'Tổng công việc': business.totalTasks || 0,
       'Hoàn thành': business.completedTasks || 0, 
       'Đang làm': business.pendingTasks || 0,
       'Từ chối': business.rejectedTasks || 0,
-      'Loại dữ liệu (bổ sung)': business.dataTypes ? business.dataTypes.join(', ') : '',
-      'Ngày cập nhật': business.lastModified ? new Date(business.lastModified).toLocaleDateString() : ''
+      'Loại dữ liệu': business.typeData ? business.typeData.join(', ') : '',
+      'Ngày cập nhật': business.lastModified ? new Date(business.lastModified).toLocaleDateString() : '',
+      'Ngày tạo': business.createdAt ? new Date(business.createdAt).toLocaleDateString() : ''
     }));
     
     const workbook = XLSX.utils.book_new();
@@ -215,6 +209,7 @@ export const BusinessPages = () => {
     toast.success(`Đã xuất ${exportData.length} doanh nghiệp ra file Excel`);
   };
 
+  // Show error toast when error exists
   useEffect(() => {
     if (error) {
       toast.error("Lỗi khi tải dữ liệu: " + error);
@@ -232,7 +227,7 @@ export const BusinessPages = () => {
             <div className="relative w-full sm:w-1/3">
               <input
                 type="text"
-                placeholder="Tìm kiếm theo MST, tên công ty, địa chỉ, người cài đặt..."
+                placeholder="Tìm kiếm theo MST, tên công ty, địa chỉ..."
                 className="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 value={searchTerm}
                 onChange={handleSearchChange}
@@ -324,7 +319,6 @@ export const BusinessPages = () => {
                   <th className="p-3 border-b">Đang làm</th>
                   <th className="p-3 border-b">Từ chối</th>
                   <th className="p-3 border-b">Loại dữ liệu</th>
-                  <th className="p-3 border-b">Người lắp đặt</th>
                   <th className="p-3 border-b">Ngày cập nhật</th>
                   <th className="p-3 border-b"></th>
                 </tr>
@@ -332,7 +326,7 @@ export const BusinessPages = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={12} className="p-8 text-center text-sm text-gray-500">
+                    <td colSpan={11} className="p-8 text-center text-sm text-gray-500">
                       <div className="flex flex-col items-center justify-center">
                         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-3"></div>
                         <p>Đang tải dữ liệu...</p>
@@ -355,31 +349,30 @@ export const BusinessPages = () => {
                       <td className="p-3 border-b text-gray-500">{business.address}</td>
                       <td className="p-3 border-b">
                         <span className="inline-flex items-center justify-center px-2 py-1 bg-cyan-100 text-cyan-800 text-xs font-medium rounded-full">
-                          {business.totalTasks}
+                          {business.totalTasks || 0}
                         </span>
                       </td>
                       <td className="p-3 border-b">
                         <span className="inline-flex items-center justify-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                          {business.completedTasks}
+                          {business.completedTasks || 0}
                         </span>
                       </td>
                       <td className="p-3 border-b">
                         <span className="inline-flex items-center justify-center px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-full">
-                          {business.pendingTasks}
+                          {business.pendingTasks || 0}
                         </span>
                       </td>
                       <td className="p-3 border-b">
                         <span className="inline-flex items-center justify-center px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
-                          {business.rejectedTasks}
+                          {business.rejectedTasks || 0}
                         </span>
                       </td>
                       <td className="p-3 border-b">
-                        {business.dataTypes && business.dataTypes.length > 0 
-                          ? business.dataTypes.join(', ')
+                        {business.typeData && business.typeData.length > 0 
+                          ? business.typeData.join(', ')
                           : <span className="text-gray-400">-</span>
                         }
                       </td>
-                      <td className="p-3 border-b">{business.PInstaller || <span className="text-gray-400">-</span>}</td>
                       <td className="p-3 border-b">{business.lastModified ? new Date(business.lastModified).toLocaleDateString() : <span className="text-gray-400">-</span>}</td>
                       <td className="p-3 border-b text-right relative">
                         <div>
@@ -401,7 +394,7 @@ export const BusinessPages = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={12} className="px-3 py-8 text-center text-sm text-gray-500">
+                    <td colSpan={11} className="px-3 py-8 text-center text-sm text-gray-500">
                       <div className="flex flex-col items-center justify-center">
                         <svg className="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -455,7 +448,7 @@ export const BusinessPages = () => {
           <MoreDetailsModalBusiness business={selectedBusiness} />
         </Modal>
 
-        {/* Nút cuộn lên đầu trang */}
+        {/* Scroll to top button */}
         {showScrollTop && (
           <button
             onClick={scrollToTop}

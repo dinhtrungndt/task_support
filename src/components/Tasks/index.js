@@ -1,7 +1,7 @@
 import React from 'react';
-import { MoreVertical, AlertTriangle } from 'lucide-react';
-import DropdownMenu from '../../components/DropdownMenu';
-import { CreateTask } from '../../components/modals/CreateTask';
+import {MoreVertical, AlertTriangle } from 'lucide-react';
+import CreateTask from '../modals/CreateTask';
+import DropdownMenu from '../DropdownMenu';
 
 export const Tasks = ({
   filteredTasks,
@@ -18,13 +18,12 @@ export const Tasks = ({
   openModalCreateTask,
   setOpenModalCreateTask,
   setActiveDropdown,
-  businesses,
   handleDeleteSelected,
   loading
 }) => {
 
   if (openModalCreateTask) {
-    return <CreateTask closeModal={() => setOpenModalCreateTask(false)} businesses={businesses} />;
+    return <CreateTask closeModal={() => setOpenModalCreateTask(false)} />;
   }
 
   const getStatusClassName = (status) => {
@@ -40,31 +39,14 @@ export const Tasks = ({
     }
   };
 
-  // Function to safely access installation history
-  const getInstallationData = (task, property, defaultValue = 'N/A') => {
-    if (property.includes('.')) {
-      const [firstKey, ...restKeys] = property.split('.');
-      try {
-        let value = task;
-        if (task.installationHistory && task.installationHistory[0]) {
-          value = task.installationHistory[0];
-        }
-        return restKeys.reduce((obj, key) => 
-          obj && obj[key] !== undefined ? obj[key] : defaultValue, 
-          value[firstKey]
-        );
-      } catch (error) {
-        console.error(`Error accessing property ${property}:`, error);
-        return defaultValue;
-      }
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch (error) {
+      return dateString;
     }
-    if (!task || !task.installationHistory || !task.installationHistory[0]) {
-      return defaultValue;
-    }
-    if (task.installationHistory[0].hasOwnProperty(property)) {
-      return task.installationHistory[0][property] || defaultValue;
-    }
-    return task[property] || defaultValue;
   };
 
   return (
@@ -91,35 +73,42 @@ export const Tasks = ({
               <th className="p-3 border-b">Mã dữ liệu</th>
               <th className="p-3 border-b">Loại dữ liệu</th>
               <th className="p-3 border-b">Ngày lắp</th>
-              <th className="p-3 border-b">Người cài</th>
               <th className="p-3 border-b">Trạng thái</th>
               <th className="p-3 border-b text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody>
-            {filteredTasks.length > 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan={11} className="p-8 text-center text-sm text-gray-500">
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-3"></div>
+                    <p>Đang tải dữ liệu...</p>
+                  </div>
+                </td>
+              </tr>
+            ) : filteredTasks.length > 0 ? (
               filteredTasks.map((task, index) => (
-                <tr key={task.id || index} className="hover:bg-gray-50 text-xs">
+                <tr key={task._id || index} className="hover:bg-gray-50 text-xs">
                   <td className="p-3 border-b">
                     <input
                       type="checkbox"
                       className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      checked={selectedIds.includes(task.id)}
-                      onChange={() => handleCheckboxChange(task.id)}
+                      checked={selectedIds.includes(task._id)}
+                      onChange={() => handleCheckboxChange(task._id)}
                     />
                   </td>
                   <td className="p-3 border-b font-medium text-gray-900">{task.mst || 'N/A'}</td>
-                  <td className="p-3 border-b">{task.name || 'N/A'}</td>
+                  <td className="p-3 border-b">{task.companyName || 'N/A'}</td>
                   <td className="p-3 border-b text-gray-500">{task.address || 'N/A'}</td>
                   <td className="p-3 border-b">{task.connectionType || 'N/A'}</td>
-                  <td className="p-3 border-b">{task.PInstaller || 'N/A'}</td>
+                  <td className="p-3 border-b">{task.installer || 'N/A'}</td>
                   <td className="p-3 border-b">{task.codeData || 'N/A'}</td>
-                  <td className="p-3 border-b">{getInstallationData(task, 'typeData')}</td>
-                  <td className="p-3 border-b">{getInstallationData(task, 'AtSetting')}</td>
-                  <td className="p-3 border-b">{getInstallationData(task, 'installer')}</td>
+                  <td className="p-3 border-b">{task.typeData || 'N/A'}</td>
+                  <td className="p-3 border-b">{formatDate(task.installDate)}</td>
                   <td className="p-3 border-b">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClassName(getInstallationData(task, 'status'))}`}>
-                      {getInstallationData(task, 'status')}
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClassName(task.status || 'Pending')}`}>
+                      {task.status || 'Pending'}
                     </span>
                   </td>
                   <td className="p-3 border-b text-right relative">
@@ -142,7 +131,7 @@ export const Tasks = ({
               ))
             ) : (
               <tr>
-                <td colSpan={12} className="px-3 py-8 text-center text-sm text-gray-500">
+                <td colSpan={11} className="px-3 py-8 text-center text-sm text-gray-500">
                   <div className="flex flex-col items-center justify-center">
                     <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-3">
                       <AlertTriangle size={28} />
@@ -167,3 +156,5 @@ export const Tasks = ({
     </div>
   );
 };
+
+export default Tasks;
