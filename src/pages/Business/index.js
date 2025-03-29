@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { HeaderPages } from '../../components/header';
-import { Search, Plus, Trash2, Filter, MoreVertical, Download } from 'lucide-react';
+import { Search, Plus, Trash2, Filter, MoreVertical, Download, ChevronUp } from 'lucide-react';
 import Modal from '../../components/modals';
 import DropdownMenu from '../../components/DropdownMenu';
 import EditBusinessModal from '../../components/modals/EditBusiness';
 import MoreDetailsModalBusiness from '../../components/modals/MoreBusiness';
 import CreateBusiness from '../../components/modals/CreateBusiness';
 import { fetchBusinesses, deleteBusinesses } from '../../stores/redux/actions/businessActions';
+import * as XLSX from 'xlsx'; // Import thư viện XLSX
 
 export const BusinessPages = () => {
   const dispatch = useDispatch();
   const { businesses, loading, error } = useSelector(state => state.business);
+  const topRef = useRef(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredBusinesses, setFilteredBusinesses] = useState(businesses);
@@ -21,10 +23,27 @@ export const BusinessPages = () => {
   const [moreModalOpen, setMoreModalOpen] = useState(false);
   const [openModalCreateBusiness, setOpenModalCreateBusiness] = useState(false);
   const [selectedBusinessIds, setSelectedBusinessIds] = useState([]);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     dispatch(fetchBusinesses());
   }, [dispatch]);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     setFilteredBusinesses(
@@ -99,8 +118,49 @@ export const BusinessPages = () => {
     setOpenModalCreateBusiness(false);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+  
+  const handleExportToExcel = () => {
+    let dataToExport = filteredBusinesses;
+    
+    if (selectedBusinessIds.length > 0) {
+      dataToExport = filteredBusinesses.filter(business => 
+        selectedBusinessIds.includes(business._id)
+      );
+    }
+    
+    const exportData = dataToExport.map((business) => ({
+      'MST': business.mst || '',
+      'Tên công ty': business.name || '',
+      'Địa chỉ': business.address || '',
+      'Tổng': business.totalTasks || 0,
+      'Hoàn thành': business.completedTasks || 0, 
+      'Đang làm': business.pendingTasks || 0,
+      'Từ chối': business.rejectedTasks || 0,
+      'Loại dữ liệu': business.dataTypes ? business.dataTypes.join(', ') : '',
+      'Người lắp đặt': business.PInstaller || '',
+      'Ngày cập nhật': business.lastModified ? new Date(business.lastModified).toLocaleDateString() : ''
+    }));
+    
+    const workbook = XLSX.utils.book_new();
+    
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Doanh nghiệp');
+    
+    const date = new Date();
+    const fileName = `danh_sach_doanh_nghiep_${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}.xlsx`;
+    
+    XLSX.writeFile(workbook, fileName);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" ref={topRef}>
       <HeaderPages title="Quản lý doanh nghiệp" />
       <div className="container mx-auto p-4 pb-6">
         {/* Top Controls */}
@@ -147,9 +207,10 @@ export const BusinessPages = () => {
               
               <button 
                 className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                onClick={handleExportToExcel}
               >
                 <Download size={16} className="mr-1.5" />
-                Xuất
+                Xuất{selectedBusinessIds.length > 0 ? ` (${selectedBusinessIds.length})` : ''}
               </button>
             </div>
           </div>
@@ -288,7 +349,6 @@ export const BusinessPages = () => {
           </div>
         </div>
 
-        {/* Create Business Modal */}
         {openModalCreateBusiness && (
           <CreateBusiness
             closeModal={() => setOpenModalCreateBusiness(false)}
@@ -318,6 +378,17 @@ export const BusinessPages = () => {
         >
           <MoreDetailsModalBusiness business={selectedBusiness} />
         </Modal>
+
+        {/* Nút cuộn lên đầu trang */}
+        {showScrollTop && (
+          <button
+            onClick={scrollToTop}
+            className="fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all z-50"
+            aria-label="Lên đầu trang"
+          >
+            <ChevronUp size={20} />
+          </button>
+        )}
       </div>
     </div>
   );
