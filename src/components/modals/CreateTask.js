@@ -19,13 +19,12 @@ export const CreateTask = ({ closeModal }) => {
         mst: "",
         address: "",
         connectionType: "",
-        installer: "N/A", // Default value for required field
-        codeData: "N/A", // Default value for required field
+        installer: "", 
+        codeData: "", 
         typeData: "Data",
         installDate: new Date().toISOString().split('T')[0],
         status: "Pending",
         notes: ""
-        // userAdd will be added when dispatching the action
     });
 
     const [selectedBusiness, setSelectedBusiness] = useState(null);
@@ -39,7 +38,6 @@ export const CreateTask = ({ closeModal }) => {
             dispatch(fetchBusinesses()); 
         }
         
-        // Cleanup function to prevent state updates on unmounted component
         return () => {
             isMounted.current = false;
         };

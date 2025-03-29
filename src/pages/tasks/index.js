@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HeaderPages } from '../../components/header';
-import { Search, Plus, Filter, Download, Calendar, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Search, Plus, Filter, Download, Calendar, CheckCircle, XCircle, Clock, ChevronUp } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import Modal from '../../components/modals';
 import EditTaskModal from '../../components/modals/EditTask';
@@ -24,6 +24,7 @@ export const TaskPages = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     dispatch(fetchTasks());
@@ -39,6 +40,31 @@ export const TaskPages = () => {
       toast.error("Lỗi khi tải dữ liệu: " + error);
     }
   }, [error]);
+
+  // Handle scroll top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+  
+  // Scroll to top
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   const filterTasks = () => {
     let results = tasks || [];
@@ -413,6 +439,17 @@ export const TaskPages = () => {
       >
         <MoreDetailsModal task={selectedTask} />
       </Modal>
+
+       {/* Scroll to top button */}
+       {showScrollTop && (
+          <button
+            onClick={scrollToTop}
+            className="fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all z-50"
+            aria-label="Lên đầu trang"
+          >
+            <ChevronUp size={20} />
+          </button>
+        )}
     </div>
   );
 };

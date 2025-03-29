@@ -10,6 +10,7 @@ import CreateBusiness from '../../components/modals/CreateBusiness';
 import { fetchBusinesses, deleteBusinesses, updateBusiness } from '../../stores/redux/actions/businessActions';
 import * as XLSX from 'xlsx';
 import { toast } from 'react-toastify';
+import BusinessList from '../../components/Business/Business';
 
 export const BusinessPages = () => {
   const dispatch = useDispatch();
@@ -296,126 +297,20 @@ export const BusinessPages = () => {
         </div>
 
         {/* Business List */}
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-gray-50 text-gray-600 text-xs font-medium uppercase tracking-wider">
-                <tr>
-                  <th className="p-3 border-b">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        onChange={handleSelectAllChange} 
-                        checked={selectedBusinessIds.length === filteredBusinesses.length && filteredBusinesses.length > 0}
-                      />
-                    </div>
-                  </th>
-                  <th className="p-3 border-b">MST</th>
-                  <th className="p-3 border-b">Tên công ty</th>
-                  <th className="p-3 border-b">Địa chỉ</th>
-                  <th className="p-3 border-b">Tổng</th>
-                  <th className="p-3 border-b">Hoàn thành</th>
-                  <th className="p-3 border-b">Đang làm</th>
-                  <th className="p-3 border-b">Từ chối</th>
-                  <th className="p-3 border-b">Loại dữ liệu</th>
-                  <th className="p-3 border-b">Ngày cập nhật</th>
-                  <th className="p-3 border-b"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={11} className="p-8 text-center text-sm text-gray-500">
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-3"></div>
-                        <p>Đang tải dữ liệu...</p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : filteredBusinesses.length > 0 ? (
-                  filteredBusinesses.map((business, index) => (
-                    <tr key={business._id || index} className="hover:bg-gray-50 text-xs">
-                      <td className="p-3 border-b">
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          checked={selectedBusinessIds.includes(business._id)}
-                          onChange={() => handleCheckboxChange(business._id)}
-                        />
-                      </td>
-                      <td className="p-3 border-b font-medium text-gray-900">{business.mst}</td>
-                      <td className="p-3 border-b">{business.name}</td>
-                      <td className="p-3 border-b text-gray-500">{business.address}</td>
-                      <td className="p-3 border-b">
-                        <span className="inline-flex items-center justify-center px-2 py-1 bg-cyan-100 text-cyan-800 text-xs font-medium rounded-full">
-                          {business.totalTasks || 0}
-                        </span>
-                      </td>
-                      <td className="p-3 border-b">
-                        <span className="inline-flex items-center justify-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                          {business.completedTasks || 0}
-                        </span>
-                      </td>
-                      <td className="p-3 border-b">
-                        <span className="inline-flex items-center justify-center px-2 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-full">
-                          {business.pendingTasks || 0}
-                        </span>
-                      </td>
-                      <td className="p-3 border-b">
-                        <span className="inline-flex items-center justify-center px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
-                          {business.rejectedTasks || 0}
-                        </span>
-                      </td>
-                      <td className="p-3 border-b">
-                        {business.typeData && business.typeData.length > 0 
-                          ? business.typeData.join(', ')
-                          : <span className="text-gray-400">-</span>
-                        }
-                      </td>
-                      <td className="p-3 border-b">{business.lastModified ? new Date(business.lastModified).toLocaleDateString() : <span className="text-gray-400">-</span>}</td>
-                      <td className="p-3 border-b text-right relative">
-                        <div>
-                          <button 
-                            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-                            onClick={() => toggleDropdown(index)}
-                          >
-                            <MoreVertical className="text-gray-500" size={16} />
-                          </button>
-                          <DropdownMenu
-                            isOpen={activeDropdown === index}
-                            onEdit={() => handleEditBusiness(business)}
-                            onMore={() => handleMoreOptions(business)}
-                            onClose={() => setActiveDropdown(null)}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={11} className="px-3 py-8 text-center text-sm text-gray-500">
-                      <div className="flex flex-col items-center justify-center">
-                        <svg className="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <p className="text-gray-500 mb-1">Không tìm thấy doanh nghiệp nào</p>
-                        {searchTerm && (
-                          <button
-                            className="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
-                            onClick={() => setSearchTerm("")}
-                          >
-                            Xóa tìm kiếm
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <BusinessList
+          filteredBusinesses={filteredBusinesses}
+          loading={loading}
+          searchTerm={searchTerm}
+          activeDropdown={activeDropdown}
+          selectedBusinessIds={selectedBusinessIds}
+          toggleDropdown={toggleDropdown}
+          handleCheckboxChange={handleCheckboxChange}
+          handleSelectAllChange={handleSelectAllChange}
+          handleEditBusiness={handleEditBusiness}
+          handleMoreOptions={handleMoreOptions}
+          setSearchTerm={setSearchTerm}
+          setActiveDropdown={setActiveDropdown}
+        />
 
         {/* Create Business Modal */}
         {openModalCreateBusiness && (
