@@ -89,20 +89,20 @@ export const Calendar = () => {
     <div className="relative" ref={setCalendarRef}>
       <button 
         onClick={toggleCalendar}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-all duration-200"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-700 transition-all duration-200 shadow-sm"
       >
         <CalendarIcon size={16} />
         <span className="text-sm font-medium">{formatShortDate(new Date())}</span>
       </button>
       
       {isCalendarOpen && (
-        <div className="absolute right-0 top-12 bg-white shadow-lg rounded-lg p-4 z-40 border border-gray-100 w-64">
+        <div className="absolute right-0 top-12 bg-white shadow-xl rounded-lg p-4 z-40 border border-indigo-100 w-64 transition-all duration-200 animate-fadeIn">
           <div className="flex items-center justify-between mb-3">
-            <button onClick={prevMonth} className="p-1 rounded-full hover:bg-gray-100 text-gray-600">
+            <button onClick={prevMonth} className="p-1.5 rounded-full hover:bg-indigo-50 text-gray-600 transition-colors">
               <ChevronLeft className="h-4 w-4" />
             </button>
             <h2 className="text-sm font-medium text-gray-800">{formatMonthYear(currentMonth)}</h2>
-            <button onClick={nextMonth} className="p-1 rounded-full hover:bg-gray-100 text-gray-600">
+            <button onClick={nextMonth} className="p-1.5 rounded-full hover:bg-indigo-50 text-gray-600 transition-colors">
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
@@ -121,7 +121,7 @@ export const Calendar = () => {
                 key={index}
                 className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer text-xs transition-colors
                   ${isToday(day.date, day.month, day.year) 
-                    ? 'bg-indigo-600 text-white hover:bg-indigo-700' 
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm' 
                     : selectedDay === day.date && day.isCurrentMonth 
                       ? 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200' 
                       : !day.isCurrentMonth 
@@ -134,9 +134,9 @@ export const Calendar = () => {
             ))}
           </div>
           
-          <div className="mt-3 pt-2 border-t border-gray-100 flex justify-between">
+          <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between">
             <button 
-              className="text-xs text-gray-500 hover:text-gray-700"
+              className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
               onClick={() => {
                 setCurrentDate(new Date());
                 setCurrentMonth(new Date());
@@ -146,7 +146,7 @@ export const Calendar = () => {
               Today
             </button>
             <button 
-              className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+              className="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
               onClick={() => setIsCalendarOpen(false)}
             >
               Close
