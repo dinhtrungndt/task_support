@@ -85,220 +85,220 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
   if (!task) return null;
 
   return (
-    <div className="bg-white rounded-lg overflow-hidden">
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Business Information Section */}
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-blue-800 mb-3">Thông tin doanh nghiệp</h3>
-          
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                MST <span className="text-gray-400 text-xs">(không thể thay đổi)</span>
-              </label>
-              <div className="flex items-center border border-gray-300 rounded-md bg-gray-50">
-                <Code size={16} className="text-gray-400 ml-3 mr-2" />
-                <input
-                  type="text"
-                  name="mst"
-                  value={formData.mst}
-                  readOnly
-                  className="w-full py-2.5 px-3 bg-gray-50 text-gray-700 focus:outline-none text-sm cursor-not-allowed"
-                />
+    <div className="bg-white rounded-lg overflow-hidden max-h-[70vh] flex flex-col">
+      <form onSubmit={handleSubmit} className="flex flex-col h-full">
+        {/* Scrollable content area */}
+        <div className="p-3 overflow-y-auto flex-grow space-y-3">
+          {/* Company Info Card (compact) */}
+          <div className="bg-blue-50 p-2 rounded-lg">
+            <h3 className="text-xs font-medium text-blue-800 mb-2">Thông tin doanh nghiệp</h3>
+            
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <div>
+                <label className="block text-xs font-medium text-gray-700">
+                  MST
+                </label>
+                <div className="flex items-center h-8 bg-gray-50 border border-gray-300 rounded-md">
+                  <Code size={12} className="text-gray-400 ml-2 mr-1" />
+                  <input
+                    type="text"
+                    value={formData.mst}
+                    readOnly
+                    className="w-full py-1 px-1 bg-gray-50 text-gray-700 text-xs focus:outline-none cursor-not-allowed"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700">
+                  Tên công ty
+                </label>
+                <div className="flex items-center h-8 bg-gray-50 border border-gray-300 rounded-md">
+                  <FileText size={12} className="text-gray-400 ml-2 mr-1" />
+                  <input
+                    type="text"
+                    value={formData.companyName}
+                    readOnly
+                    className="w-full py-1 px-1 bg-gray-50 text-gray-700 text-xs focus:outline-none cursor-not-allowed truncate"
+                  />
+                </div>
               </div>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tên công ty <span className="text-gray-400 text-xs">(không thể thay đổi)</span>
+              <label className="block text-xs font-medium text-gray-700">
+                Địa chỉ
               </label>
-              <div className="flex items-center border border-gray-300 rounded-md bg-gray-50">
-                <FileText size={16} className="text-gray-400 ml-3 mr-2" />
+              <div className="flex items-center h-8 bg-gray-50 border border-gray-300 rounded-md">
+                <MapPin size={12} className="text-gray-400 ml-2 mr-1 flex-shrink-0" />
                 <input
                   type="text"
-                  name="companyName"
-                  value={formData.companyName}
+                  value={formData.address}
                   readOnly
-                  className="w-full py-2.5 px-3 bg-gray-50 text-gray-700 focus:outline-none text-sm cursor-not-allowed"
+                  className="w-full py-1 px-1 bg-gray-50 text-gray-700 text-xs focus:outline-none cursor-not-allowed truncate"
                 />
               </div>
             </div>
           </div>
           
-          <div className="mt-3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Địa chỉ <span className="text-gray-400 text-xs">(không thể thay đổi)</span>
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-md bg-gray-50">
-              <MapPin size={16} className="text-gray-400 ml-3 mr-2" />
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                readOnly
-                className="w-full py-2.5 px-3 bg-gray-50 text-gray-700 focus:outline-none text-sm cursor-not-allowed"
-              />
+          {/* Task Information */}
+          <div>
+            <h3 className="text-xs font-medium text-gray-700 mb-2">Thông tin công việc</h3>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs font-medium text-gray-700">
+                  Loại kết nối <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center h-8 border border-gray-300 rounded-md">
+                  <Link size={12} className="text-gray-400 ml-2 mr-1" />
+                  <input
+                    type="text"
+                    name="connectionType"
+                    value={formData.connectionType}
+                    onChange={handleChange}
+                    className="w-full py-1 px-1 text-xs focus:outline-none"
+                    placeholder="Nhập loại kết nối"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700">
+                  Người lắp đặt
+                </label>
+                <div className="flex items-center h-8 border border-gray-300 rounded-md">
+                  <User size={12} className="text-gray-400 ml-2 mr-1" />
+                  <input
+                    type="text"
+                    name="installer"
+                    value={formData.installer}
+                    onChange={handleChange}
+                    className="w-full py-1 px-1 text-xs focus:outline-none"
+                    placeholder="Nhập người lắp đặt"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700">
+                  Mã dữ liệu
+                </label>
+                <div className="flex items-center h-8 border border-gray-300 rounded-md">
+                  <Code size={12} className="text-gray-400 ml-2 mr-1" />
+                  <input
+                    type="text"
+                    name="codeData"
+                    value={formData.codeData}
+                    onChange={handleChange}
+                    className="w-full py-1 px-1 text-xs focus:outline-none"
+                    placeholder="Nhập mã dữ liệu"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700">
+                  Loại dữ liệu
+                </label>
+                <div className="flex items-center h-8 border border-gray-300 rounded-md">
+                  <Database size={12} className="text-gray-400 ml-2 mr-1" />
+                  <select
+                    name="typeData"
+                    value={formData.typeData}
+                    onChange={handleChange}
+                    className="w-full h-full py-0 px-1 text-xs focus:outline-none border-none"
+                  >
+                    <option value="Data">Data</option>
+                    <option value="Cloud">Cloud</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700">
+                  Ngày lắp đặt
+                </label>
+                <div className="flex items-center h-8 border border-gray-300 rounded-md">
+                  <Calendar size={12} className="text-gray-400 ml-2 mr-1" />
+                  <input
+                    type="date"
+                    name="installDate"
+                    value={formData.installDate}
+                    onChange={handleChange}
+                    className="w-full py-0 px-1 text-xs focus:outline-none"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-medium text-gray-700">
+                  Trạng thái <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center h-8 border border-gray-300 rounded-md">
+                  <CheckCircle size={12} className="text-gray-400 ml-2 mr-1" />
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full h-full py-0 px-1 text-xs focus:outline-none border-none"
+                  >
+                    <option value="Pending">Đang làm</option>
+                    <option value="Done">Hoàn thành</option>
+                    <option value="Rejected">Từ chối</option>
+                  </select>
+                </div>
+              </div>
             </div>
+            
+            {/* Rejection Reason - only show when status is Rejected */}
+            {formData.status === 'Rejected' && (
+              <div className="mt-2">
+                <label className="block text-xs font-medium text-gray-700">
+                  Lý do từ chối <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-start">
+                  <AlertTriangle size={12} className="text-red-400 mr-1 mt-1.5 flex-shrink-0" />
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Vui lòng nhập lý do từ chối công việc"
+                    rows={2}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-0.5 ml-5">
+                  Lý do từ chối sẽ được ghi lại trong lịch sử.
+                </p>
+              </div>
+            )}
+            
+            {/* Changed indicator */}
+            {hasChanges && (
+              <div className="mt-2 p-1.5 bg-blue-50 border border-blue-100 rounded-md">
+                <p className="text-xs text-blue-700 flex items-center">
+                  <Info size={12} className="mr-1 flex-shrink-0" />
+                  Bạn đã thay đổi thông tin. Nhớ lưu lại để áp dụng.
+                </p>
+              </div>
+            )}
           </div>
         </div>
         
-        {/* Task Information Section */}
-        <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Thông tin công việc</h3>
-          
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Loại kết nối <span className="text-red-500">*</span>
-              </label>
-              <div className="flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-                <Link size={16} className="text-gray-400 ml-3 mr-2" />
-                <input
-                  type="text"
-                  name="connectionType"
-                  value={formData.connectionType}
-                  onChange={handleChange}
-                  className="w-full py-2.5 px-3 focus:outline-none text-sm"
-                  placeholder="Nhập loại kết nối"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Người lắp đặt
-              </label>
-              <div className="flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-                <User size={16} className="text-gray-400 ml-3 mr-2" />
-                <input
-                  type="text"
-                  name="installer"
-                  value={formData.installer}
-                  onChange={handleChange}
-                  className="w-full py-2.5 px-3 focus:outline-none text-sm"
-                  placeholder="Nhập người lắp đặt"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Mã dữ liệu
-              </label>
-              <div className="flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-                <Code size={16} className="text-gray-400 ml-3 mr-2" />
-                <input
-                  type="text"
-                  name="codeData"
-                  value={formData.codeData}
-                  onChange={handleChange}
-                  className="w-full py-2.5 px-3 focus:outline-none text-sm"
-                  placeholder="Nhập mã dữ liệu"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Loại dữ liệu
-              </label>
-              <div className="flex items-center border border-gray-300 rounded-md">
-                <Database size={16} className="text-gray-400 ml-3 mr-2" />
-                <select
-                  name="typeData"
-                  value={formData.typeData}
-                  onChange={handleChange}
-                  className="w-full py-2.5 px-3 focus:outline-none text-sm border-none"
-                >
-                  <option value="Data">Data</option>
-                  <option value="Cloud">Cloud</option>
-                </select>
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ngày lắp đặt
-              </label>
-              <div className="flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-                <Calendar size={16} className="text-gray-400 ml-3 mr-2" />
-                <input
-                  type="date"
-                  name="installDate"
-                  value={formData.installDate}
-                  onChange={handleChange}
-                  className="w-full py-2.5 px-3 focus:outline-none text-sm"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Trạng thái <span className="text-red-500">*</span>
-              </label>
-              <div className="flex items-center border border-gray-300 rounded-md">
-                <CheckCircle size={16} className="text-gray-400 ml-3 mr-2" />
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="w-full py-2.5 px-3 focus:outline-none text-sm border-none"
-                >
-                  <option value="Pending">Đang làm</option>
-                  <option value="Done">Hoàn thành</option>
-                  <option value="Rejected">Từ chối</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          
-          {/* Rejection Reason - only show when status is Rejected */}
-          {formData.status === 'Rejected' && (
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Lý do từ chối <span className="text-red-500">*</span>
-              </label>
-              <div className="flex items-start">
-                <AlertTriangle size={16} className="text-red-400 mr-2 mt-2.5" />
-                <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Vui lòng nhập lý do từ chối công việc"
-                  rows={3}
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1 ml-6">
-                Lý do từ chối sẽ được ghi lại và hiển thị trong lịch sử công việc.
-              </p>
-            </div>
-          )}
-          
-          {/* Changed indicator */}
-          {hasChanges && (
-            <div className="mt-4 p-2 bg-blue-50 border border-blue-100 rounded-md">
-              <p className="text-xs text-blue-700 flex items-center">
-                <Info size={14} className="mr-1.5" />
-                Bạn đã thay đổi thông tin công việc. Nhớ lưu lại để áp dụng thay đổi.
-              </p>
-            </div>
-          )}
-        </div>
-        
-        {/* Form Actions */}
-        <div className="flex justify-end space-x-3 pt-4 border-t">
+        {/* Form Actions - Fixed at bottom */}
+        <div className="flex justify-end space-x-2 p-2 border-t bg-gray-50">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 hover:bg-gray-50"
             disabled={isSubmitting}
           >
             Hủy
           </button>
           <button
             type="submit"
-            className={`px-4 py-2 rounded-md text-sm font-medium text-white ${
+            className={`px-3 py-1.5 rounded-md text-xs font-medium text-white ${
               hasChanges 
                 ? 'bg-blue-600 hover:bg-blue-700' 
                 : 'bg-gray-400 cursor-not-allowed'
@@ -307,7 +307,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
           >
             {isSubmitting ? (
               <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin -ml-1 mr-1 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
