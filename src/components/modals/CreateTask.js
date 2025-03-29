@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
-import { X, Search, Building, MapPin, FileText, Link, Database, Calendar, User, CheckCircle, Info } from 'lucide-react';
+import React, { useState, useContext, useRef } from 'react';
+import { X, FileText, Link, Database, Calendar, User, CheckCircle, Building } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchBusinesses } from '../../stores/redux/actions/businessActions';
+import { useDispatch } from 'react-redux';
 import { addTask } from '../../stores/redux/actions/taskActions';
 import { AuthContext } from '../../contexts/start/AuthContext';
+import BusinessSelector from '../Business/BusinessSelector';
 
 export const CreateTask = ({ closeModal }) => {
     const dispatch = useDispatch();
-    const { businesses } = useSelector(state => state.business);
     const auth = useContext(AuthContext);
     const { user } = auth;
     const isMounted = useRef(true);
@@ -28,33 +27,8 @@ export const CreateTask = ({ closeModal }) => {
     });
 
     const [selectedBusiness, setSelectedBusiness] = useState(null);
-    const [businessSearch, setBusinessSearch] = useState('');
-    const [filteredBusinesses, setFilteredBusinesses] = useState(businesses);
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    useEffect(() => {
-        if (!businesses.length) {
-            dispatch(fetchBusinesses()); 
-        }
-        
-        return () => {
-            isMounted.current = false;
-        };
-    }, [dispatch, businesses.length]);
-
-    useEffect(() => {
-        if (businessSearch.trim() === '') {
-            setFilteredBusinesses(businesses);
-        } else {
-            const searchTerm = businessSearch.toLowerCase().trim();
-            const filtered = businesses.filter(business =>
-                (business.name && business.name.toLowerCase().includes(searchTerm)) ||
-                (business.mst && business.mst.toLowerCase().includes(searchTerm))
-            );
-            setFilteredBusinesses(filtered);
-        }
-    }, [businessSearch, businesses]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -73,7 +47,17 @@ export const CreateTask = ({ closeModal }) => {
             companyName: business.name,
             address: business.address
         }));
-        setBusinessSearch('');
+    };
+
+    const handleClearBusinessSelection = () => {
+        setSelectedBusiness(null);
+        setFormData(prev => ({
+            ...prev,
+            companyId: "",
+            mst: "",
+            companyName: "",
+            address: ""
+        }));
     };
 
     const handleSubmit = async () => {
@@ -165,7 +149,7 @@ export const CreateTask = ({ closeModal }) => {
                     <button 
                         onClick={() => {
                             if (!isSubmitting) {
-                                const result = closeModal();
+                                closeModal();
                             }
                         }}
                         className="p-1 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
@@ -191,97 +175,13 @@ export const CreateTask = ({ closeModal }) => {
                 {/* Form Body */}
                 <div className="p-6">
                     {step === 1 ? (
-                        /* Step 1: Business Selection */
                         <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm doanh nghiệp</label>
-                                <div className="relative">
-                                    <div className="flex items-center border border-gray-300 rounded-md overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-                                        <Search className="ml-3 text-gray-400" size={18} />
-                                        <input 
-                                            type="text" 
-                                            placeholder="Tìm theo tên hoặc MST" 
-                                            className="w-full p-2.5 border-none focus:outline-none text-sm"
-                                            value={businessSearch}
-                                            onChange={(e) => setBusinessSearch(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {selectedBusiness && (
-                                <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h3 className="text-sm font-medium text-blue-800">Doanh nghiệp đã chọn</h3>
-                                        <button 
-                                            className="text-blue-500 hover:text-blue-700 text-sm"
-                                            onClick={() => setSelectedBusiness(null)}
-                                        >
-                                            Hủy chọn
-                                        </button>
-                                    </div>
-                                    <div className="bg-white border border-gray-100 rounded-md p-3">
-                                        <div className="flex justify-between items-center">
-                                            <div>
-                                                <p className="text-sm font-medium">{selectedBusiness.name}</p>
-                                                <div className="flex items-center mt-1 text-xs text-gray-500">
-                                                    <Building size={14} className="mr-1" />
-                                                    <span>MST: {selectedBusiness.mst}</span>
-                                                </div>
-                                            </div>
-                                            <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs flex items-center">
-                                                <CheckCircle size={14} className="mr-1" />
-                                                Đã chọn
-                                            </div>
-                                        </div>
-                                        <div className="mt-2 text-xs text-gray-500 flex items-start">
-                                            <MapPin size={14} className="mr-1 mt-0.5 flex-shrink-0" />
-                                            <span>{selectedBusiness.address || 'Chưa có địa chỉ'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-md bg-white">
-                                {filteredBusinesses.length > 0 ? (
-                                    <div className="divide-y divide-gray-200">
-                                        {filteredBusinesses.map((business) => (
-                                            <div 
-                                                key={business._id} 
-                                                className={`p-3 cursor-pointer hover:bg-gray-50 transition-colors ${
-                                                    selectedBusiness?._id === business._id ? 'bg-blue-50' : ''
-                                                }`}
-                                                onClick={() => handleBusinessSelect(business)}
-                                            >
-                                                <div className="flex justify-between items-start">
-                                                    <div>
-                                                        <p className="text-sm font-medium text-gray-900">{business.name}</p>
-                                                        <div className="flex items-center mt-1 text-xs text-gray-500">
-                                                            <Building size={14} className="mr-1" />
-                                                            <span>MST: {business.mst}</span>
-                                                        </div>
-                                                    </div>
-                                                    {selectedBusiness?._id === business._id && (
-                                                        <div className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">
-                                                            Đã chọn
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="mt-1 text-xs text-gray-500 flex items-start">
-                                                    <MapPin size={14} className="mr-1 mt-0.5 flex-shrink-0" />
-                                                    <span>{business.address || 'Chưa có địa chỉ'}</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="py-6 text-center">
-                                        <Info size={24} className="mx-auto text-gray-400 mb-2" />
-                                        <p className="text-gray-500 text-sm">Không tìm thấy doanh nghiệp</p>
-                                        <p className="text-xs text-gray-400 mt-1">Vui lòng thử tìm kiếm khác</p>
-                                    </div>
-                                )}
-                            </div>
+                            {/* Using the Business Selector component */}
+                            <BusinessSelector
+                                selectedBusiness={selectedBusiness}
+                                onBusinessSelect={handleBusinessSelect}
+                                onClearSelection={handleClearBusinessSelection}
+                            />
                             
                             {/* Current user info */}
                             <div className="mt-4 p-2 bg-gray-50 border border-gray-200 rounded-md">

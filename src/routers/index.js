@@ -13,6 +13,7 @@ import Register from "../pages/register";
 import PrivateRoute from "../components/user/PrivateRoute";
 import { ToastContainer } from "react-toastify";
 import PublicRoute from "../components/user/PublicRoute";
+import ServicePages from "../pages/Services";
 
 export const Routers = () => {
   const { user } = useContext(AuthContext);
@@ -31,6 +32,7 @@ export const Routers = () => {
           </Route>
           <Route path="/task" element={<TaskPages />} />
           <Route path="/message" element={<MessagesPage />} />
+          <Route path="/service" element={<ServicePages />} />
           <Route path="/business" element={<BusinessPages />} />
           <Route path="/users" element={<UserPages />} />
           <Route path="/settings" element={<SettingPages />} />
