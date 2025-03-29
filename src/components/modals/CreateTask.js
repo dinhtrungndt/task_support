@@ -166,7 +166,6 @@ export const CreateTask = ({ closeModal }) => {
                         onClick={() => {
                             if (!isSubmitting) {
                                 const result = closeModal();
-                                console.log("closeModal result:", result);
                             }
                         }}
                         className="p-1 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
