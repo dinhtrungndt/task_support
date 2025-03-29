@@ -90,7 +90,13 @@ export const TaskPages = () => {
           (task.connectionType || '').toLowerCase().includes(searchTermLower) ||
           (task.installer || '').toLowerCase().includes(searchTermLower) ||
           (task.codeData || '').toLowerCase().includes(searchTermLower) ||
-          (task.typeData || '').toLowerCase().includes(searchTermLower)
+          (task.typeData || '').toLowerCase().includes(searchTermLower) ||
+          (task.userAdd.name || '').toLowerCase().includes(searchTermLower) ||
+          (task.notes || '').toLowerCase().includes(searchTermLower) ||
+          (task.status || '').toLowerCase().includes(searchTermLower) ||
+          (task.installDate ? new Date(task.installDate).toLocaleDateString() : '').includes(searchTermLower) ||
+          (task.lastModified ? new Date(task.lastModified).toLocaleDateString() : '').includes(searchTermLower) ||
+          (task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '').includes(searchTermLower) 
         );
       });
     }

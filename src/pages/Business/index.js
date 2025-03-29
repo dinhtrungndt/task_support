@@ -56,7 +56,8 @@ export const BusinessPages = () => {
       businesses.filter(business =>
         business.mst?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         business.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        business.address?.toLowerCase().includes(searchTerm.toLowerCase())
+        business.address?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        business.typeData?.some(type => type.toLowerCase().includes(searchTerm.toLowerCase()))
       )
     );
   }, [businesses, searchTerm]);
