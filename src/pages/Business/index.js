@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { HeaderPages } from '../../components/header';
-import { Search, Plus, Trash2, Filter, MoreVertical, Download, ChevronUp } from 'lucide-react';
+import { Search, Plus, Trash2, Filter, MoreVertical, Download, ChevronUp, Calendar } from 'lucide-react';
 import Modal from '../../components/modals';
 import DropdownMenu from '../../components/DropdownMenu';
 import EditBusinessModal from '../../components/modals/EditBusiness';
 import MoreDetailsModalBusiness from '../../components/modals/MoreBusiness';
 import CreateBusiness from '../../components/modals/CreateBusiness';
-import { fetchBusinesses, deleteBusinesses } from '../../stores/redux/actions/businessActions';
+import { fetchBusinesses, deleteBusinesses, updateBusiness } from '../../stores/redux/actions/businessActions';
 import * as XLSX from 'xlsx'; // Import thư viện XLSX
+import { toast } from 'react-toastify';
 
 export const BusinessPages = () => {
   const dispatch = useDispatch();
@@ -24,13 +25,17 @@ export const BusinessPages = () => {
   const [openModalCreateBusiness, setOpenModalCreateBusiness] = useState(false);
   const [selectedBusinessIds, setSelectedBusinessIds] = useState([]);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
+  // Lấy danh sách doanh nghiệp khi component mount
   useEffect(() => {
     dispatch(fetchBusinesses());
   }, [dispatch]);
   
+  // Xử lý hiển thị nút scroll top
   useEffect(() => {
     const handleScroll = () => {
+      // Hiển thị nút khi cuộn xuống hơn 300px
       if (window.scrollY > 300) {
         setShowScrollTop(true);
       } else {
@@ -40,57 +45,80 @@ export const BusinessPages = () => {
     
     window.addEventListener('scroll', handleScroll);
     
+    // Cleanup event listener khi component unmount
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
+  // Cập nhật danh sách doanh nghiệp đã lọc khi danh sách gốc hoặc từ khóa tìm kiếm thay đổi
   useEffect(() => {
     setFilteredBusinesses(
       businesses.filter(business =>
         business.mst?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         business.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        business.address?.toLowerCase().includes(searchTerm.toLowerCase())
+        business.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (business.PInstaller && business.PInstaller.toLowerCase().includes(searchTerm.toLowerCase()))
       )
     );
   }, [businesses, searchTerm]);
 
+  // Xử lý thay đổi trong ô tìm kiếm
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
+  // Hiển thị/ẩn dropdown menu
   const toggleDropdown = (index) => {
     setActiveDropdown(activeDropdown === index ? null : index);
   };
 
+  // Mở modal chỉnh sửa doanh nghiệp
   const handleEditBusiness = (business) => {
     setSelectedBusiness(business);
     setEditModalOpen(true);
     setActiveDropdown(null);
   };
 
-  const handleSaveBusiness = (updatedBusiness) => {
-    const updatedBusinesses = businesses.map(b =>
-      b.id === updatedBusiness.id ? updatedBusiness : b
-    );
-    setFilteredBusinesses(updatedBusinesses);
-    setEditModalOpen(false);
+  const handleSaveBusiness = async (updatedBusiness) => {
+    try {
+      if (!updatedBusiness._id) {
+        console.error("Business missing ID in handleSaveBusiness:", updatedBusiness);
+        toast.error("Lỗi: Không thể cập nhật doanh nghiệp không có ID");
+        return;
+      }
+      
+      await dispatch(updateBusiness(updatedBusiness));
+      
+      setFilteredBusinesses(prevBusinesses => 
+        prevBusinesses.map(b => b._id === updatedBusiness._id ? {...b, ...updatedBusiness} : b)
+      );
+      
+      setEditModalOpen(false);
+      toast.success("Cập nhật doanh nghiệp thành công");
+    } catch (error) {
+      console.error("Error in handleSaveBusiness:", error);
+      toast.error("Lỗi khi cập nhật doanh nghiệp: " + (error.message || "Đã xảy ra lỗi"));
+    }
   };
 
+  // Mở modal hiển thị chi tiết
   const handleMoreOptions = (business) => {
     setSelectedBusiness(business);
     setMoreModalOpen(true);
     setActiveDropdown(null);
   };
 
+  // Xử lý chọn/bỏ chọn tất cả doanh nghiệp
   const handleSelectAllChange = () => {
     if (selectedBusinessIds.length === filteredBusinesses.length) {
-      setSelectedBusinessIds([]); 
+      setSelectedBusinessIds([]); // Bỏ chọn tất cả
     } else {
-      setSelectedBusinessIds(filteredBusinesses.map(business => business._id));
+      setSelectedBusinessIds(filteredBusinesses.map(business => business._id)); // Chọn tất cả
     }
   };
 
+  // Xử lý chọn/bỏ chọn một doanh nghiệp
   const handleCheckboxChange = (businessId) => {
     setSelectedBusinessIds((prevSelectedIds) => {
       if (prevSelectedIds.includes(businessId)) {
@@ -101,21 +129,43 @@ export const BusinessPages = () => {
     });
   };
 
-  const handleDeleteSelected = () => {
-    if (selectedBusinessIds.length > 0) {
-      const confirmation = window.confirm(`Bạn có chắc chắn muốn xóa ${selectedBusinessIds.length} doanh nghiệp?`);
-      if (confirmation) {
-        dispatch(deleteBusinesses(selectedBusinessIds)).then(() => {
-          setFilteredBusinesses(filteredBusinesses.filter(business => !selectedBusinessIds.includes(business._id)));
-          setSelectedBusinessIds([]);
-        });
+  // Xử lý xóa các doanh nghiệp đã chọn
+  const handleDeleteSelected = async () => {
+    if (selectedBusinessIds.length === 0) return;
+    
+    const confirmMessage = selectedBusinessIds.length === 1 
+      ? "Bạn có chắc chắn muốn xóa doanh nghiệp này?" 
+      : `Bạn có chắc chắn muốn xóa ${selectedBusinessIds.length} doanh nghiệp?`;
+    
+    const confirmation = window.confirm(confirmMessage);
+    
+    if (confirmation) {
+      try {
+        setIsDeleting(true);
+        
+        // Gọi API xóa thông qua Redux action
+        await dispatch(deleteBusinesses(selectedBusinessIds));
+        
+        // Cập nhật UI
+        setFilteredBusinesses(prevBusinesses => 
+          prevBusinesses.filter(business => !selectedBusinessIds.includes(business._id))
+        );
+        
+        setSelectedBusinessIds([]);
+        toast.success("Xóa doanh nghiệp thành công");
+      } catch (error) {
+        toast.error("Lỗi khi xóa doanh nghiệp: " + (error.message || "Đã xảy ra lỗi"));
+      } finally {
+        setIsDeleting(false);
       }
     }
   };
 
+  // Xử lý sau khi tạo doanh nghiệp mới
   const handleBusinessCreated = (newBusiness) => {
     setFilteredBusinesses([...businesses, newBusiness]);
     setOpenModalCreateBusiness(false);
+    toast.success("Tạo doanh nghiệp thành công");
   };
 
   const scrollToTop = () => {
@@ -138,12 +188,16 @@ export const BusinessPages = () => {
       'MST': business.mst || '',
       'Tên công ty': business.name || '',
       'Địa chỉ': business.address || '',
-      'Tổng': business.totalTasks || 0,
+      'Loại dịch vụ': business.connectionType || '',
+      'Người cài đặt': business.PInstaller || '',
+      'Mã dữ liệu': business.codeData || '',
+      'Loại dữ liệu': business.typeData || '',
+      'Ngày cài đặt': business.AtSetting ? new Date(business.AtSetting).toLocaleDateString() : '',
+      'Tổng công việc': business.totalTasks || 0,
       'Hoàn thành': business.completedTasks || 0, 
       'Đang làm': business.pendingTasks || 0,
       'Từ chối': business.rejectedTasks || 0,
-      'Loại dữ liệu': business.dataTypes ? business.dataTypes.join(', ') : '',
-      'Người lắp đặt': business.PInstaller || '',
+      'Loại dữ liệu (bổ sung)': business.dataTypes ? business.dataTypes.join(', ') : '',
       'Ngày cập nhật': business.lastModified ? new Date(business.lastModified).toLocaleDateString() : ''
     }));
     
@@ -157,7 +211,15 @@ export const BusinessPages = () => {
     const fileName = `danh_sach_doanh_nghiep_${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}.xlsx`;
     
     XLSX.writeFile(workbook, fileName);
+    
+    toast.success(`Đã xuất ${exportData.length} doanh nghiệp ra file Excel`);
   };
+
+  useEffect(() => {
+    if (error) {
+      toast.error("Lỗi khi tải dữ liệu: " + error);
+    }
+  }, [error]);
 
   return (
     <div className="min-h-screen bg-gray-50" ref={topRef}>
@@ -170,7 +232,7 @@ export const BusinessPages = () => {
             <div className="relative w-full sm:w-1/3">
               <input
                 type="text"
-                placeholder="Tìm kiếm doanh nghiệp..."
+                placeholder="Tìm kiếm theo MST, tên công ty, địa chỉ, người cài đặt..."
                 className="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 value={searchTerm}
                 onChange={handleSearchChange}
@@ -190,11 +252,24 @@ export const BusinessPages = () => {
               
               {selectedBusinessIds.length > 0 && (
                 <button
-                  className="inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+                  className="inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                   onClick={handleDeleteSelected}
+                  disabled={isDeleting}
                 >
-                  <Trash2 size={16} className="mr-1.5" />
-                  Xóa ({selectedBusinessIds.length})
+                  {isDeleting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Đang xóa...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={16} className="mr-1.5" />
+                      Xóa ({selectedBusinessIds.length})
+                    </>
+                  )}
                 </button>
               )}
               
@@ -349,6 +424,7 @@ export const BusinessPages = () => {
           </div>
         </div>
 
+        {/* Create Business Modal */}
         {openModalCreateBusiness && (
           <CreateBusiness
             closeModal={() => setOpenModalCreateBusiness(false)}

@@ -1,16 +1,23 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Calendar } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { addBusiness } from '../../stores/redux/actions/businessActions';
 
 export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) => {
+    const dispatch = useDispatch();
     const [formData, setFormData] = useState({
         mst: "",
         name: "",
         address: "",
+        connectionType: "",
+        PInstaller: "",
+        codeData: "",
+        typeData: "Data", 
+        AtSetting: new Date().toISOString().split('T')[0],
         contactPerson: "",
         phone: "",
-        email: "",
-        PInstaller: ""
+        email: ""
     });
 
     const handleChange = (e) => {
@@ -21,32 +28,56 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
         }));
     };
 
-    const handleSubmit = () => {
-        if (!formData.mst || !formData.name) {
-            toast.error("Vui lòng điền đầy đủ thông tin");
+    const handleSubmit = async () => {
+        if (!formData.mst || !formData.name || !formData.address || 
+            !formData.connectionType || !formData.PInstaller || 
+            !formData.codeData || !formData.typeData || !formData.AtSetting) {
+            toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
+            return;
+        }
+
+        const mstExists = businesses.some(business => business.mst === formData.mst);
+        if (mstExists) {
+            toast.error("Mã số thuế đã tồn tại trong hệ thống");
             return;
         }
 
         const newBusiness = {
-            id: formData.mst,
             mst: formData.mst,
             name: formData.name,
             address: formData.address,
-            contactPerson: formData.contactPerson || 'N/A',
-            phone: formData.phone,
-            email: formData.email,
+            connectionType: formData.connectionType,
             PInstaller: formData.PInstaller,
+            codeData: formData.codeData,
+            typeData: formData.typeData,
+            AtSetting: formData.AtSetting,
+            contactPerson: formData.contactPerson || '',
+            phone: formData.phone || '',
+            email: formData.email || '',
+            dataTypes: [],
             totalTasks: 0,
             completedTasks: 0,
             pendingTasks: 0,
             rejectedTasks: 0,
-            dataTypes: [],
-            installationHistory: [],
-            lastModified: new Date().toISOString()
+            installationHistory: [{
+                date: formData.AtSetting,
+                type: formData.typeData,
+                installer: formData.PInstaller,
+                connectionType: formData.connectionType,
+                status: 'Pending',
+                notes: ''
+            }]
         };
+        console.log("New Business Data:", newBusiness);
 
-        onBusinessCreated(newBusiness);
-        closeModal();
+        try {
+            await dispatch(addBusiness(newBusiness));
+            toast.success("Tạo doanh nghiệp thành công");
+            onBusinessCreated(newBusiness);
+            closeModal();
+        } catch (error) {
+            toast.error("Lỗi khi thêm doanh nghiệp: " + (error.message || "Đã xảy ra lỗi"));
+        }
     };
 
     return (
@@ -64,11 +95,13 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
                 </div>
                 
                 {/* Form Body */}
-                <div className="p-6">
+                <div className="p-6 max-h-[70vh] overflow-y-auto">
                     <div className="space-y-5">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">MST <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    MST <span className="text-red-500">*</span>
+                                </label>
                                 <input
                                     type="text"
                                     name="mst"
@@ -80,7 +113,9 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Tên công ty <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Tên công ty <span className="text-red-500">*</span>
+                                </label>
                                 <input
                                     type="text"
                                     name="name"
@@ -94,7 +129,9 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Địa chỉ <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="text"
                                 name="address"
@@ -102,48 +139,29 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
                                 onChange={handleChange}
                                 className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                                 placeholder="Nhập địa chỉ"
+                                required
                             />
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Người liên hệ</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Loại dịch vụ <span className="text-red-500">*</span>
+                                </label>
                                 <input
                                     type="text"
-                                    name="contactPerson"
-                                    value={formData.contactPerson}
+                                    name="connectionType"
+                                    value={formData.connectionType}
                                     onChange={handleChange}
                                     className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    placeholder="Nhập tên người liên hệ"
+                                    placeholder="Nhập loại dịch vụ"
+                                    required
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    placeholder="Nhập số điện thoại"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                    placeholder="Nhập email"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Người cài đặt</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Người cài đặt <span className="text-red-500">*</span>
+                                </label>
                                 <input
                                     type="text"
                                     name="PInstaller"
@@ -151,6 +169,106 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
                                     onChange={handleChange}
                                     className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                                     placeholder="Nhập tên người cài đặt"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Mã dữ liệu <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="codeData"
+                                    value={formData.codeData}
+                                    onChange={handleChange}
+                                    className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    placeholder="Nhập mã dữ liệu"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Loại dữ liệu <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    name="typeData"
+                                    value={formData.typeData}
+                                    onChange={handleChange}
+                                    className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    required
+                                >
+                                    <option value="Data">Data</option>
+                                    <option value="Cloud">Cloud</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Ngày cài đặt <span className="text-red-500">*</span>
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="date"
+                                        name="AtSetting"
+                                        value={formData.AtSetting}
+                                        onChange={handleChange}
+                                        className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pl-10"
+                                        required
+                                    />
+                                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Thông tin thêm */}
+                        <div className="mt-6 pt-6 border-t border-gray-200">
+                            <h3 className="text-sm font-medium text-gray-700 mb-4">Thông tin bổ sung</h3>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Người liên hệ
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="contactPerson"
+                                        value={formData.contactPerson}
+                                        onChange={handleChange}
+                                        className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                        placeholder="Nhập tên người liên hệ"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Số điện thoại
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        value={formData.phone}
+                                        onChange={handleChange}
+                                        className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                        placeholder="Nhập số điện thoại"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mt-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Email
+                                </label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    placeholder="Nhập email"
                                 />
                             </div>
                         </div>

@@ -22,10 +22,12 @@ const businessReducer = (state = initialState, action) => {
         ),
       };
     case DELETE_BUSINESSES:
-      return {
-        ...state,
-        businesses: state.businesses.filter(business => !action.payload.some(deleted => deleted._id === business._id)),
-      };
+    return {
+      ...state,
+      businesses: state.businesses.filter(business => 
+        !action.payload.includes(business._id)
+      ),
+    };
     default:
       return state;
   }

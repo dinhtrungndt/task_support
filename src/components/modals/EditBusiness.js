@@ -1,16 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Calendar } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { updateBusiness } from '../../stores/redux/actions/businessActions';
+import { toast } from 'react-toastify';
 
 export const EditBusinessModal = ({ 
   business, 
   onClose, 
   onSave 
 }) => {
+  const dispatch = useDispatch();
   const [editedBusiness, setEditedBusiness] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (business) {
-      setEditedBusiness({...business});
+      const formattedBusiness = {
+        ...business,
+        AtSetting: business.AtSetting ? new Date(business.AtSetting).toISOString().split('T')[0] : '',
+      };
+      setEditedBusiness(formattedBusiness);
     }
   }, [business]);
 
@@ -23,12 +32,46 @@ export const EditBusinessModal = ({
     }
   };
 
-  const handleSave = () => {
-    if (editedBusiness) {
-      onSave({
+  const handleSave = async () => {
+    if (!editedBusiness) return;
+    
+    // Validate required fields
+    if (!editedBusiness.mst || !editedBusiness.name || !editedBusiness.address || 
+        !editedBusiness.connectionType || !editedBusiness.PInstaller || 
+        !editedBusiness.codeData || !editedBusiness.typeData || !editedBusiness.AtSetting) {
+      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
+      return;
+    }
+    
+    // Debug to confirm ID is present
+    console.log("Saving business with ID:", editedBusiness._id);
+    
+    try {
+      setIsSubmitting(true);
+      
+      if (!editedBusiness._id) {
+        console.error("Missing _id in editedBusiness:", editedBusiness);
+        toast.error("Lỗi: ID doanh nghiệp không xác định");
+        return;
+      }
+      
+      const result = await dispatch(updateBusiness({
         ...editedBusiness,
-        lastModified: new Date().toISOString()
-      });
+        _id: editedBusiness._id
+      }));
+      
+      if (result) {
+        onSave({
+          ...result,
+          _id: editedBusiness._id 
+        });
+        toast.success("Cập nhật thông tin doanh nghiệp thành công");
+      }
+    } catch (error) {
+      console.error("Error in handleSave:", error);
+      toast.error("Lỗi khi cập nhật: " + (error.message || "Đã xảy ra lỗi"));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -48,86 +91,167 @@ export const EditBusinessModal = ({
       </div>
       
       {/* Form Content */}
-      <div className="p-6">
+      <div className="p-6 max-h-[70vh] overflow-y-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">MST <span className="text-gray-400 text-xs">(không thể thay đổi)</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              MST <span className="text-gray-400 text-xs">(không thể thay đổi)</span>
+            </label>
             <input
               type="text"
               name="mst"
-              value={editedBusiness.mst}
+              value={editedBusiness.mst || ''}
               className="w-full p-2.5 border border-gray-300 rounded-md text-sm bg-gray-50 text-gray-500 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-not-allowed"
               disabled
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tên công ty <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tên công ty <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               name="name"
-              value={editedBusiness.name}
+              value={editedBusiness.name || ''}
               onChange={handleInputChange}
               className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               placeholder="Nhập tên công ty"
+              required
             />
           </div>
           <div className="col-span-1 sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Địa chỉ <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               name="address"
-              value={editedBusiness.address}
+              value={editedBusiness.address || ''}
               onChange={handleInputChange}
               className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               placeholder="Nhập địa chỉ"
+              required
             />
           </div>
+          
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Người liên hệ</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Loại dịch vụ <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="connectionType"
+              value={editedBusiness.connectionType || ''}
+              onChange={handleInputChange}
+              className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              placeholder="Nhập loại dịch vụ"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Người cài đặt <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="PInstaller"
+              value={editedBusiness.PInstaller || ''}
+              onChange={handleInputChange}
+              className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              placeholder="Nhập tên người cài đặt"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Mã dữ liệu <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="codeData"
+              value={editedBusiness.codeData || ''}
+              onChange={handleInputChange}
+              className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              placeholder="Nhập mã dữ liệu"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Loại dữ liệu <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="typeData"
+              value={editedBusiness.typeData || 'Data'}
+              onChange={handleInputChange}
+              className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              required
+            >
+              <option value="Data">Data</option>
+              <option value="Cloud">Cloud</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Ngày cài đặt <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type="date"
+                name="AtSetting"
+                value={editedBusiness.AtSetting || ''}
+                onChange={handleInputChange}
+                className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pl-10"
+                required
+              />
+              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Người liên hệ
+            </label>
             <input
               type="text"
               name="contactPerson"
-              value={editedBusiness.contactPerson}
+              value={editedBusiness.contactPerson || ''}
               onChange={handleInputChange}
               className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               placeholder="Nhập tên người liên hệ"
             />
           </div>
+          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
             <input
               type="text"
               name="phone"
-              value={editedBusiness.phone}
+              value={editedBusiness.phone || ''}
               onChange={handleInputChange}
               className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               placeholder="Nhập số điện thoại"
             />
           </div>
+          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               type="email"
               name="email"
-              value={editedBusiness.email}
+              value={editedBusiness.email || ''}
               onChange={handleInputChange}
               className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               placeholder="Nhập email"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Người cài đặt</label>
-            <input
-              type="text"
-              name="PInstaller"
-              value={editedBusiness.PInstaller}
-              onChange={handleInputChange}
-              className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Nhập tên người cài đặt"
-            />
-          </div>
+          
           <div className="col-span-1 sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Loại dữ liệu</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Loại dữ liệu (bổ sung)</label>
             <input
               type="text"
               name="dataTypes"
@@ -153,14 +277,26 @@ export const EditBusinessModal = ({
         <button
           onClick={onClose}
           className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          disabled={isSubmitting}
         >
           Hủy
         </button>
         <button
           onClick={handleSave}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+          disabled={isSubmitting}
         >
-          Lưu thay đổi
+          {isSubmitting ? (
+            <span className="flex items-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Đang lưu...
+            </span>
+          ) : (
+            "Lưu thay đổi"
+          )}
         </button>
       </div>
     </div>
