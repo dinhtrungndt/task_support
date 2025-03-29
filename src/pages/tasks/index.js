@@ -154,53 +154,53 @@ export const TaskPages = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <HeaderPages title="Quản lý công việc" />
-      <div className="container mx-auto p-4 pb-6">
+      <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 max-w-6xl">
         {/* Top Controls */}
-        <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="bg-white p-3 rounded-lg shadow-sm mb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             {/* Search Bar */}
             <div className="relative w-full sm:w-1/3">
               <input
                 type="text"
                 placeholder="Tìm kiếm công việc..."
-                className="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full bg-gray-50 border border-gray-300 rounded-lg pl-8 pr-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
             </div>
             
             {/* Action Buttons */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               <button 
-                className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                className="inline-flex items-center justify-center px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
                 onClick={() => setOpenModalCreateTask(true)}
               >
-                <Plus size={16} className="mr-1.5" />
+                <Plus size={14} className="mr-1" />
                 Thêm công việc
               </button>
               
               {selectedIds.length > 0 && (
                 <button
-                  className="inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+                  className="inline-flex items-center justify-center px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-500 focus:ring-offset-1 transition-colors"
                   onClick={handleDeleteSelected}
                 >
-                  <XCircle size={16} className="mr-1.5" />
+                  <XCircle size={14} className="mr-1" />
                   Xóa ({selectedIds.length})
                 </button>
               )}
               
               <button 
-                className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 bg-white text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
               >
-                <Filter size={16} className="mr-1.5" />
+                <Filter size={14} className="mr-1" />
                 Lọc
               </button>
               
               <button 
-                className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 bg-white text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
               >
-                <Download size={16} className="mr-1.5" />
+                <Download size={14} className="mr-1" />
                 Xuất
               </button>
             </div>
@@ -208,84 +208,84 @@ export const TaskPages = () => {
         </div>
         
         {/* Status Filters */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
           <div 
-            className={`bg-white p-4 rounded-lg border cursor-pointer transition-all ${
+            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${
               activeFilter === 'All' ? 'border-blue-500 shadow-sm' : 'border-gray-200 hover:border-blue-200'
             }`}
             onClick={() => handleFilterClick('All')}
           >
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-sm text-gray-500">Tất cả công việc</span>
-                <span className="text-2xl font-semibold mt-1">{counts.all}</span>
+                <span className="text-xs text-gray-500">Tất cả công việc</span>
+                <span className="text-lg sm:text-xl font-semibold mt-0.5">{counts.all}</span>
               </div>
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                <Calendar size={20} />
+              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                <Calendar size={16} />
               </div>
             </div>
           </div>
           
           <div 
-            className={`bg-white p-4 rounded-lg border cursor-pointer transition-all ${
+            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${
               activeFilter === 'Done' ? 'border-green-500 shadow-sm' : 'border-gray-200 hover:border-green-200'
             }`}
             onClick={() => handleFilterClick('Done')}
           >
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-sm text-gray-500">Hoàn thành</span>
-                <span className="text-2xl font-semibold mt-1 text-green-600">{counts.done}</span>
+                <span className="text-xs text-gray-500">Hoàn thành</span>
+                <span className="text-lg sm:text-xl font-semibold mt-0.5 text-green-600">{counts.done}</span>
               </div>
-              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                <CheckCircle size={20} />
+              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                <CheckCircle size={16} />
               </div>
             </div>
           </div>
           
           <div 
-            className={`bg-white p-4 rounded-lg border cursor-pointer transition-all ${
+            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${
               activeFilter === 'Pending' ? 'border-amber-500 shadow-sm' : 'border-gray-200 hover:border-amber-200'
             }`}
             onClick={() => handleFilterClick('Pending')}
           >
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-sm text-gray-500">Đang xử lý</span>
-                <span className="text-2xl font-semibold mt-1 text-amber-600">{counts.pending}</span>
+                <span className="text-xs text-gray-500">Đang xử lý</span>
+                <span className="text-lg sm:text-xl font-semibold mt-0.5 text-amber-600">{counts.pending}</span>
               </div>
-              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-                <Clock size={20} />
+              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                <Clock size={16} />
               </div>
             </div>
           </div>
           
           <div 
-            className={`bg-white p-4 rounded-lg border cursor-pointer transition-all ${
+            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${
               activeFilter === 'Rejected' ? 'border-red-500 shadow-sm' : 'border-gray-200 hover:border-red-200'
             }`}
             onClick={() => handleFilterClick('Rejected')}
           >
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-sm text-gray-500">Từ chối</span>
-                <span className="text-2xl font-semibold mt-1 text-red-600">{counts.rejected}</span>
+                <span className="text-xs text-gray-500">Từ chối</span>
+                <span className="text-lg sm:text-xl font-semibold mt-0.5 text-red-600">{counts.rejected}</span>
               </div>
-              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                <XCircle size={20} />
+              <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                <XCircle size={16} />
               </div>
             </div>
           </div>
         </div>
         
         {/* Status Line */}
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-sm text-gray-600">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs sm:text-sm text-gray-600">
             {filteredTasks.length > 0 
               ? <span className="font-medium">Tổng <span className="text-blue-600 font-semibold">{filteredTasks.length}</span> công việc</span>
               : "Không tìm thấy công việc nào"}
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-xs sm:text-sm text-gray-500">
             {activeFilter !== 'All' && 
               `Hiển thị: ${activeFilter === 'Done' ? 'Hoàn thành' : activeFilter === 'Pending' ? 'Đang xử lý' : 'Từ chối'}`
             }
