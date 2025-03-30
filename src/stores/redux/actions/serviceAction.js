@@ -27,8 +27,6 @@ export const fetchServices = () => async (dispatch) => {
 // Add a new service
 export const addService = (service) => async (dispatch) => {
   try {
-    console.log("Adding service with data:", service);
-    
     // Send all data to the backend
     const response = await axiosClient.post('/services/add', service);
     
@@ -56,8 +54,6 @@ export const updateService = (service) => async (dispatch) => {
       throw new Error("Service ID is missing or undefined");
     }
     
-    console.log("Updating service:", service);
-    
     const response = await axiosClient.put(`/services/${service._id}`, service);
     
     dispatch({
@@ -79,8 +75,6 @@ export const updateService = (service) => async (dispatch) => {
 // Delete a service by ID
 export const deleteService = (serviceId) => async (dispatch) => {
   try {
-    console.log("Deleting service:", serviceId);
-    
     const response = await axiosClient.delete(`/services/${serviceId}`);
     
     dispatch({
@@ -102,7 +96,7 @@ export const deleteService = (serviceId) => async (dispatch) => {
 // Delete multiple services by their IDs
 export const deleteServices = (serviceIds) => async (dispatch) => {
   try {
-    console.log("Bulk deleting services:", serviceIds);
+    // console.log("Bulk deleting services:", serviceIds);
     
     const response = await axiosClient.delete('/services', { data: serviceIds });
     
