@@ -8,7 +8,7 @@ const SidebarContext = createContext()
 
 export default function Sidebar({ children }) {
   const auth = useContext(AuthContext);
-  const [expanded, setExpanded] = useState(true)
+  const [expanded, setExpanded] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
 
