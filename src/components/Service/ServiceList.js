@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit, MoreHorizontal, AlertCircle } from 'lucide-react';
+import { Edit, MoreHorizontal, AlertCircle, Building } from 'lucide-react';
 import DropdownMenu from '../DropdownMenu';
 
 const ServiceList = ({
@@ -90,6 +90,12 @@ const ServiceList = ({
                 Loại dịch vụ
               </th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                MST
+              </th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Doanh nghiệp
+              </th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Giá dịch vụ
               </th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -138,6 +144,22 @@ const ServiceList = ({
                   }`}>
                     {service.type}
                   </span>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{service.companyId?.mst || 'N/A'}</div>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="flex flex-col">
+                    <div className="text-sm font-medium text-gray-900">
+                      {service.companyId?.name || 'N/A'}
+                    </div>
+                    {service.companyId?.mst && (
+                      <div className="text-xs text-gray-500 flex items-center mt-1">
+                        <Building size={12} className="mr-1" />
+                        MST: {service.companyId.mst}
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{formatPrice(service.price)} VNĐ</div>

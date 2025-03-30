@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { Plus, X, Search, User } from 'lucide-react';
+import { Plus, X, Search, User, Building, MapPin } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../../contexts/start/AuthContext';
+import BusinessSelector from '../Business/BusinessSelector';
 
 const EditServiceModal = ({ service, onClose, onSave }) => {
   const auth = useContext(AuthContext);
@@ -21,7 +22,8 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
     duration: '',
     status: 'Active',
     features: [],
-    userCreated: ''
+    userCreated: '',
+    companyId: ''
   });
 
   const [currentFeature, setCurrentFeature] = useState('');
@@ -33,6 +35,9 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
   const [filteredUsers, setFilteredUsers] = useState(users || []);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  
+  // Business selection state
+  const [selectedBusiness, setSelectedBusiness] = useState(null);
 
   // Initialize form with service data
   useEffect(() => {
@@ -46,13 +51,23 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
         duration: service.duration || '',
         status: service.status || 'Active',
         features: service.features || [],
-        userCreated: service.userCreated || ''
+        userCreated: service.userCreated?._id || service.userCreated || '',
+        companyId: service.companyId?._id || service.companyId || ''
       });
       
       // Find the user object from the users array
-      const userObj = users.find(u => u._id === service.userCreated);
+      const userObj = users.find(u => 
+        u._id === (service.userCreated?._id || service.userCreated)
+      );
       if (userObj) {
         setSelectedUser(userObj);
+      }
+      
+      // Set selected business if available
+      if (service.companyId) {
+        setSelectedBusiness(
+          typeof service.companyId === 'object' ? service.companyId : { _id: service.companyId }
+        );
       }
     }
     
@@ -102,6 +117,24 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
     setUserSearch('');
     setShowUserDropdown(false);
   };
+  
+  // Handle business selection
+  const handleBusinessSelect = (business) => {
+    setSelectedBusiness(business);
+    setFormData(prev => ({
+      ...prev,
+      companyId: business._id
+    }));
+  };
+  
+  // Handle clear business selection
+  const handleClearBusinessSelection = () => {
+    setSelectedBusiness(null);
+    setFormData(prev => ({
+      ...prev,
+      companyId: ""
+    }));
+  };
 
   // Add feature to the list
   const handleAddFeature = () => {
@@ -146,6 +179,10 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
       newErrors.userCreated = 'Vui lòng chọn người tạo dịch vụ';
     }
     
+    if (!formData.companyId) {
+      newErrors.companyId = 'Vui lòng chọn doanh nghiệp';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -179,6 +216,20 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Company selection */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Doanh nghiệp <span className="text-red-500">*</span>
+        </label>
+        <BusinessSelector
+          selectedBusiness={selectedBusiness}
+          onBusinessSelect={handleBusinessSelect}
+          onClearSelection={handleClearBusinessSelection}
+          className="mt-1"
+        />
+        {errors.companyId && <p className="mt-1 text-sm text-red-500">{errors.companyId}</p>}
+      </div>
+      
       {/* Tên dịch vụ */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">

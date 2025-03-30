@@ -1,4 +1,5 @@
 import React from 'react';
+import { Building, User, Calendar, MapPin } from 'lucide-react';
 
 const MoreServiceDetailsModal = ({ service }) => {
   if (!service) return <div>Không có thông tin.</div>;
@@ -59,6 +60,50 @@ const MoreServiceDetailsModal = ({ service }) => {
         </div>
       </div>
 
+      {/* Company Information */}
+      <div>
+        <h3 className="text-sm font-medium text-gray-500 mb-2">Thông tin doanh nghiệp</h3>
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200">
+              <tr>
+                <td className="px-4 py-2 bg-gray-50 text-sm font-medium text-gray-500">
+                  <div className="flex items-center">
+                    <Building className="mr-1.5" size={16} />
+                    <span>Tên doanh nghiệp</span>
+                  </div>
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-900">
+                  {service.companyId?.name || 'N/A'}
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-2 bg-gray-50 text-sm font-medium text-gray-500">
+                  <div className="flex items-center">
+                    <Building className="mr-1.5" size={16} />
+                    <span>Mã số thuế</span>
+                  </div>
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-900">
+                  {service.companyId?.mst || 'N/A'}
+                </td>
+              </tr>
+              <tr>
+                <td className="px-4 py-2 bg-gray-50 text-sm font-medium text-gray-500">
+                  <div className="flex items-center">
+                    <MapPin className="mr-1.5" size={16} />
+                    <span>Địa chỉ</span>
+                  </div>
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-900">
+                  {service.companyId?.address || 'Không có địa chỉ'}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* Pricing & Duration */}
       <div>
         <h3 className="text-sm font-medium text-gray-500 mb-2">Giá và thời hạn</h3>
@@ -111,17 +156,35 @@ const MoreServiceDetailsModal = ({ service }) => {
           <table className="min-w-full divide-y divide-gray-200">
             <tbody className="divide-y divide-gray-200">
               <tr>
-                <td className="px-4 py-2 bg-gray-50 text-sm font-medium text-gray-500">Người tạo</td>
+                <td className="px-4 py-2 bg-gray-50 text-sm font-medium text-gray-500">
+                  <div className="flex items-center">
+                    <User className="mr-1.5" size={16} />
+                    <span>Người tạo</span>
+                  </div>
+                </td>
                 <td className="px-4 py-2 text-sm text-gray-900">
-                  {service.userCreated?.name || service.userCreated || 'N/A'}
+                  {service.userCreated?.name || 'N/A'}
+                  {service.userCreated?.email && (
+                    <span className="text-xs text-gray-500 ml-2">({service.userCreated.email})</span>
+                  )}
                 </td>
               </tr>
               <tr>
-                <td className="px-4 py-2 bg-gray-50 text-sm font-medium text-gray-500">Ngày tạo</td>
+                <td className="px-4 py-2 bg-gray-50 text-sm font-medium text-gray-500">
+                  <div className="flex items-center">
+                    <Calendar className="mr-1.5" size={16} />
+                    <span>Ngày tạo</span>
+                  </div>
+                </td>
                 <td className="px-4 py-2 text-sm text-gray-900">{formatDate(service.createdAt)}</td>
               </tr>
               <tr>
-                <td className="px-4 py-2 bg-gray-50 text-sm font-medium text-gray-500">Cập nhật lần cuối</td>
+                <td className="px-4 py-2 bg-gray-50 text-sm font-medium text-gray-500">
+                  <div className="flex items-center">
+                    <Calendar className="mr-1.5" size={16} />
+                    <span>Cập nhật lần cuối</span>
+                  </div>
+                </td>
                 <td className="px-4 py-2 text-sm text-gray-900">{formatDate(service.lastModified)}</td>
               </tr>
             </tbody>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { HeaderPages } from '../../components/header';
-import { Search, Plus, Trash2, Filter, Download, ChevronUp } from 'lucide-react';
+import { Search, Plus, Trash2, Filter, Download, ChevronUp, Building } from 'lucide-react';
 import Modal from '../../components/modals';
 import CreateService from '../../components/modals/CreateService';
 import EditServiceModal from '../../components/modals/EditServiceModal';
@@ -60,6 +60,8 @@ export const ServicePages = () => {
         service.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         service.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         service.description?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        service.companyId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.companyId?.mst?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (service.features && service.features.some(feature => 
           feature.toLowerCase().includes(searchTerm.toLowerCase())
         ))
@@ -192,6 +194,8 @@ export const ServicePages = () => {
     const exportData = dataToExport.map((service) => ({
       'Tên dịch vụ': service.name || '',
       'Loại dịch vụ': service.type || '',
+      'Doanh nghiệp': service.companyId?.name || '',
+      'MST': service.companyId?.mst || '',
       'Mô tả': service.description || '',
       'Giá dịch vụ (VNĐ)': service.price || 0,
       'Thời hạn (tháng)': service.duration || 0,
@@ -234,7 +238,7 @@ export const ServicePages = () => {
             <div className="relative w-full sm:w-1/3">
               <input
                 type="text"
-                placeholder="Tìm kiếm theo tên, loại, mô tả dịch vụ..."
+                placeholder="Tìm kiếm theo tên, loại, mô tả, doanh nghiệp..."
                 className="w-full bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 value={searchTerm}
                 onChange={handleSearchChange}
