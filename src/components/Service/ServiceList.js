@@ -1,6 +1,7 @@
 import React from 'react';
 import { Edit, MoreHorizontal, AlertCircle, Building } from 'lucide-react';
 import DropdownMenu from '../DropdownMenu';
+import moment from 'moment';
 
 const ServiceList = ({
   filteredServices,
@@ -23,13 +24,27 @@ const ServiceList = ({
 
   // Format date
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    const currentTime = moment();
+    const postTime = moment(dateString);
+    const diffInSeconds = currentTime.diff(postTime, 'seconds');
+
+    if (diffInSeconds < 1) {
+      return 'Vừa đăng';
+    } else if (diffInSeconds < 60) {
+      return `${diffInSeconds} giây trước`;
+    } else if (diffInSeconds < 3600) {
+      return `${Math.floor(diffInSeconds / 60)} phút trước`;
+    } else if (diffInSeconds < 24 * 3600) {
+      return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+    } else if (diffInSeconds < 30 * 24 * 3600) {
+      return `${Math.floor(diffInSeconds / (24 * 3600))} ngày trước`;
+    } else if (diffInSeconds < 12 * 30 * 24 * 3600) {
+      return `${Math.floor(diffInSeconds / (30 * 24 * 3600))} tháng trước`;
+    } else if (diffInSeconds < 12 * 365 * 24 * 3600) {
+      return `${Math.floor(diffInSeconds / (12 * 30 * 24 * 3600))} năm trước`;
+    } else {
+      return postTime.format('DD/MM/YYYY');
+    }
   };
 
   // Handle click outside of dropdown
@@ -54,7 +69,7 @@ const ServiceList = ({
           {searchTerm && (
             <p className="text-sm text-gray-500 max-w-md">
               Không tìm thấy kết quả nào cho từ khóa "{searchTerm}". Vui lòng thử từ khóa khác hoặc{" "}
-              <button 
+              <button
                 className="text-blue-600 hover:text-blue-800 font-medium"
                 onClick={() => setSearchTerm('')}
               >
@@ -107,6 +122,9 @@ const ServiceList = ({
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Ngày tạo
               </th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Ngày cập nhật
+              </th>
               <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Tùy chọn
               </th>
@@ -114,11 +132,10 @@ const ServiceList = ({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredServices.map((service, index) => (
-              <tr 
-                key={service._id} 
-                className={`hover:bg-gray-50 ${
-                  selectedServiceIds.includes(service._id) ? 'bg-blue-50' : ''
-                }`}
+              <tr
+                key={service._id}
+                className={`hover:bg-gray-50 ${selectedServiceIds.includes(service._id) ? 'bg-blue-50' : ''
+                  }`}
               >
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex items-center">
@@ -136,12 +153,11 @@ const ServiceList = ({
                   </div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    service.type === 'Data' ? 'bg-blue-100 text-blue-800' :
-                    service.type === 'Cloud' ? 'bg-purple-100 text-purple-800' :
-                    service.type === 'Network' ? 'bg-green-100 text-green-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${service.type === 'Data' ? 'bg-blue-100 text-blue-800' :
+                      service.type === 'Cloud' ? 'bg-purple-100 text-purple-800' :
+                        service.type === 'Network' ? 'bg-green-100 text-green-800' :
+                          'bg-gray-100 text-gray-800'
+                    }`}>
                     {service.type}
                   </span>
                 </td>
@@ -168,31 +184,33 @@ const ServiceList = ({
                   <div className="text-sm text-gray-900">{service.duration} tháng</div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    service.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${service.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
                     {service.status}
                   </span>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                   {formatDate(service.createdAt)}
                 </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {formatDate(service.lastModified !== service.createdAt ? service.lastModified : service.createdAt)}
+                </td>
                 <td className="p-3 border-b text-right relative">
-                    <div>
-                      <button 
-                        className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-                        onClick={() => toggleDropdown(index)}
-                      >
-                        <MoreHorizontal className="text-gray-500" size={16} />
-                      </button>
-                      <DropdownMenu
-                        isOpen={activeDropdown === index}
-                        onEdit={() => handleEditService(service)}
-                        onMore={() => handleMoreOptions(service)}
-                        onClose={() => setActiveDropdown(null)}
-                      />
-                    </div>
-                  </td>
+                  <div>
+                    <button
+                      className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                      onClick={() => toggleDropdown(index)}
+                    >
+                      <MoreHorizontal className="text-gray-500" size={16} />
+                    </button>
+                    <DropdownMenu
+                      isOpen={activeDropdown === index}
+                      onEdit={() => handleEditService(service)}
+                      onMore={() => handleMoreOptions(service)}
+                      onClose={() => setActiveDropdown(null)}
+                    />
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

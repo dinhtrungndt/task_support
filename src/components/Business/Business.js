@@ -1,6 +1,7 @@
 import React from 'react';
 import { MoreHorizontal, MoreVertical } from 'lucide-react';
 import DropdownMenu from '../../components/DropdownMenu';
+import moment from 'moment';
 
 export const BusinessList = ({ 
   filteredBusinesses, 
@@ -16,6 +17,31 @@ export const BusinessList = ({
   setSearchTerm,
   setActiveDropdown
 }) => {
+
+   const formatDate = (dateString) => {
+      const currentTime = moment();
+      const postTime = moment(dateString);
+      const diffInSeconds = currentTime.diff(postTime, 'seconds');
+  
+      if (diffInSeconds < 1) {
+        return 'Vừa đăng';
+      } else if (diffInSeconds < 60) {
+        return `${diffInSeconds} giây trước`;
+      } else if (diffInSeconds < 3600) {
+        return `${Math.floor(diffInSeconds / 60)} phút trước`;
+      } else if (diffInSeconds < 24 * 3600) {
+        return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+      } else if (diffInSeconds < 30 * 24 * 3600) {
+        return `${Math.floor(diffInSeconds / (24 * 3600))} ngày trước`;
+      } else if (diffInSeconds < 12 * 30 * 24 * 3600) {
+        return `${Math.floor(diffInSeconds / (30 * 24 * 3600))} tháng trước`;
+      } else if (diffInSeconds < 12 * 365 * 24 * 3600) {
+        return `${Math.floor(diffInSeconds / (12 * 30 * 24 * 3600))} năm trước`;
+      } else {
+        return postTime.format('DD/MM/YYYY');
+      }
+    };
+
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
@@ -94,7 +120,9 @@ export const BusinessList = ({
                       : <span className="text-gray-400">-</span>
                     }
                   </td>
-                  <td className="p-3 border-b">{business.lastModified ? new Date(business.lastModified).toLocaleDateString() : <span className="text-gray-400">-</span>}</td>
+                  <td className="p-3 border-b">
+                    {business.updatedAt ? formatDate(business.updatedAt) : 'Chưa cập nhật'}
+                  </td>
                   <td className="p-3 border-b text-right relative">
                     <div>
                       <button 

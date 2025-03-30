@@ -2,6 +2,7 @@ import React from 'react';
 import { MoreVertical, AlertTriangle, User, MoreHorizontal } from 'lucide-react';
 import CreateTask from '../modals/CreateTask';
 import DropdownMenu from '../DropdownMenu';
+import moment from 'moment';
 
 export const Tasks = ({
   filteredTasks,
@@ -40,12 +41,27 @@ export const Tasks = ({
   };
 
   // Format date for display
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    try {
-      return new Date(dateString).toLocaleDateString();
-    } catch (error) {
-      return dateString;
+ const formatDate = (dateString) => {
+    const currentTime = moment();
+    const postTime = moment(dateString);
+    const diffInSeconds = currentTime.diff(postTime, 'seconds');
+
+    if (diffInSeconds < 1) {
+      return 'Vừa đăng';
+    } else if (diffInSeconds < 60) {
+      return `${diffInSeconds} giây trước`;
+    } else if (diffInSeconds < 3600) {
+      return `${Math.floor(diffInSeconds / 60)} phút trước`;
+    } else if (diffInSeconds < 24 * 3600) {
+      return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+    } else if (diffInSeconds < 30 * 24 * 3600) {
+      return `${Math.floor(diffInSeconds / (24 * 3600))} ngày trước`;
+    } else if (diffInSeconds < 12 * 30 * 24 * 3600) {
+      return `${Math.floor(diffInSeconds / (30 * 24 * 3600))} tháng trước`;
+    } else if (diffInSeconds < 12 * 365 * 24 * 3600) {
+      return `${Math.floor(diffInSeconds / (12 * 30 * 24 * 3600))} năm trước`;
+    } else {
+      return postTime.format('DD/MM/YYYY');
     }
   };
 
