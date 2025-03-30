@@ -177,33 +177,22 @@ const ServiceList = ({
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                   {formatDate(service.createdAt)}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-medium relative">
-                  <button
-                    onClick={() => toggleDropdown(index)}
-                    className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                  >
-                    <MoreHorizontal className="h-5 w-5" />
-                  </button>
-                  
-                  {activeDropdown === index && (
-                    <DropdownMenu onClickOutside={handleClickOutside}>
-                      <button
-                        onClick={() => handleEditService(service)}
-                        className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                <td className="p-3 border-b text-right relative">
+                    <div>
+                      <button 
+                        className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                        onClick={() => toggleDropdown(index)}
                       >
-                        <Edit className="h-4 w-4 inline mr-2" />
-                        Chỉnh sửa
+                        <MoreHorizontal className="text-gray-500" size={16} />
                       </button>
-                      <button
-                        onClick={() => handleMoreOptions(service)}
-                        className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        <MoreHorizontal className="h-4 w-4 inline mr-2" />
-                        Xem chi tiết
-                      </button>
-                    </DropdownMenu>
-                  )}
-                </td>
+                      <DropdownMenu
+                        isOpen={activeDropdown === index}
+                        onEdit={() => handleEditService(service)}
+                        onMore={() => handleMoreOptions(service)}
+                        onClose={() => setActiveDropdown(null)}
+                      />
+                    </div>
+                  </td>
               </tr>
             ))}
           </tbody>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { MoreVertical } from 'lucide-react';
+import { MoreHorizontal, MoreVertical } from 'lucide-react';
 import DropdownMenu from '../../components/DropdownMenu';
 
 export const BusinessList = ({ 
@@ -101,7 +101,7 @@ export const BusinessList = ({
                         className="p-1 rounded-full hover:bg-gray-100 transition-colors"
                         onClick={() => toggleDropdown(index)}
                       >
-                        <MoreVertical className="text-gray-500" size={16} />
+                        <MoreHorizontal className="text-gray-500" size={16} />
                       </button>
                       <DropdownMenu
                         isOpen={activeDropdown === index}

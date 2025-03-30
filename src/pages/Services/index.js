@@ -76,6 +76,7 @@ export const ServicePages = () => {
 
   // Toggle dropdown menu
   const toggleDropdown = (index) => {
+    console.log("Toggling dropdown for index:", index);
     setActiveDropdown(activeDropdown === index ? null : index);
   };
 

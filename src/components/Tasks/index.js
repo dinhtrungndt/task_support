@@ -1,5 +1,5 @@
 import React from 'react';
-import { MoreVertical, AlertTriangle, User } from 'lucide-react';
+import { MoreVertical, AlertTriangle, User, MoreHorizontal } from 'lucide-react';
 import CreateTask from '../modals/CreateTask';
 import DropdownMenu from '../DropdownMenu';
 
@@ -137,7 +137,7 @@ export const Tasks = ({
                         className="p-1 rounded-full hover:bg-gray-100 transition-colors"
                         onClick={() => toggleDropdown(index)}
                       >
-                        <MoreVertical className="text-gray-500" size={16} />
+                        <MoreHorizontal className="text-gray-500" size={16} />
                       </button>
                       <DropdownMenu
                         isOpen={activeDropdown === index}
