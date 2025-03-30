@@ -168,7 +168,7 @@ export const ServicePages = () => {
 
   // Handle service created callback
   const handleServiceCreated = (newService) => {
-    setFilteredServices([...services, newService]);
+    setFilteredServices(prevServices => [...prevServices, newService]);
     setOpenModalCreateService(false);
     toast.success("Tạo dịch vụ thành công");
   };

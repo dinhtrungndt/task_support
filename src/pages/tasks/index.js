@@ -134,9 +134,7 @@ export const TaskPages = () => {
 
   const handleSaveTask = async (updatedTask) => {
     try {
-      // Update task in backend through Redux action
       await dispatch(updateTask(updatedTask));
-      
       setEditModalOpen(false);
       toast.success("Cập nhật công việc thành công");
     } catch (error) {
