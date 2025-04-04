@@ -37,11 +37,29 @@ export default function Sidebar({ children }) {
         </SidebarContext.Provider>
 
         <div className="border-t flex p-2 sticky bottom-0 bg-white">
-          <img
+          {
+            expanded ? (
+              <img
             src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
             alt=""
             className="w-8 h-8 rounded-md"
           />
+            ) : (
+              <div onClick={() => setDropdownOpen(!dropdownOpen)} className="w-8 h-8 rounded-md bg-gray-200 flex items-center justify-center cursor-pointer">
+              <img
+            src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
+            alt=""
+            className="w-8 h-8 rounded-md"
+          />
+          {
+            dropdownOpen && (
+              <div className="absolute z-50 left-52 top-4">
+                <DropdownMenuLogout />
+              </div>
+            )}
+            </div>
+            )
+          }
           <div
             className={`
               flex justify-between items-center
