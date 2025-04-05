@@ -1,8 +1,37 @@
-// contexts/start/AuthContext.js
 import React, { createContext, useState, useEffect } from 'react';
 import { getIdUser, refreshToken, logout } from '../../services/user';
 
 export const AuthContext = createContext();
+
+// Hàm an toàn để giải mã JWT token
+const safelyDecodeToken = (token) => {
+  try {
+    if (!token) return null;
+    
+    // Lấy phần payload (phần thứ 2) của JWT token
+    const base64Url = token.split('.')[1];
+    if (!base64Url) return null;
+    
+    // Chuyển base64url thành base64 chuẩn bằng cách thay thế các ký tự
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    
+    // Thêm padding nếu cần
+    const paddedBase64 = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+    
+    // Giải mã base64 và chuyển thành đối tượng JSON
+    const jsonPayload = decodeURIComponent(
+      atob(paddedBase64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Token decode error:', error);
+    return null;
+  }
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -19,10 +48,10 @@ export const AuthProvider = ({ children }) => {
         if (token && storedUser) {
           // Giải mã token để kiểm tra thời gian hết hạn
           try {
-            const decodedToken = JSON.parse(atob(token.split('.')[1]));
+            const decodedToken = safelyDecodeToken(token);
             
             // Lấy thời gian hết hạn từ token (thường là trường exp)
-            if (decodedToken.exp) {
+            if (decodedToken && decodedToken.exp) {
               const expiryTime = new Date(decodedToken.exp * 1000);
               setTokenExpiryTime(expiryTime);
               
@@ -90,13 +119,9 @@ export const AuthProvider = ({ children }) => {
     // Lấy token từ localStorage và cài đặt thời gian hết hạn
     const token = localStorage.getItem('token');
     if (token) {
-      try {
-        const decodedToken = JSON.parse(atob(token.split('.')[1]));
-        if (decodedToken.exp) {
-          setTokenExpiryTime(new Date(decodedToken.exp * 1000));
-        }
-      } catch (error) {
-        console.error('Token decode error:', error);
+      const decodedToken = safelyDecodeToken(token);
+      if (decodedToken && decodedToken.exp) {
+        setTokenExpiryTime(new Date(decodedToken.exp * 1000));
       }
     }
   };
