@@ -19,7 +19,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
     notes: '',
     userAdd: ''
   });
-  
+
   const [hasChanges, setHasChanges] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [taskCreator, setTaskCreator] = useState(null);
@@ -41,10 +41,10 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
         notes: task.notes || '',
         userAdd: task.userAdd || ''
       });
-      
+
       // Reset change tracking
       setHasChanges(false);
-      
+
       // Find user details if users are available
       if (task.userAdd && users?.length) {
         const creator = users.find(user => user.id === task.userAdd);
@@ -64,25 +64,25 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate form - check required fields
     if (!formData._id || !formData.status) {
       toast.error('Vui lòng điền đầy đủ các trường bắt buộc');
       return;
     }
-    
+
     // Validate notes for rejected status
     if (formData.status === 'Rejected' && !formData.notes) {
       toast.error('Vui lòng nhập lý do từ chối');
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
-      
+
       // Call onSave callback with the updated task
       await onSave(formData);
-      
+
       toast.success('Cập nhật công việc thành công');
     } catch (error) {
       console.error('Error updating task:', error);
@@ -91,20 +91,20 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
       setIsSubmitting(false);
     }
   };
-  
+
   // Format creator name
   const getCreatorName = () => {
     if (taskCreator) {
       return taskCreator.name || taskCreator.email || 'Người dùng';
     }
-    
+
     if (typeof task.userAdd === 'object') {
       return task.userAdd.name || task.userAdd.email || 'Người dùng';
     }
-    
+
     return 'Người dùng';
   };
-  
+
   // If no task is provided, don't render
   if (!task) return null;
 
@@ -132,11 +132,11 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
               Không thể thay đổi người tạo công việc
             </p>
           </div>
-          
+
           {/* Company Info Card (compact) */}
           <div className="bg-gray-50 p-2 rounded-lg">
             <h3 className="text-xs font-medium text-gray-700 mb-2">Thông tin doanh nghiệp</h3>
-            
+
             <div className="grid grid-cols-2 gap-2 mb-2">
               <div>
                 <label className="block text-xs font-medium text-gray-700">
@@ -152,7 +152,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-xs font-medium text-gray-700">
                   Tên công ty
@@ -168,7 +168,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                 </div>
               </div>
             </div>
-            
+
             <div>
               <label className="block text-xs font-medium text-gray-700">
                 Địa chỉ
@@ -184,11 +184,11 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
               </div>
             </div>
           </div>
-          
+
           {/* Task Information */}
           <div>
             <h3 className="text-xs font-medium text-gray-700 mb-2">Thông tin công việc</h3>
-            
+
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-xs font-medium text-gray-700">
@@ -196,17 +196,20 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                 </label>
                 <div className="flex items-center h-8 border border-gray-300 rounded-md">
                   <Link size={12} className="text-gray-400 ml-2 mr-1" />
-                  <input
-                    type="text"
+                  <select
                     name="connectionType"
                     value={formData.connectionType}
                     onChange={handleChange}
-                    className="w-full py-1 px-1 text-xs focus:outline-none"
-                    placeholder="Nhập loại kết nối"
-                  />
+                    className="w-full h-full py-0 px-1 text-xs focus:outline-none border-none"
+                  >
+                    <option value="Mạng">Mạng</option>
+                    <option value="Data">Data</option>
+                    <option value="Cloud">Cloud</option>
+                  </select>
+
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-xs font-medium text-gray-700">
                   Người lắp đặt
@@ -223,7 +226,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-xs font-medium text-gray-700">
                   Mã dữ liệu
@@ -240,7 +243,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-xs font-medium text-gray-700">
                   Loại dữ liệu
@@ -258,7 +261,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                   </select>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-xs font-medium text-gray-700">
                   Ngày lắp đặt
@@ -274,7 +277,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-xs font-medium text-gray-700">
                   Trạng thái <span className="text-red-500">*</span>
@@ -294,7 +297,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                 </div>
               </div>
             </div>
-            
+
             {/* Rejection Reason - only show when status is Rejected */}
             {formData.status === 'Rejected' && (
               <div className="mt-2">
@@ -317,7 +320,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
                 </p>
               </div>
             )}
-            
+
             {/* Changed indicator */}
             {hasChanges && (
               <div className="mt-2 p-1.5 bg-blue-50 border border-blue-100 rounded-md">
@@ -329,7 +332,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
             )}
           </div>
         </div>
-        
+
         {/* Form Actions - Fixed at bottom */}
         <div className="flex justify-end space-x-2 p-2 border-t bg-gray-50">
           <button
@@ -342,11 +345,10 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
           </button>
           <button
             type="submit"
-            className={`px-3 py-1.5 rounded-md text-xs font-medium text-white ${
-              hasChanges 
-                ? 'bg-blue-600 hover:bg-blue-700' 
+            className={`px-3 py-1.5 rounded-md text-xs font-medium text-white ${hasChanges
+                ? 'bg-blue-600 hover:bg-blue-700'
                 : 'bg-gray-400 cursor-not-allowed'
-            } ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+              } ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
             disabled={!hasChanges || isSubmitting}
           >
             {isSubmitting ? (

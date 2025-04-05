@@ -43,7 +43,7 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
   useEffect(() => {
     if (service) {
       setFormData({
-        _id: service.id || '',
+        _id: service._id || '',
         name: service.name || '',
         type: service.type || 'Data',
         description: service.description || '',

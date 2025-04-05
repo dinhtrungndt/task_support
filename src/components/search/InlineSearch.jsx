@@ -154,7 +154,7 @@ const InlineSearch = () => {
                 {[
                   { label: 'Tìm doanh nghiệp', icon: <Briefcase size={14} className="text-emerald-600" /> },
                   { label: 'Tìm công việc', icon: <FileText size={14} className="text-blue-600" /> },
-                  { label: 'Tìm dịch vụ', icon: <Package size={14} className="text-purple-600" /> },
+                  { label: 'Tìm bảo hành', icon: <Package size={14} className="text-purple-600" /> },
                 ].map((item, index) => (
                   <div 
                     key={index}

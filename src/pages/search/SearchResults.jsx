@@ -10,7 +10,7 @@ const SearchResultsPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const searchQuery = new URLSearchParams(location.search).get('q') || '';
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('All');
   
   // Get data from Redux store
   const { tasks } = useSelector(state => state.tasks);
