@@ -17,6 +17,9 @@ const ServiceList = ({
   setSearchTerm,
   setActiveDropdown
 }) => {
+  // Console log để debug
+  console.log("ServiceList received loading prop:", loading);
+
   // Format price with commas
   const formatPrice = (price) => {
     return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || '0';
@@ -52,14 +55,7 @@ const ServiceList = ({
     setActiveDropdown(null);
   };
 
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm p-4 flex justify-center items-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
+  // Kiểm tra nếu không có dịch vụ nào
   if (filteredServices.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-sm p-6 text-center">
@@ -214,7 +210,7 @@ const ServiceList = ({
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
       </div>
     </div>
   );

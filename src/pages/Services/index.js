@@ -31,8 +31,13 @@ export const ServicePages = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Console log để debug
+  console.log("ServicePages loading state:", loading);
+  console.log("ServicePages services:", services.length);
+
   // Fetch services when component mounts
   useEffect(() => {
+    console.log("Dispatching fetchServices");
     dispatch(fetchServices());
   }, [dispatch]);
   
@@ -306,21 +311,82 @@ export const ServicePages = () => {
           </p>
         </div>
 
-        {/* Service List */}
-        <ServiceList
-          filteredServices={filteredServices}
-          loading={loading}
-          searchTerm={searchTerm}
-          activeDropdown={activeDropdown}
-          selectedServiceIds={selectedServiceIds}
-          toggleDropdown={toggleDropdown}
-          handleCheckboxChange={handleCheckboxChange}
-          handleSelectAllChange={handleSelectAllChange}
-          handleEditService={handleEditService}
-          handleMoreOptions={handleMoreOptions}
-          setSearchTerm={setSearchTerm}
-          setActiveDropdown={setActiveDropdown}
-        />
+        {loading ? (
+          <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-4 py-3 text-left w-12">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          disabled
+                        />
+                      </div>
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tên dịch vụ
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Loại dịch vụ
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      MST
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Doanh nghiệp
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Giá dịch vụ
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Thời hạn
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Trạng thái
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ngày tạo
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ngày cập nhật
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tùy chọn
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colSpan={11} className="p-8 text-center text-sm text-gray-500">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-3"></div>
+                        <p>Đang tải dữ liệu...</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <ServiceList
+            filteredServices={filteredServices}
+            loading={loading}
+            searchTerm={searchTerm}
+            activeDropdown={activeDropdown}
+            selectedServiceIds={selectedServiceIds}
+            toggleDropdown={toggleDropdown}
+            handleCheckboxChange={handleCheckboxChange}
+            handleSelectAllChange={handleSelectAllChange}
+            handleEditService={handleEditService}
+            handleMoreOptions={handleMoreOptions}
+            setSearchTerm={setSearchTerm}
+            setActiveDropdown={setActiveDropdown}
+          />
+        )}
 
         {/* Create Service Modal */}
         {openModalCreateService && (
