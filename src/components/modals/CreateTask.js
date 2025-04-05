@@ -9,8 +9,8 @@ import BusinessSelector from '../Business/BusinessSelector';
 export const CreateTask = ({ closeModal }) => {
     const dispatch = useDispatch();
     const auth = useContext(AuthContext);
-    const { user } = auth;
     const isMounted = useRef(true);
+    const user = auth.user;
 
     const [formData, setFormData] = useState({
         companyId: "",
