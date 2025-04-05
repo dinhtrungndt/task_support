@@ -47,7 +47,7 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
       
       // Find user details if users are available
       if (task.userAdd && users?.length) {
-        const creator = users.find(user => user._id === task.userAdd);
+        const creator = users.find(user => user.id === task.userAdd);
         setTaskCreator(creator);
       }
     }

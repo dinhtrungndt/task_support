@@ -32,7 +32,7 @@ const MoreServiceDetailsModal = ({ service }) => {
             <tbody className="divide-y divide-gray-200">
               <tr>
                 <td className="px-2 py-1.5 bg-gray-50 font-medium text-gray-500 w-1/3">ID</td>
-                <td className="px-2 py-1.5 text-gray-900 break-all">{service._id}</td>
+                <td className="px-2 py-1.5 text-gray-900 break-all">{service.id}</td>
               </tr>
               <tr>
                 <td className="px-2 py-1.5 bg-gray-50 font-medium text-gray-500">Tên dịch vụ</td>

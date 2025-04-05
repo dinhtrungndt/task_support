@@ -27,9 +27,6 @@ export const fetchServices = () => async (dispatch) => {
 // Add a new service
 export const addService = (service) => async (dispatch) => {
   try {
-    console.log("Adding service:", service);
-    
-    // Đảm bảo các trường bắt buộc có giá trị
     const serviceToAdd = {
       ...service,
       price: service.price ? parseFloat(service.price) : 0,
@@ -45,7 +42,6 @@ export const addService = (service) => async (dispatch) => {
       response = await axiosClient.post('/services', serviceToAdd);
     } catch (error) {
       // Nếu gọi /services thất bại, thử gọi /services/add
-      console.log("Trying alternative endpoint /services/add");
       response = await axiosClient.post('/services/add', serviceToAdd);
     }
     

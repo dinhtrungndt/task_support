@@ -10,7 +10,7 @@ const MoreDetailsModal = ({ task }) => {
   useEffect(() => {
     // Find the user who created this task
     if (task?.userAdd && users?.length) {
-      const creator = users.find(user => user._id === task.userAdd);
+      const creator = users.find(user => user.id === task.userAdd);
       setTaskCreator(creator);
     } else if (task?.userAdd && typeof task.userAdd === 'object') {
       // If userAdd is already an object with user data

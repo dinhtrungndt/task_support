@@ -43,7 +43,7 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
   useEffect(() => {
     if (service) {
       setFormData({
-        _id: service._id || '',
+        _id: service.id || '',
         name: service.name || '',
         type: service.type || 'Data',
         description: service.description || '',
@@ -57,7 +57,7 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
       
       // Find the user object from the users array
       const userObj = users.find(u => 
-        u._id === (service.userCreated?._id || service.userCreated)
+        u.id === (service.userCreated?.id || service.userCreated)
       );
       if (userObj) {
         setSelectedUser(userObj);
@@ -66,7 +66,7 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
       // Set selected business if available
       if (service.companyId) {
         setSelectedBusiness(
-          typeof service.companyId === 'object' ? service.companyId : { _id: service.companyId }
+          typeof service.companyId === 'object' ? service.companyId : { id: service.companyId }
         );
       }
     }
@@ -112,7 +112,7 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
     setSelectedUser(selectedUser);
     setFormData(prev => ({
       ...prev,
-      userCreated: selectedUser._id
+      userCreated: selectedUser.id
     }));
     setUserSearch('');
     setShowUserDropdown(false);

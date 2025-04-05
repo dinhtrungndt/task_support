@@ -83,7 +83,7 @@ export const CreateTask = ({ closeModal }) => {
         }
         
         // Check if user is logged in
-        if (!user || !user._id) {
+        if (!user || !user.id) {
             toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
             return;
         }
@@ -99,7 +99,7 @@ export const CreateTask = ({ closeModal }) => {
             };
             
             // Pass the user ID directly to the action
-            await dispatch(addTask(dataToSubmit, user._id));
+            await dispatch(addTask(dataToSubmit, user.id));
             
             toast.success("Tạo công việc thành công!");
             

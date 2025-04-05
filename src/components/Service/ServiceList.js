@@ -133,7 +133,7 @@ const ServiceList = ({
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredServices.map((service, index) => (
               <tr
-                key={service._id}
+                key={`${service._id}-${index}`}
                 className={`hover:bg-gray-50 ${selectedServiceIds.includes(service._id) ? 'bg-blue-50' : ''
                   }`}
               >

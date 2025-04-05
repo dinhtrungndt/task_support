@@ -9,7 +9,7 @@ import { addService } from '../../stores/redux/actions/serviceAction';
 const CreateService = ({ closeModal, onServiceCreated }) => {
   const dispatch = useDispatch();
   const auth = useContext(AuthContext);
-  const { user } = auth;
+  const user = auth?.user
   const isMounted = useRef(true);
 
   const [service, setService] = useState({
@@ -20,7 +20,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
     duration: '',
     status: 'Active',
     features: [],
-    userCreated: user?._id || "",
+    userCreated: user?.id || "",
     companyId: ""
   });
 
@@ -35,7 +35,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
     if (user && service.userCreated === "") {
       setService(prev => ({
         ...prev,
-        userCreated: user._id
+        userCreated: user.id
       }));
     }
     
