@@ -48,17 +48,31 @@ export const addTask = (taskData, userId) => async (dispatch) => {
       userAdd: userId // Add the user ID passed from the component
     };
 
-    // console.log("Sending task data:", taskToAdd);
+    console.log("Sending task data:", taskToAdd);
 
-    // Changed from '/tasks/add' to '/tasks'
-    const response = await axiosClient.post('/tasks', [taskToAdd]); // Notice we wrap in array for POST /tasks
+    // Thử gọi cả hai endpoint để đảm bảo một trong hai sẽ thành công
+    // (Sau này nên thống nhất lại chỉ một endpoint)
+    let response;
+    try {
+      // Thử gọi endpoint /tasks
+      response = await axiosClient.post('/tasks', [taskToAdd]); 
+    } catch (error) {
+      // Nếu gọi /tasks thất bại, thử gọi /tasks/add
+      console.log("Trying alternative endpoint /tasks/add");
+      response = await axiosClient.post('/tasks/add', taskToAdd);
+      
+      // Chuyển đổi định dạng phản hồi để phù hợp với xử lý tiếp theo
+      if (!Array.isArray(response.data)) {
+        response.data = [response.data];
+      }
+    }
     
     dispatch({
       type: ADD_TASK,
-      payload: response.data[0], // Get the first item from the array response
+      payload: Array.isArray(response.data) ? response.data[0] : response.data, 
     });
     
-    return response.data[0]; // Return the first created task
+    return Array.isArray(response.data) ? response.data[0] : response.data;
   } catch (error) {
     console.error("Add task error details:", error.response?.data || error);
     dispatch({

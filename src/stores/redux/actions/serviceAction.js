@@ -27,8 +27,27 @@ export const fetchServices = () => async (dispatch) => {
 // Add a new service
 export const addService = (service) => async (dispatch) => {
   try {
-    // Send all data to the backend
-    const response = await axiosClient.post('/services/add', service);
+    console.log("Adding service:", service);
+    
+    // Đảm bảo các trường bắt buộc có giá trị
+    const serviceToAdd = {
+      ...service,
+      price: service.price ? parseFloat(service.price) : 0,
+      duration: service.duration ? parseInt(service.duration, 10) : 1,
+      status: service.status || 'Active',
+      features: service.features || []
+    };
+    
+    // Thử gọi cả hai endpoint để đảm bảo một trong hai sẽ thành công
+    let response;
+    try {
+      // Thử gọi endpoint /services
+      response = await axiosClient.post('/services', serviceToAdd);
+    } catch (error) {
+      // Nếu gọi /services thất bại, thử gọi /services/add
+      console.log("Trying alternative endpoint /services/add");
+      response = await axiosClient.post('/services/add', serviceToAdd);
+    }
     
     dispatch({
       type: ADD_SERVICE,
@@ -37,7 +56,7 @@ export const addService = (service) => async (dispatch) => {
     
     return response.data;
   } catch (error) {
-    console.error("Error in addService action:", error);
+    console.error("Error in addService action:", error.response?.data || error);
     dispatch({
       type: FETCH_SERVICES_ERROR,
       payload: error.response?.data?.message || error.message,
