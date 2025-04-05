@@ -17,24 +17,42 @@ const Login = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const user = await login(form);
-      if (user) {
-        auth?.loginUser(user);
-        toast.success(`Chào mừng, ${user.name}!`);
-        navigate("/");
-      } else {
-        toast.error("Thông tin không đúng!");
-      }
-    } catch (error) {
-      toast.error("Đăng nhập thất bại, vui lòng thử lại!");
-    } finally {
-      setIsLoading(false);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
+  try {
+    const user = await login(form);
+    
+    if (user) {
+      auth?.loginUser(user);
+      toast.success(`Chào mừng, ${user.name}!`);
+      navigate("/");
+    } else {
+      toast.error("Email hoặc mật khẩu không đúng!");
     }
-  };
+  } catch (error) {
+    console.error("Login error:", error);
+    
+    // Xử lý các loại lỗi cụ thể
+    if (error.response) {
+      const { status, data } = error.response;
+      
+      if (status === 401) {
+        toast.error("Email hoặc mật khẩu không đúng!");
+      } else if (status === 429) {
+        toast.error("Quá nhiều lần đăng nhập thất bại. Vui lòng thử lại sau!");
+      } else if (data && data.message) {
+        toast.error(data.message);
+      } else {
+        toast.error("Đăng nhập thất bại, vui lòng thử lại!");
+      }
+    } else {
+      toast.error("Không thể kết nối đến máy chủ. Vui lòng thử lại sau!");
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">

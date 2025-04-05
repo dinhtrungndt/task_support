@@ -1,29 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { Routers } from "./routers";
-import axiosClient from './api/axiosClient.ts';
+
+import React, { useEffect } from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import { AuthProvider } from './contexts/start/AuthContext';
+import { setupActivityTracking, isSessionExpired } from './utils/sessionUtils';
+import { logout } from './services/user';
+import 'react-toastify/dist/ReactToastify.css';
+import { Routers } from './routers';
+import { errorToast } from './ui/CustomToast';
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        await axiosClient.get('/companies');
-        
-        await new Promise(resolve => setTimeout(resolve, 1500));
-      } catch (error) {
-        console.error('Initialization error:', error);
-      } finally {
-        setIsLoading(false);
+    const cleanup = setupActivityTracking();
+    
+    const sessionCheckInterval = setInterval(() => {
+      const hasToken = localStorage.getItem('token');
+      
+      if (hasToken && isSessionExpired()) {
+        // Phiên đã hết hạn do không hoạt động
+        clearInterval(sessionCheckInterval);
+        logout();
+        errorToast('Phiên làm việc đã hết hạn do không hoạt động. Vui lòng đăng nhập lại.');
+        window.location.href = '/login';
       }
+    }, 60000); // Kiểm tra mỗi phút
+    
+    return () => {
+      cleanup();
+      clearInterval(sessionCheckInterval);
     };
-
-    initializeApp();
   }, []);
-
-  if (isLoading) {
-    return 
-  }
 
   return <Routers />;
 }

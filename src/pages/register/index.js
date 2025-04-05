@@ -16,7 +16,7 @@ const Register = () => {
   const validateForm = () => {
     let isValid = true;
     const newErrors = { name: "", email: "", password: "", confirmPassword: "" };
-
+    
     // Kiểm tra tên
     if (!form.name.trim()) {
       newErrors.name = "Vui lòng nhập tên của bạn";
@@ -25,7 +25,7 @@ const Register = () => {
       newErrors.name = "Tên phải có ít nhất 2 ký tự";
       isValid = false;
     }
-
+    
     // Kiểm tra email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!form.email.trim()) {
@@ -35,16 +35,22 @@ const Register = () => {
       newErrors.email = "Email không hợp lệ";
       isValid = false;
     }
-
-    // Kiểm tra mật khẩu
+    
+    // Kiểm tra mật khẩu - tăng cường bảo mật hơn
     if (!form.password) {
       newErrors.password = "Vui lòng nhập mật khẩu";
       isValid = false;
-    } else if (form.password.length < 3) {
-      newErrors.password = "Mật khẩu phải có ít nhất 3 ký tự";
+    } else if (form.password.length < 8) {
+      newErrors.password = "Mật khẩu phải có ít nhất 8 ký tự";
+      isValid = false;
+    } else if (!/[A-Z]/.test(form.password)) {
+      newErrors.password = "Mật khẩu phải có ít nhất 1 chữ hoa";
+      isValid = false;
+    } else if (!/[0-9]/.test(form.password)) {
+      newErrors.password = "Mật khẩu phải có ít nhất 1 chữ số";
       isValid = false;
     }
-
+    
     // Kiểm tra xác nhận mật khẩu
     if (!form.confirmPassword) {
       newErrors.confirmPassword = "Vui lòng xác nhận mật khẩu";
@@ -53,7 +59,7 @@ const Register = () => {
       newErrors.confirmPassword = "Mật khẩu không khớp";
       isValid = false;
     }
-
+    
     setErrors(newErrors);
     return isValid;
   };
@@ -71,7 +77,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) {
+    if (!validateForm()) {  
       return;
     }
     
@@ -83,19 +89,37 @@ const Register = () => {
         password: form.password
       };
       
-      const res = await register(formData);
+      const response = await register(formData);
       
-      if (res.data && res.data.status === 400) {
-        toast.error("Email đã tồn tại!");
-        return;
-      }
+      // Kiểm tra đúng cấu trúc phản hồi từ API
+      console.log("API response:", response); // Gỡ lỗi
       
-      if (res.status === 200) {
-        toast.success("Đăng ký thành công!");
-        navigate("/login");
+      // Cách xử lý đúng hơn dựa vào cấu trúc API
+      if (response && response.data) {
+        if (response.data.status === 400 || response.data.status === 202) {
+          toast.error(response.data.message || "Email đã tồn tại!");
+        } else if (response.data.status === 200) {
+          toast.success("Đăng ký thành công!");
+          navigate("/login");
+        } else {
+          // Trường hợp khác
+          toast.warning("Có lỗi xảy ra, vui lòng thử lại sau.");
+        }
       }
     } catch (error) {
-      toast.error("Đăng ký thất bại, vui lòng thử lại!");
+      console.error("Lỗi đăng ký:", error);
+      
+      // Xử lý lỗi theo loại
+      if (error.response) {
+        // Lỗi từ server
+        toast.error(error.response.data?.message || "Đăng ký thất bại!");
+      } else if (error.request) {
+        // Không có phản hồi từ server
+        toast.error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng!");
+      } else {
+        // Lỗi khác
+        toast.error("Đăng ký thất bại, vui lòng thử lại!");
+      }
     } finally {
       setIsLoading(false);
     }

@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Route, Routes } from "react-router-dom"; // Bỏ BrowserRouter
+import { Route, Routes } from "react-router-dom";
 import { SidebarComponents } from "../components/sidebar";
 import { OverviewPages } from "../pages/Overview";
 import { TaskPages } from "../pages/tasks";
@@ -15,6 +15,7 @@ import { ToastContainer } from "react-toastify";
 import PublicRoute from "../components/user/PublicRoute";
 import ServicePages from "../pages/Services";
 import SearchResultsPage from "../pages/search/SearchResults";
+import NotFound from "../utils/NotFound";
 
 export const Routers = () => {
   const { user } = useContext(AuthContext);
@@ -25,20 +26,26 @@ export const Routers = () => {
         {user && <SidebarComponents />}
         <div className="flex-1 p-4 pb-0">
           <Routes>
-            <Route element={<PrivateRoute />}>
-              <Route path="/" element={<OverviewPages />} />
-            </Route>
+            {/* Public routes - Chỉ truy cập khi chưa đăng nhập */}
             <Route element={<PublicRoute />}>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
             </Route>
-            <Route path="/task" element={<TaskPages />} />
-            <Route path="/message" element={<MessagesPage />} />
-            <Route path="/service" element={<ServicePages />} />
-            <Route path="/business" element={<BusinessPages />} />
-            <Route path="/users" element={<UserPages />} />
-            <Route path="/settings" element={<SettingPages />} />
-            <Route path="/search" element={<SearchResultsPage />} />
+            
+            {/* Protected routes - Bắt buộc đăng nhập để truy cập */}
+            <Route element={<PrivateRoute />}>
+              <Route path="/" element={<OverviewPages />} />
+              <Route path="/task" element={<TaskPages />} />
+              <Route path="/message" element={<MessagesPage />} />
+              <Route path="/service" element={<ServicePages />} />
+              <Route path="/business" element={<BusinessPages />} />
+              <Route path="/users" element={<UserPages />} />
+              <Route path="/settings" element={<SettingPages />} />
+              <Route path="/search" element={<SearchResultsPage />} />
+            </Route>
+            
+            {/* Route 404 - Trang không tìm thấy */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
         <ToastContainer position="top-right" autoClose={3000} />
