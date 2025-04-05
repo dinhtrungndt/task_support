@@ -6,7 +6,6 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate data loading or API initialization
     const initializeApp = async () => {
       try {
         await axiosClient.get('/companies');
@@ -21,6 +20,10 @@ export default function App() {
 
     initializeApp();
   }, []);
+
+  if (isLoading) {
+    return 
+  }
 
   return <Routers />;
 }

@@ -10,15 +10,18 @@ import store from './stores/redux/store';
 import 'react-toastify/dist/ReactToastify.css';
 
 import './api/axiosClient.ts';
+import { SearchProvider } from './contexts/search/SearchContext.jsx';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <Provider store={store}>
     <AuthProvider>
       <BrowserRouter>
-        <React.StrictMode>
-          <App />
-        </React.StrictMode>
+        <SearchProvider>
+          <React.StrictMode>
+            <App />
+          </React.StrictMode>
+        </SearchProvider>
       </BrowserRouter>
     </AuthProvider>
   </Provider>

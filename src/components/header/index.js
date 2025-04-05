@@ -1,11 +1,14 @@
-// HeaderPages.jsx
+// src/components/header/HeaderPages.jsx
 import React, { useContext, useState, useRef, useEffect } from 'react'
-import { BellDot, ChevronLeft, X, Search, Calendar as CalendarIcon, LayoutDashboard, Menu } from 'lucide-react'
+import { BellDot, ChevronLeft, X, Calendar as CalendarIcon, LayoutDashboard, Menu } from 'lucide-react'
 import { Calendar } from '../Calendar'
 import { AuthContext } from '../../contexts/start/AuthContext';
+import InlineSearch from '../search/InlineSearch';
+import { useNavigate } from 'react-router-dom';
 
 export const HeaderPages = () => {
     const auth = useContext(AuthContext);
+    const navigate = useNavigate();
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const notificationRef = useRef(null);
@@ -63,13 +66,8 @@ export const HeaderPages = () => {
                         className='absolute right-4 top-16 bg-white rounded-lg shadow-lg p-4 z-50 border border-gray-100 w-64'
                     >
                         <div className='space-y-3'>
-                            <div className='relative'>
-                                <input 
-                                    type='text' 
-                                    placeholder='Search...' 
-                                    className='w-full pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
-                                />
-                                <Search size={16} className='absolute left-3 top-2.5 text-gray-400' />
+                            <div className='relative w-full'>
+                                <InlineSearch />
                             </div>
                             <div className='p-2 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer'>
                                 <div className='flex items-center space-x-3'>
@@ -90,14 +88,9 @@ export const HeaderPages = () => {
             
             {/* Right section */}
             <div className='hidden md:flex items-center space-x-6'>
-                {/* Search bar */}
-                <div className='relative'>
-                    <input 
-                        type='text' 
-                        placeholder='Search...' 
-                        className='pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
-                    />
-                    <Search size={16} className='absolute left-3 top-2.5 text-gray-400' />
+                {/* New Inline Search Component */}
+                <div className="w-64">
+                    <InlineSearch />
                 </div>
                 
                 {/* Notification bell */}
