@@ -10,6 +10,7 @@ const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [keepSignedIn, setKeepSignedIn] = useState(false);
   const navigate = useNavigate();
   const auth = useContext(AuthContext);
 
@@ -17,167 +18,197 @@ const Login = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
-  try {
-    const user = await login(form);
-    
-    if (user) {
-      auth?.loginUser(user);
-      toast.success(`Chào mừng, ${user.name}!`);
-      navigate("/");
-    } else {
-      toast.error("Email hoặc mật khẩu không đúng!");
-    }
-  } catch (error) {
-    console.error("Login error:", error);
-    
-    // Xử lý các loại lỗi cụ thể
-    if (error.response) {
-      const { status, data } = error.response;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const user = await login(form);
       
-      if (status === 401) {
-        toast.error("Email hoặc mật khẩu không đúng!");
-      } else if (status === 429) {
-        toast.error("Quá nhiều lần đăng nhập thất bại. Vui lòng thử lại sau!");
-      } else if (data && data.message) {
-        toast.error(data.message);
+      if (user) {
+        auth?.loginUser(user);
+        toast.success(`Chào mừng, ${user.name}!`);
+        navigate("/");
       } else {
-        toast.error("Đăng nhập thất bại, vui lòng thử lại!");
+        toast.error("Email hoặc mật khẩu không đúng!");
       }
-    } else {
-      toast.error("Không thể kết nối đến máy chủ. Vui lòng thử lại sau!");
+    } catch (error) {
+      console.error("Login error:", error);
+      
+      // Xử lý các loại lỗi cụ thể
+      if (error.response) {
+        const { status, data } = error.response;
+        
+        if (status === 401) {
+          toast.error("Email hoặc mật khẩu không đúng!");
+        } else if (status === 429) {
+          toast.error("Quá nhiều lần đăng nhập thất bại. Vui lòng thử lại sau!");
+        } else if (data && data.message) {
+          toast.error(data.message);
+        } else {
+          toast.error("Đăng nhập thất bại, vui lòng thử lại!");
+        }
+      } else {
+        toast.error("Không thể kết nối đến máy chủ. Vui lòng thử lại sau!");
+      }
+    } finally {
+      setIsLoading(false);
     }
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-6">
-        <div className="bg-white p-8 shadow-lg rounded-lg border border-gray-200">
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">Đăng Nhập</h1>
-            <p className="text-gray-500 mt-2 text-sm">Đăng nhập để truy cập vào tài khoản của bạn</p>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
+      <div className="w-full max-w-6xl h-[650px] shadow-2xl rounded-lg overflow-hidden flex bg-white border border-gray-200">
+        {/* Left side - Blue background with welcome message */}
+        <div className="hidden md:flex md:w-1/2 bg-gradient-to-b from-blue-500 to-blue-600 text-white p-12 flex-col justify-center items-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-blue-500">
+            {/* Grid background */}
+            <div className="absolute inset-0" style={{ 
+              backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', 
+              backgroundSize: '20px 20px'
+            }}></div>
+            
+            {/* Decorative elements */}
+            <div className="absolute top-20 left-20 w-20 h-20 bg-blue-400 rounded-full opacity-30 animate-pulse"></div>
+            <div className="absolute bottom-40 right-20 w-32 h-32 bg-blue-400 rounded-full opacity-30"></div>
+            <div className="absolute top-1/4 right-1/4 w-16 h-16 bg-blue-400 rounded-full opacity-30"></div>
+            
+            {/* Additional decorative elements */}
+            <div className="absolute bottom-1/4 left-1/3 w-24 h-24 bg-blue-300 rounded-full opacity-20"></div>
+            <div className="absolute top-40 right-40 w-12 h-12 bg-blue-300 rounded-full opacity-20 animate-pulse"></div>
+            
+            {/* Wave patterns */}
+            <div className="absolute inset-x-0 top-0 h-64 opacity-20">
+              <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+              </svg>
+            </div>
+            <div className="absolute inset-x-0 bottom-0 h-64 opacity-20">
+              <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style={{ transform: 'rotate(180deg)' }}>
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+              </svg>
+            </div>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email field */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-2" htmlFor="email">
-                Email
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                  </svg>
-                </div>
+          {/* Company name */}
+          <div className="relative z-10 w-full max-w-md">
+            <div className="flex items-center mb-24">
+              <div className="w-10 h-10 rounded-full border-2 border-white flex items-center justify-center mr-2">
+                <span className="text-white text-lg font-bold">T</span>
+              </div>
+              <span className="font-semibold tracking-wide text-lg">Task Support</span>
+            </div>
+            
+            {/* Welcome message */}
+            <div className="text-center mb-16">
+              <p className="text-xl mb-3 font-light tracking-wide">Nice to see you again</p>
+              <h1 className="text-6xl font-bold mb-8">WELCOME BACK</h1>
+              <div className="w-16 h-1 bg-white mx-auto mb-8"></div>
+              <p className="text-md opacity-90 max-w-xs mx-auto leading-relaxed">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud.
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Right side - Login form */}
+        <div className="w-full md:w-1/2 flex justify-center items-center p-12">
+          <div className="w-full max-w-md">
+            <div className="text-center mb-10">
+              <h2 className="text-4xl font-bold text-blue-500 mb-4">Login Account</h2>
+              <p className="text-gray-500 text-md max-w-md mx-auto leading-relaxed">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna.
+              </p>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Email field */}
+              <div className="transition-all duration-300 hover:shadow-md">
                 <input
                   id="email"
                   type="email"
                   name="email"
                   value={form.email}
-                  placeholder="Email của bạn"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  placeholder="Email ID"
+                  className="w-full p-4 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50"
                   onChange={handleChange}
                   required
                 />
               </div>
-            </div>
-            
-            {/* Password field */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-gray-700 font-medium" htmlFor="password">
-                  Mật khẩu
-                </label>
-                <a href="#" className="text-sm text-blue-600 hover:underline">
-                  Quên mật khẩu?
-                </a>
-              </div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
+              
+              {/* Password field */}
+              <div className="relative transition-all duration-300 hover:shadow-md">
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={form.password}
-                  placeholder="Mật khẩu của bạn"
-                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  placeholder="Password"
+                  className="w-full p-4 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50"
                   required
                   onChange={handleChange}
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   {showPassword ? (
                     <EyeOff 
-                      size={18} 
-                      className="text-gray-400 cursor-pointer" 
+                      size={20} 
+                      className="text-gray-400 cursor-pointer hover:text-blue-500 transition-colors" 
                       onClick={() => setShowPassword(false)} 
                     />
                   ) : (
                     <Eye 
-                      size={18} 
-                      className="text-gray-400 cursor-pointer" 
+                      size={20} 
+                      className="text-gray-400 cursor-pointer hover:text-blue-500 transition-colors" 
                       onClick={() => setShowPassword(true)} 
                     />
                   )}
                 </div>
               </div>
-            </div>
-            
-            {/* Remember me checkbox */}
-            <div className="flex items-center">
-              <input
-                id="remember"
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
-                Ghi nhớ đăng nhập
-              </label>
-            </div>
-            
-            {/* Submit button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all ${
-                isLoading ? "opacity-70 cursor-not-allowed" : ""
-              }`}
-            >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Đang xử lý...
-                </>
-              ) : (
-                "Đăng nhập"
-              )}
-            </button>
-          </form>
-          
-          {/* Register link */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Bạn chưa có tài khoản?{" "}
-              <span 
-                className="text-blue-600 font-medium hover:underline cursor-pointer" 
-                onClick={() => navigate("/register")}
+              
+              {/* Remember me and Already a member */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    id="remember"
+                    type="checkbox"
+                    checked={keepSignedIn}
+                    onChange={() => setKeepSignedIn(!keepSignedIn)}
+                    className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="remember" className="ml-2 block text-sm text-gray-500">
+                    Keep me signed in
+                  </label>
+                </div>
+                <div>
+                  <span 
+                    className="text-blue-500 text-sm cursor-pointer hover:underline font-medium"
+                    onClick={() => navigate("/register")}
+                  >
+                    Already a member?
+                  </span>
+                </div>
+              </div>
+              
+              {/* Submit button */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full py-4 px-6 rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all font-medium text-center text-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 ${
+                  isLoading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
               >
-                Đăng ký ngay
-              </span>
-            </p>
+                {isLoading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Đang xử lý...
+                  </>
+                ) : (
+                  "SUBSCRIBE"
+                )}
+              </button>
+            </form>
           </div>
         </div>
       </div>
