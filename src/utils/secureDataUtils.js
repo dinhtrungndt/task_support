@@ -34,22 +34,37 @@ export const decryptData = (encryptedData, secretKey) => {
 // Lưu dữ liệu nhạy cảm vào localStorage với mã hóa
 export const secureStorage = {
   setItem: (key, value) => {
-    const secretKey = process.env.REACT_APP_STORAGE_SECRET || 'default-secure-key';
-    const encryptedValue = encryptData(value, secretKey);
-    localStorage.setItem(key, encryptedValue);
+    try {
+      // For objects, convert to string
+      const valueToStore = typeof value === 'object' ? JSON.stringify(value) : value;
+      localStorage.setItem(key, valueToStore);
+    } catch (error) {
+      console.error('Error storing data:', error);
+    }
   },
   
   getItem: (key) => {
-    const secretKey = process.env.REACT_APP_STORAGE_SECRET || 'default-secure-key';
-    const encryptedValue = localStorage.getItem(key);
-    return decryptData(encryptedValue, secretKey);
+    try {
+      const value = localStorage.getItem(key);
+      
+      // Try to parse as JSON in case it's an object
+      try {
+        return JSON.parse(value);
+      } catch {
+        // If parsing fails, it's a simple string
+        return value;
+      }
+    } catch (error) {
+      console.error('Error retrieving data:', error);
+      return null;
+    }
   },
   
   removeItem: (key) => {
-    localStorage.removeItem(key);
-  },
-  
-  clear: () => {
-    localStorage.clear();
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error('Error removing data:', error);
+    }
   }
 };

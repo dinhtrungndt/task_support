@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { getIdUser, refreshToken, logout } from '../../services/user';
+import { secureStorage } from '../../utils/secureDataUtils';
 
 export const AuthContext = createContext();
 
@@ -8,17 +9,12 @@ const safelyDecodeToken = (token) => {
   try {
     if (!token) return null;
     
-    // Lấy phần payload (phần thứ 2) của JWT token
     const base64Url = token.split('.')[1];
     if (!base64Url) return null;
     
-    // Chuyển base64url thành base64 chuẩn bằng cách thay thế các ký tự
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    
-    // Thêm padding nếu cần
     const paddedBase64 = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
     
-    // Giải mã base64 và chuyển thành đối tượng JSON
     const jsonPayload = decodeURIComponent(
       atob(paddedBase64)
         .split('')
@@ -42,20 +38,18 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
+        // Use secureStorage instead of localStorage
+        const token = secureStorage.getItem('token');
+        const storedUser = secureStorage.getItem('user');
         
         if (token && storedUser) {
-          // Giải mã token để kiểm tra thời gian hết hạn
           try {
             const decodedToken = safelyDecodeToken(token);
             
-            // Lấy thời gian hết hạn từ token (thường là trường exp)
             if (decodedToken && decodedToken.exp) {
               const expiryTime = new Date(decodedToken.exp * 1000);
               setTokenExpiryTime(expiryTime);
               
-              // Nếu token đã hết hạn, thử refresh
               if (expiryTime <= new Date()) {
                 const newToken = await refreshToken();
                 if (!newToken) {
@@ -64,12 +58,10 @@ export const AuthProvider = ({ children }) => {
               }
             }
             
-            // Nếu token hợp lệ, lấy thông tin người dùng
-            const userData = JSON.parse(storedUser);
-            setUser(userData);
+            // No need to parse again since secureStorage.getItem already handles it
+            setUser(storedUser);
           } catch (tokenError) {
             console.error('Token validation error:', tokenError);
-            // Nếu không thể giải mã token, đăng xuất
             handleLogout();
           }
         }
@@ -89,10 +81,8 @@ export const AuthProvider = ({ children }) => {
     if (tokenExpiryTime) {
       const timeUntilExpiry = tokenExpiryTime.getTime() - new Date().getTime();
       
-      // Refresh trước khi hết hạn 5 phút
       const refreshTime = timeUntilExpiry - (5 * 60 * 1000);
       
-      // Nếu thời gian refresh hợp lệ (> 0), thiết lập timer
       if (refreshTime > 0) {
         const refreshTimer = setTimeout(async () => {
           try {
@@ -104,7 +94,6 @@ export const AuthProvider = ({ children }) => {
         
         return () => clearTimeout(refreshTimer);
       } else {
-        // Nếu token gần hết hạn hoặc đã hết hạn, refresh ngay
         refreshToken().catch(error => {
           console.error('Immediate token refresh error:', error);
         });
@@ -116,8 +105,8 @@ export const AuthProvider = ({ children }) => {
   const loginUser = (userData) => {
     setUser(userData);
     
-    // Lấy token từ localStorage và cài đặt thời gian hết hạn
-    const token = localStorage.getItem('token');
+    // Get token from secureStorage
+    const token = secureStorage.getItem('token');
     if (token) {
       const decodedToken = safelyDecodeToken(token);
       if (decodedToken && decodedToken.exp) {
