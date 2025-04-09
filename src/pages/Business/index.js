@@ -1,23 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { HeaderPages } from '../../components/header';
-import { Search, Plus, Trash2, Filter, MoreVertical, Download, ChevronUp } from 'lucide-react';
-import Modal from '../../components/modals';
-import DropdownMenu from '../../components/DropdownMenu';
-import EditBusinessModal from '../../components/modals/EditBusiness';
-import MoreDetailsModalBusiness from '../../components/modals/MoreBusiness';
-import CreateBusiness from '../../components/modals/CreateBusiness';
-import { fetchBusinesses, deleteBusinesses, updateBusiness } from '../../stores/redux/actions/businessActions';
-import * as XLSX from 'xlsx';
-import { toast } from 'react-toastify';
-import BusinessList from '../../components/Business/Business';
+import React, { useState, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { HeaderPages } from "../../components/header";
+import {
+  Search,
+  Plus,
+  Trash2,
+  Filter,
+  MoreVertical,
+  Download,
+  ChevronUp,
+} from "lucide-react";
+import Modal from "../../components/modals";
+import DropdownMenu from "../../components/DropdownMenu";
+import EditBusinessModal from "../../components/modals/EditBusiness";
+import MoreDetailsModalBusiness from "../../components/modals/MoreBusiness";
+import CreateBusiness from "../../components/modals/CreateBusiness";
+import {
+  fetchBusinesses,
+  deleteBusinesses,
+  updateBusiness,
+} from "../../stores/redux/actions/businessActions";
+import * as XLSX from "xlsx";
+import { toast } from "react-toastify";
+import BusinessList from "../../components/Business/Business";
 
 export const BusinessPages = () => {
   const dispatch = useDispatch();
-  const { businesses, loading, error } = useSelector(state => state.business);
+  const { businesses, loading, error } = useSelector((state) => state.business);
   const topRef = useRef(null);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredBusinesses, setFilteredBusinesses] = useState(businesses);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -32,7 +44,7 @@ export const BusinessPages = () => {
   useEffect(() => {
     dispatch(fetchBusinesses());
   }, [dispatch]);
-  
+
   // Handle scroll top button visibility
   useEffect(() => {
     const handleScroll = () => {
@@ -42,22 +54,25 @@ export const BusinessPages = () => {
         setShowScrollTop(false);
       }
     };
-    
-    window.addEventListener('scroll', handleScroll);
-    
+
+    window.addEventListener("scroll", handleScroll);
+
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
   // Update filtered businesses when the original list or search term changes
   useEffect(() => {
     setFilteredBusinesses(
-      businesses.filter(business =>
-        business.mst?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        business.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        business.address?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        business.typeData?.some(type => type.toLowerCase().includes(searchTerm.toLowerCase()))
+      businesses.filter(
+        (business) =>
+          business.mst?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          business.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          business.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          business.typeData?.some((type) =>
+            type.toLowerCase().includes(searchTerm.toLowerCase())
+          )
       )
     );
   }, [businesses, searchTerm]);
@@ -83,22 +98,29 @@ export const BusinessPages = () => {
   const handleSaveBusiness = async (updatedBusiness) => {
     try {
       if (!updatedBusiness._id) {
-        console.error("Business missing ID in handleSaveBusiness:", updatedBusiness);
+        console.error(
+          "Business missing ID in handleSaveBusiness:",
+          updatedBusiness
+        );
         toast.error("Lỗi: Không thể cập nhật doanh nghiệp không có ID");
         return;
       }
-      
+
       await dispatch(updateBusiness(updatedBusiness));
-      
-      setFilteredBusinesses(prevBusinesses => 
-        prevBusinesses.map(b => b._id === updatedBusiness._id ? {...b, ...updatedBusiness} : b)
+
+      setFilteredBusinesses((prevBusinesses) =>
+        prevBusinesses.map((b) =>
+          b._id === updatedBusiness._id ? { ...b, ...updatedBusiness } : b
+        )
       );
-      
+
       setEditModalOpen(false);
       toast.success("Cập nhật doanh nghiệp thành công");
     } catch (error) {
       console.error("Error in handleSaveBusiness:", error);
-      toast.error("Lỗi khi cập nhật doanh nghiệp: " + (error.message || "Đã xảy ra lỗi"));
+      toast.error(
+        "Lỗi khi cập nhật doanh nghiệp: " + (error.message || "Đã xảy ra lỗi")
+      );
     }
   };
 
@@ -114,7 +136,9 @@ export const BusinessPages = () => {
     if (selectedBusinessIds.length === filteredBusinesses.length) {
       setSelectedBusinessIds([]); // Unselect all
     } else {
-      setSelectedBusinessIds(filteredBusinesses.map(business => business._id)); // Select all
+      setSelectedBusinessIds(
+        filteredBusinesses.map((business) => business._id)
+      ); // Select all
     }
   };
 
@@ -122,9 +146,9 @@ export const BusinessPages = () => {
   const handleCheckboxChange = (businessId) => {
     setSelectedBusinessIds((prevSelectedIds) => {
       if (prevSelectedIds.includes(businessId)) {
-        return prevSelectedIds.filter(id => id !== businessId);
+        return prevSelectedIds.filter((id) => id !== businessId);
       } else {
-        return [...prevSelectedIds, businessId]; 
+        return [...prevSelectedIds, businessId];
       }
     });
   };
@@ -132,27 +156,32 @@ export const BusinessPages = () => {
   // Delete selected businesses
   const handleDeleteSelected = async () => {
     if (selectedBusinessIds.length === 0) return;
-    
-    const confirmMessage = selectedBusinessIds.length === 1 
-      ? "Bạn có chắc chắn muốn xóa doanh nghiệp này?" 
-      : `Bạn có chắc chắn muốn xóa ${selectedBusinessIds.length} doanh nghiệp?`;
-    
+
+    const confirmMessage =
+      selectedBusinessIds.length === 1
+        ? "Bạn có chắc chắn muốn xóa doanh nghiệp này?"
+        : `Bạn có chắc chắn muốn xóa ${selectedBusinessIds.length} doanh nghiệp?`;
+
     const confirmation = window.confirm(confirmMessage);
-    
+
     if (confirmation) {
       try {
         setIsDeleting(true);
-        
+
         await dispatch(deleteBusinesses(selectedBusinessIds));
-        
-        setFilteredBusinesses(prevBusinesses => 
-          prevBusinesses.filter(business => !selectedBusinessIds.includes(business._id))
+
+        setFilteredBusinesses((prevBusinesses) =>
+          prevBusinesses.filter(
+            (business) => !selectedBusinessIds.includes(business._id)
+          )
         );
-        
+
         setSelectedBusinessIds([]);
         toast.success("Xóa doanh nghiệp thành công");
       } catch (error) {
-        toast.error("Lỗi khi xóa doanh nghiệp: " + (error.message || "Đã xảy ra lỗi"));
+        toast.error(
+          "Lỗi khi xóa doanh nghiệp: " + (error.message || "Đã xảy ra lỗi")
+        );
       } finally {
         setIsDeleting(false);
       }
@@ -170,44 +199,50 @@ export const BusinessPages = () => {
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
-  
+
   // Export to Excel
   const handleExportToExcel = () => {
     let dataToExport = filteredBusinesses;
-    
+
     if (selectedBusinessIds.length > 0) {
-      dataToExport = filteredBusinesses.filter(business => 
+      dataToExport = filteredBusinesses.filter((business) =>
         selectedBusinessIds.includes(business._id)
       );
     }
-    
+
     const exportData = dataToExport.map((business) => ({
-      'MST': business.mst || '',
-      'Tên công ty': business.name || '',
-      'Địa chỉ': business.address || '',
-      'Tổng công việc': business.totalTasks || 0,
-      'Hoàn thành': business.completedTasks || 0, 
-      'Đang làm': business.pendingTasks || 0,
-      'Từ chối': business.rejectedTasks || 0,
-      'Loại dữ liệu': business.typeData ? business.typeData.join(', ') : '',
-      'Ngày cập nhật': business.lastModified ? new Date(business.lastModified).toLocaleDateString() : '',
-      'Ngày tạo': business.createdAt ? new Date(business.createdAt).toLocaleDateString() : ''
+      MST: business.mst || "",
+      "Tên công ty": business.name || "",
+      "Địa chỉ": business.address || "",
+      "Tổng công việc": business.totalTasks || 0,
+      "Hoàn thành": business.completedTasks || 0,
+      "Đang làm": business.pendingTasks || 0,
+      "Từ chối": business.rejectedTasks || 0,
+      "Loại dữ liệu": business.typeData ? business.typeData.join(", ") : "",
+      "Ngày cập nhật": business.lastModified
+        ? new Date(business.lastModified).toLocaleDateString()
+        : "",
+      "Ngày tạo": business.createdAt
+        ? new Date(business.createdAt).toLocaleDateString()
+        : "",
     }));
-    
+
     const workbook = XLSX.utils.book_new();
-    
+
     const worksheet = XLSX.utils.json_to_sheet(exportData);
-    
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Doanh nghiệp');
-    
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Doanh nghiệp");
+
     const date = new Date();
-    const fileName = `danh_sach_doanh_nghiep_${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}.xlsx`;
-    
+    const fileName = `danh_sach_doanh_nghiep_${date.getDate()}_${
+      date.getMonth() + 1
+    }_${date.getFullYear()}.xlsx`;
+
     XLSX.writeFile(workbook, fileName);
-    
+
     toast.success(`Đã xuất ${exportData.length} doanh nghiệp ra file Excel`);
   };
 
@@ -234,19 +269,22 @@ export const BusinessPages = () => {
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
             </div>
-            
+
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-2">
-              <button 
+              <button
                 className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                 onClick={() => setOpenModalCreateBusiness(true)}
               >
                 <Plus size={16} className="mr-1.5" />
                 Thêm doanh nghiệp
               </button>
-              
+
               {selectedBusinessIds.length > 0 && (
                 <button
                   className="inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
@@ -255,9 +293,25 @@ export const BusinessPages = () => {
                 >
                   {isDeleting ? (
                     <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       Đang xóa...
                     </>
@@ -269,23 +323,34 @@ export const BusinessPages = () => {
                   )}
                 </button>
               )}
-              <button 
+              <button
                 className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                 onClick={handleExportToExcel}
               >
                 <Download size={16} className="mr-1.5" />
-                Xuất{selectedBusinessIds.length > 0 ? ` (${selectedBusinessIds.length})` : ''}
+                Xuất
+                {selectedBusinessIds.length > 0
+                  ? ` (${selectedBusinessIds.length})`
+                  : ""}
               </button>
             </div>
           </div>
         </div>
-        
+
         {/* Status Line */}
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm text-gray-600">
-            {filteredBusinesses.length > 0 
-              ? <span className="font-medium">Tổng <span className="text-blue-600 font-semibold">{filteredBusinesses.length}</span> doanh nghiệp</span>
-              : "Không tìm thấy doanh nghiệp nào"}
+            {filteredBusinesses.length > 0 ? (
+              <span className="font-medium">
+                Tổng{" "}
+                <span className="text-blue-600 font-semibold">
+                  {filteredBusinesses.length}
+                </span>{" "}
+                doanh nghiệp
+              </span>
+            ) : (
+              "Không tìm thấy doanh nghiệp nào"
+            )}
           </p>
         </div>
 

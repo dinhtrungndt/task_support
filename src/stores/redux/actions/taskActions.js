@@ -1,18 +1,18 @@
-import { 
-  FETCH_TASKS, 
-  FETCH_TASKS_ERROR, 
-  ADD_TASK, 
-  UPDATE_TASK, 
-  DELETE_TASK, 
-  DELETE_TASKS 
-} from './types';
-import axiosClient from '../../../api/axiosClient.ts';
+import {
+  FETCH_TASKS,
+  FETCH_TASKS_ERROR,
+  ADD_TASK,
+  UPDATE_TASK,
+  DELETE_TASK,
+  DELETE_TASKS,
+} from "./types";
+import axiosClient from "../../../api/axiosClient.ts";
 
 // Fetch all tasks
 export const fetchTasks = () => async (dispatch) => {
   try {
-    const response = await axiosClient.get('/tasks');
-    
+    const response = await axiosClient.get("/tasks");
+
     dispatch({
       type: FETCH_TASKS,
       payload: response.data,
@@ -29,49 +29,44 @@ export const fetchTasks = () => async (dispatch) => {
 export const addTask = (taskData, userId) => async (dispatch) => {
   try {
     if (!userId) {
-      throw new Error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+      throw new Error(
+        "Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại."
+      );
     }
-    
+
     // Make sure installer and codeData have values since they're required
     const taskToAdd = {
-      mst: taskData.mst || '',
-      companyName: taskData.name || taskData.companyName || '', 
-      address: taskData.address || '',
-      connectionType: taskData.connectionType || '',
-      installer: taskData.PInstaller || taskData.installer || 'N/A', // Default value for required field
-      codeData: taskData.codeData || 'N/A', // Default value for required field
-      typeData: taskData.typeData || 'Data',
-      installDate: taskData.AtSetting || taskData.installDate || new Date().toISOString(), 
-      status: taskData.status || 'Pending',
-      notes: taskData.cancellationReason || taskData.notes || '',
+      mst: taskData.mst || "",
+      companyName: taskData.name || taskData.companyName || "",
+      address: taskData.address || "",
+      connectionType: taskData.connectionType || "",
+      installer: taskData.PInstaller || taskData.installer || "N/A", // Default value for required field
+      codeData: taskData.codeData || "N/A", // Default value for required field
+      typeData: taskData.typeData || "Data",
+      installDate:
+        taskData.AtSetting || taskData.installDate || new Date().toISOString(),
+      status: taskData.status || "Pending",
+      notes: taskData.cancellationReason || taskData.notes || "",
       companyId: taskData.companyId || taskData.businessId, // Make sure the company ID is passed
-      userAdd: userId // Add the user ID passed from the component
+      userAdd: userId, // Add the user ID passed from the component
     };
 
-    console.log("Sending task data:", taskToAdd);
-
-    // Thử gọi cả hai endpoint để đảm bảo một trong hai sẽ thành công
-    // (Sau này nên thống nhất lại chỉ một endpoint)
     let response;
     try {
-      // Thử gọi endpoint /tasks
-      response = await axiosClient.post('/tasks', [taskToAdd]); 
+      response = await axiosClient.post("/tasks", [taskToAdd]);
     } catch (error) {
-      // Nếu gọi /tasks thất bại, thử gọi /tasks/add
-      console.log("Trying alternative endpoint /tasks/add");
-      response = await axiosClient.post('/tasks/add', taskToAdd);
-      
-      // Chuyển đổi định dạng phản hồi để phù hợp với xử lý tiếp theo
+      response = await axiosClient.post("/tasks/add", taskToAdd);
+
       if (!Array.isArray(response.data)) {
         response.data = [response.data];
       }
     }
-    
+
     dispatch({
       type: ADD_TASK,
-      payload: Array.isArray(response.data) ? response.data[0] : response.data, 
+      payload: Array.isArray(response.data) ? response.data[0] : response.data,
     });
-    
+
     return Array.isArray(response.data) ? response.data[0] : response.data;
   } catch (error) {
     console.error("Add task error details:", error.response?.data || error);
@@ -89,36 +84,40 @@ export const updateTask = (taskData) => async (dispatch) => {
     if (!taskData._id) {
       throw new Error("Task ID is required for update");
     }
-    
+
     // Prepare data according to the updated Task model
     const taskToUpdate = {
-      mst: taskData.mst || '',
-      companyName: taskData.name || taskData.companyName || '', 
-      address: taskData.address || '',
-      connectionType: taskData.connectionType || '',
-      installer: taskData.PInstaller || taskData.installer || 'N/A', // Default value 
-      codeData: taskData.codeData || 'N/A', // Default value
-      typeData: taskData.typeData || 'Data',
-      installDate: taskData.AtSetting || taskData.installDate || new Date().toISOString(), 
-      status: taskData.status || 'Pending',
-      notes: taskData.cancellationReason || taskData.notes || '',
-      userAdd: taskData.userAdd // Keep the original user who created the task
+      mst: taskData.mst || "",
+      companyName: taskData.name || taskData.companyName || "",
+      address: taskData.address || "",
+      connectionType: taskData.connectionType || "",
+      installer: taskData.PInstaller || taskData.installer || "N/A", // Default value
+      codeData: taskData.codeData || "N/A", // Default value
+      typeData: taskData.typeData || "Data",
+      installDate:
+        taskData.AtSetting || taskData.installDate || new Date().toISOString(),
+      status: taskData.status || "Pending",
+      notes: taskData.cancellationReason || taskData.notes || "",
+      userAdd: taskData.userAdd, // Keep the original user who created the task
     };
 
     // Use the updated endpoint
-    const response = await axiosClient.put(`/tasks/${taskData._id}`, taskToUpdate);
-    
+    const response = await axiosClient.put(
+      `/tasks/${taskData._id}`,
+      taskToUpdate
+    );
+
     dispatch({
       type: UPDATE_TASK,
       payload: {
         ...response.data,
-        _id: taskData._id // Ensure ID is in the response
-      }
+        _id: taskData._id, // Ensure ID is in the response
+      },
     });
-    
+
     return {
       ...response.data,
-      _id: taskData._id
+      _id: taskData._id,
     };
   } catch (error) {
     dispatch({
@@ -134,12 +133,12 @@ export const deleteTask = (taskId) => async (dispatch) => {
   try {
     // Use the updated endpoint
     const response = await axiosClient.delete(`/tasks/${taskId}`);
-    
+
     dispatch({
       type: DELETE_TASK,
       payload: taskId,
     });
-    
+
     return response.data;
   } catch (error) {
     dispatch({
@@ -154,8 +153,8 @@ export const deleteTask = (taskId) => async (dispatch) => {
 export const deleteTasks = (taskIds) => async (dispatch) => {
   try {
     // Use the updated endpoint
-    await axiosClient.delete('/tasks', { data: taskIds });
-    
+    await axiosClient.delete("/tasks", { data: taskIds });
+
     dispatch({
       type: DELETE_TASKS,
       payload: taskIds,
@@ -173,12 +172,12 @@ export const deleteTasks = (taskIds) => async (dispatch) => {
 export const fetchTasksByCompany = (companyId) => async (dispatch) => {
   try {
     const response = await axiosClient.get(`/companies/${companyId}/tasks`);
-    
+
     dispatch({
       type: FETCH_TASKS,
       payload: response.data,
     });
-    
+
     return response.data;
   } catch (error) {
     dispatch({
