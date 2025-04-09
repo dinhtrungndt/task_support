@@ -26,7 +26,6 @@ import ServiceList from "../../components/Service/ServiceList";
 export const ServicePages = () => {
   const dispatch = useDispatch();
   const { services, loading, error } = useSelector((state) => state.services);
-  const topRef = useRef(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredServices, setFilteredServices] = useState(services);
@@ -83,7 +82,7 @@ export const ServicePages = () => {
             ))
       )
     );
-  }, [services, searchTerm]);
+  }, [services, searchTerm, services]);
 
   // Handle search input change
   const handleSearchChange = (e) => {
@@ -262,7 +261,7 @@ export const ServicePages = () => {
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-gray-50" ref={topRef}>
+    <div className="min-h-screen bg-gray-50">
       <HeaderPages title="Quản lý dịch vụ" />
       <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 max-w-full">
         {/* Top Controls */}

@@ -1,22 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { HeaderPages } from '../../components/header';
-import { Search, Plus, Filter, Download, Calendar, CheckCircle, XCircle, Clock, ChevronUp } from 'lucide-react';
-import { useDispatch, useSelector } from 'react-redux';
-import Modal from '../../components/modals';
-import EditTaskModal from '../../components/modals/EditTask';
-import MoreDetailsModal from '../../components/modals/MoreTask';
-import { Tasks } from '../../components/Tasks';
-import { fetchTasks, deleteTasks, updateTask } from '../../stores/redux/actions/taskActions';
-import { toast } from 'react-toastify';
-import * as XLSX from 'xlsx';
+import React, { useState, useEffect } from "react";
+import { HeaderPages } from "../../components/header";
+import {
+  Search,
+  Plus,
+  Filter,
+  Download,
+  Calendar,
+  CheckCircle,
+  XCircle,
+  Clock,
+  ChevronUp,
+} from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import Modal from "../../components/modals";
+import EditTaskModal from "../../components/modals/EditTask";
+import MoreDetailsModal from "../../components/modals/MoreTask";
+import { Tasks } from "../../components/Tasks";
+import {
+  fetchTasks,
+  deleteTasks,
+  updateTask,
+} from "../../stores/redux/actions/taskActions";
+import { toast } from "react-toastify";
+import * as XLSX from "xlsx";
 
 export const TaskPages = () => {
   const dispatch = useDispatch();
-  const { tasks, loading, error } = useSelector(state => state.tasks);
+  const { tasks, loading, error } = useSelector((state) => state.tasks);
+
   const [openModalCreateTask, setOpenModalCreateTask] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredTasks, setFilteredTasks] = useState([]);
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeFilter, setActiveFilter] = useState("All");
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [moreModalOpen, setMoreModalOpen] = useState(false);
@@ -34,13 +49,6 @@ export const TaskPages = () => {
     filterTasks();
   }, [searchTerm, activeFilter, tasks]);
 
-  // Display error notifications
-  useEffect(() => {
-    if (error) {
-      toast.error("Lỗi khi tải dữ liệu: " + error);
-    }
-  }, [error]);
-
   // Handle scroll top button visibility
   useEffect(() => {
     const handleScroll = () => {
@@ -51,10 +59,10 @@ export const TaskPages = () => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -62,7 +70,7 @@ export const TaskPages = () => {
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
 
@@ -70,33 +78,40 @@ export const TaskPages = () => {
     let results = tasks || [];
 
     // Apply status filter
-    if (activeFilter !== 'All') {
-      results = results.filter(task =>
-        task.status === activeFilter
-      );
+    if (activeFilter !== "All") {
+      results = results.filter((task) => task.status === activeFilter);
     }
 
     // Apply search filter
-    if (searchTerm.trim() !== '') {
+    if (searchTerm.trim() !== "") {
       const searchTermLower = searchTerm.toLowerCase().trim();
-      results = results.filter(task => {
+      results = results.filter((task) => {
         // Guard against missing properties
         if (!task) return false;
 
         return (
-          (task.companyName || '').toLowerCase().includes(searchTermLower) ||
-          (task.mst || '').toLowerCase().includes(searchTermLower) ||
-          (task.address || '').toLowerCase().includes(searchTermLower) ||
-          (task.connectionType || '').toLowerCase().includes(searchTermLower) ||
-          (task.installer || '').toLowerCase().includes(searchTermLower) ||
-          (task.codeData || '').toLowerCase().includes(searchTermLower) ||
-          (task.typeData || '').toLowerCase().includes(searchTermLower) ||
-          (task.userAdd.name || '').toLowerCase().includes(searchTermLower) ||
-          (task.notes || '').toLowerCase().includes(searchTermLower) ||
-          (task.status || '').toLowerCase().includes(searchTermLower) ||
-          (task.installDate ? new Date(task.installDate).toLocaleDateString() : '').includes(searchTermLower) ||
-          (task.lastModified ? new Date(task.lastModified).toLocaleDateString() : '').includes(searchTermLower) ||
-          (task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '').includes(searchTermLower)
+          (task.companyName || "").toLowerCase().includes(searchTermLower) ||
+          (task.mst || "").toLowerCase().includes(searchTermLower) ||
+          (task.address || "").toLowerCase().includes(searchTermLower) ||
+          (task.connectionType || "").toLowerCase().includes(searchTermLower) ||
+          (task.installer || "").toLowerCase().includes(searchTermLower) ||
+          (task.codeData || "").toLowerCase().includes(searchTermLower) ||
+          (task.typeData || "").toLowerCase().includes(searchTermLower) ||
+          (task.userAdd.name || "").toLowerCase().includes(searchTermLower) ||
+          (task.notes || "").toLowerCase().includes(searchTermLower) ||
+          (task.status || "").toLowerCase().includes(searchTermLower) ||
+          (task.installDate
+            ? new Date(task.installDate).toLocaleDateString()
+            : ""
+          ).includes(searchTermLower) ||
+          (task.lastModified
+            ? new Date(task.lastModified).toLocaleDateString()
+            : ""
+          ).includes(searchTermLower) ||
+          (task.createdAt
+            ? new Date(task.createdAt).toLocaleDateString()
+            : ""
+          ).includes(searchTermLower)
         );
       });
     }
@@ -138,7 +153,9 @@ export const TaskPages = () => {
       setEditModalOpen(false);
       toast.success("Cập nhật công việc thành công");
     } catch (error) {
-      toast.error("Lỗi khi cập nhật công việc: " + (error.message || "Đã xảy ra lỗi"));
+      toast.error(
+        "Lỗi khi cập nhật công việc: " + (error.message || "Đã xảy ra lỗi")
+      );
     }
   };
 
@@ -146,23 +163,26 @@ export const TaskPages = () => {
     if (selectAll) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredTasks.map(task => task._id));
+      setSelectedIds(filteredTasks.map((task) => task._id));
     }
     setSelectAll(!selectAll);
   };
 
   const handleCheckboxChange = (id) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter((selectedId) => selectedId !== id)
+        : [...prev, id]
     );
   };
 
   const handleDeleteSelected = async () => {
     if (selectedIds.length === 0) return;
 
-    const confirmMessage = selectedIds.length === 1
-      ? "Bạn có chắc chắn muốn xóa công việc này?"
-      : `Bạn có chắc chắn muốn xóa ${selectedIds.length} công việc?`;
+    const confirmMessage =
+      selectedIds.length === 1
+        ? "Bạn có chắc chắn muốn xóa công việc này?"
+        : `Bạn có chắc chắn muốn xóa ${selectedIds.length} công việc?`;
 
     const confirmation = window.confirm(confirmMessage);
 
@@ -177,7 +197,9 @@ export const TaskPages = () => {
         setSelectAll(false);
         toast.success(`Đã xóa ${selectedIds.length} công việc thành công`);
       } catch (error) {
-        toast.error("Lỗi khi xóa công việc: " + (error.message || "Đã xảy ra lỗi"));
+        toast.error(
+          "Lỗi khi xóa công việc: " + (error.message || "Đã xảy ra lỗi")
+        );
       } finally {
         setIsDeleting(false);
       }
@@ -189,7 +211,7 @@ export const TaskPages = () => {
     let dataToExport = filteredTasks;
 
     if (selectedIds.length > 0) {
-      dataToExport = filteredTasks.filter(task =>
+      dataToExport = filteredTasks.filter((task) =>
         selectedIds.includes(task._id)
       );
     }
@@ -197,17 +219,21 @@ export const TaskPages = () => {
     // Prepare data for Excel
     const exportData = dataToExport.map((task) => {
       return {
-        'MST': task.mst || '',
-        'Tên công ty': task.companyName || '',
-        'Địa chỉ': task.address || '',
-        'Loại kết nối': task.connectionType || '',
-        'Người lắp đặt': task.installer || '',
-        'Mã dữ liệu': task.codeData || '',
-        'Loại dữ liệu': task.typeData || '',
-        'Ngày lắp đặt': task.installDate ? new Date(task.installDate).toLocaleDateString() : '',
-        'Trạng thái': task.status || 'Pending',
-        'Ghi chú': task.notes || '',
-        'Ngày cập nhật': task.lastModified ? new Date(task.lastModified).toLocaleDateString() : ''
+        MST: task.mst || "",
+        "Tên công ty": task.companyName || "",
+        "Địa chỉ": task.address || "",
+        "Loại kết nối": task.connectionType || "",
+        "Người lắp đặt": task.installer || "",
+        "Mã dữ liệu": task.codeData || "",
+        "Loại dữ liệu": task.typeData || "",
+        "Ngày lắp đặt": task.installDate
+          ? new Date(task.installDate).toLocaleDateString()
+          : "",
+        "Trạng thái": task.status || "Pending",
+        "Ghi chú": task.notes || "",
+        "Ngày cập nhật": task.lastModified
+          ? new Date(task.lastModified).toLocaleDateString()
+          : "",
       };
     });
 
@@ -218,11 +244,13 @@ export const TaskPages = () => {
     const worksheet = XLSX.utils.json_to_sheet(exportData);
 
     // Add worksheet to workbook
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Công việc');
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Công việc");
 
     // Generate file name with current date
     const date = new Date();
-    const fileName = `danh_sach_cong_viec_${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}.xlsx`;
+    const fileName = `danh_sach_cong_viec_${date.getDate()}_${
+      date.getMonth() + 1
+    }_${date.getFullYear()}.xlsx`;
 
     // Export file
     XLSX.writeFile(workbook, fileName);
@@ -232,13 +260,14 @@ export const TaskPages = () => {
 
   // Get counts for each status
   const getCounts = () => {
-    if (!tasks || !Array.isArray(tasks)) return { all: 0, done: 0, pending: 0, rejected: 0 };
+    if (!tasks || !Array.isArray(tasks))
+      return { all: 0, done: 0, pending: 0, rejected: 0 };
 
     const counts = {
       all: tasks.length,
-      done: tasks.filter(task => task.status === 'Done').length,
-      pending: tasks.filter(task => task.status === 'Pending').length,
-      rejected: tasks.filter(task => task.status === 'Rejected').length
+      done: tasks.filter((task) => task.status === "Done").length,
+      pending: tasks.filter((task) => task.status === "Pending").length,
+      rejected: tasks.filter((task) => task.status === "Rejected").length,
     };
 
     return counts;
@@ -263,7 +292,10 @@ export const TaskPages = () => {
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+              <Search
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={16}
+              />
             </div>
 
             {/* Action Buttons */}
@@ -284,9 +316,25 @@ export const TaskPages = () => {
                 >
                   {isDeleting ? (
                     <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       Đang xóa...
                     </>
@@ -303,7 +351,7 @@ export const TaskPages = () => {
                 onClick={handleExportToExcel}
               >
                 <Download size={14} className="mr-1" />
-                Xuất{selectedIds.length > 0 ? ` (${selectedIds.length})` : ''}
+                Xuất{selectedIds.length > 0 ? ` (${selectedIds.length})` : ""}
               </button>
             </div>
           </div>
@@ -312,14 +360,19 @@ export const TaskPages = () => {
         {/* Status Filters */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
           <div
-            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${activeFilter === 'All' ? 'border-blue-500 shadow-sm' : 'border-gray-200 hover:border-blue-200'
-              }`}
-            onClick={() => handleFilterClick('All')}
+            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${
+              activeFilter === "All"
+                ? "border-blue-500 shadow-sm"
+                : "border-gray-200 hover:border-blue-200"
+            }`}
+            onClick={() => handleFilterClick("All")}
           >
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-xs text-gray-500">Tất cả công việc</span>
-                <span className="text-lg sm:text-xl font-semibold mt-0.5">{counts.all}</span>
+                <span className="text-lg sm:text-xl font-semibold mt-0.5">
+                  {counts.all}
+                </span>
               </div>
               <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                 <Calendar size={16} />
@@ -328,14 +381,19 @@ export const TaskPages = () => {
           </div>
 
           <div
-            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${activeFilter === 'Done' ? 'border-green-500 shadow-sm' : 'border-gray-200 hover:border-green-200'
-              }`}
-            onClick={() => handleFilterClick('Done')}
+            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${
+              activeFilter === "Done"
+                ? "border-green-500 shadow-sm"
+                : "border-gray-200 hover:border-green-200"
+            }`}
+            onClick={() => handleFilterClick("Done")}
           >
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-xs text-gray-500">Hoàn thành</span>
-                <span className="text-lg sm:text-xl font-semibold mt-0.5 text-green-600">{counts.done}</span>
+                <span className="text-lg sm:text-xl font-semibold mt-0.5 text-green-600">
+                  {counts.done}
+                </span>
               </div>
               <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
                 <CheckCircle size={16} />
@@ -344,14 +402,19 @@ export const TaskPages = () => {
           </div>
 
           <div
-            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${activeFilter === 'Pending' ? 'border-amber-500 shadow-sm' : 'border-gray-200 hover:border-amber-200'
-              }`}
-            onClick={() => handleFilterClick('Pending')}
+            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${
+              activeFilter === "Pending"
+                ? "border-amber-500 shadow-sm"
+                : "border-gray-200 hover:border-amber-200"
+            }`}
+            onClick={() => handleFilterClick("Pending")}
           >
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-xs text-gray-500">Đang xử lý</span>
-                <span className="text-lg sm:text-xl font-semibold mt-0.5 text-amber-600">{counts.pending}</span>
+                <span className="text-lg sm:text-xl font-semibold mt-0.5 text-amber-600">
+                  {counts.pending}
+                </span>
               </div>
               <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
                 <Clock size={16} />
@@ -360,14 +423,19 @@ export const TaskPages = () => {
           </div>
 
           <div
-            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${activeFilter === 'Rejected' ? 'border-red-500 shadow-sm' : 'border-gray-200 hover:border-red-200'
-              }`}
-            onClick={() => handleFilterClick('Rejected')}
+            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${
+              activeFilter === "Rejected"
+                ? "border-red-500 shadow-sm"
+                : "border-gray-200 hover:border-red-200"
+            }`}
+            onClick={() => handleFilterClick("Rejected")}
           >
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-xs text-gray-500">Từ chối</span>
-                <span className="text-lg sm:text-xl font-semibold mt-0.5 text-red-600">{counts.rejected}</span>
+                <span className="text-lg sm:text-xl font-semibold mt-0.5 text-red-600">
+                  {counts.rejected}
+                </span>
               </div>
               <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
                 <XCircle size={16} />
@@ -379,14 +447,27 @@ export const TaskPages = () => {
         {/* Status Line */}
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs sm:text-sm text-gray-600">
-            {filteredTasks.length > 0
-              ? <span className="font-medium">Tổng <span className="text-blue-600 font-semibold">{filteredTasks.length}</span> công việc</span>
-              : "Không tìm thấy công việc nào"}
+            {filteredTasks.length > 0 ? (
+              <span className="font-medium">
+                Tổng{" "}
+                <span className="text-blue-600 font-semibold">
+                  {filteredTasks.length}
+                </span>{" "}
+                công việc
+              </span>
+            ) : (
+              "Không tìm thấy công việc nào"
+            )}
           </p>
           <p className="text-xs sm:text-sm text-gray-500">
-            {activeFilter !== 'All' &&
-              `Hiển thị: ${activeFilter === 'Done' ? 'Hoàn thành' : activeFilter === 'Pending' ? 'Đang xử lý' : 'Từ chối'}`
-            }
+            {activeFilter !== "All" &&
+              `Hiển thị: ${
+                activeFilter === "Done"
+                  ? "Hoàn thành"
+                  : activeFilter === "Pending"
+                  ? "Đang xử lý"
+                  : "Từ chối"
+              }`}
           </p>
         </div>
 
