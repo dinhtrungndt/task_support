@@ -1,11 +1,11 @@
-import { FETCH_USERS, FETCH_USERS_ERROR } from './types';
-import axiosClient from '../../../api/axiosClient.ts';
+import { FETCH_USERS, FETCH_USERS_ERROR } from "./types";
+import axiosClient from "../../../api/axiosClient";
 
 // Fetch all users
 export const fetchUsers = () => async (dispatch) => {
   try {
-    const response = await axiosClient.get('/users');
-    
+    const response = await axiosClient.get("/users");
+
     dispatch({
       type: FETCH_USERS,
       payload: response.data,

@@ -5,7 +5,7 @@ import {
   FETCH_BUSINESSES_ERROR,
   UPDATE_BUSINESS,
 } from "./types";
-import axiosClient from "../../../api/axiosClient.ts";
+import axiosClient from "../../../api/axiosClient";
 
 export const fetchBusinesses = () => async (dispatch) => {
   try {

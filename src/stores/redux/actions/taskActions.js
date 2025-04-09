@@ -6,7 +6,7 @@ import {
   DELETE_TASK,
   DELETE_TASKS,
 } from "./types";
-import axiosClient from "../../../api/axiosClient.ts";
+import axiosClient from "../../../api/axiosClient";
 
 // Fetch all tasks
 export const fetchTasks = () => async (dispatch) => {

@@ -1,70 +1,85 @@
-import CryptoJS from 'crypto-js';
+import CryptoJS from "crypto-js";
 
-// Mã hóa dữ liệu nhạy cảm trước khi lưu vào localStorage
-export const encryptData = (data, secretKey) => {
-  if (!data) return null;
-  
-  const dataString = typeof data === 'object' ? JSON.stringify(data) : String(data);
-  return CryptoJS.AES.encrypt(dataString, secretKey).toString();
-};
+const ENCRYPTION_KEY =
+  process.env.REACT_APP_ENCRYPTION_KEY || "REACT_APP_ENCRYPTION_KEY";
 
-// Giải mã dữ liệu từ localStorage
-export const decryptData = (encryptedData, secretKey) => {
-  if (!encryptedData) return null;
-  
-  try {
-    const bytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-    const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-    
-    if (!decryptedString) return null;
-    
-    // Thử parse thành JSON nếu có thể
+/**
+ * Lớp thực hiện mã hóa thực sự cho localStorage
+ */
+class SecureStorage {
+  /**
+   * Mã hóa và lưu trữ dữ liệu
+   * @param {string} key - Khóa để lưu trữ dữ liệu
+   * @param {any} value - Giá trị cần mã hóa và lưu trữ
+   */
+  setItem(key, value) {
     try {
-      return JSON.parse(decryptedString);
-    } catch (e) {
-      // Nếu không phải JSON, trả về string
-      return decryptedString;
+      // Chuyển đổi object thành chuỗi JSON
+      const valueToStore = JSON.stringify(value);
+
+      // Mã hóa dữ liệu
+      const encrypted = CryptoJS.AES.encrypt(
+        valueToStore,
+        ENCRYPTION_KEY
+      ).toString();
+
+      // Lưu dữ liệu đã mã hóa vào localStorage
+      localStorage.setItem(key, encrypted);
+    } catch (error) {
+      console.error("Error encrypting and storing data:", key);
     }
-  } catch (error) {
-    console.error('Decryption error:', error);
-    return null;
   }
-};
 
-// Lưu dữ liệu nhạy cảm vào localStorage với mã hóa
-export const secureStorage = {
-  setItem: (key, value) => {
+  /**
+   * Lấy và giải mã dữ liệu
+   * @param {string} key - Khóa để lấy dữ liệu
+   * @returns {any|null} Dữ liệu đã giải mã hoặc null nếu có lỗi
+   */
+  getItem(key) {
     try {
-      // For objects, convert to string
-      const valueToStore = typeof value === 'object' ? JSON.stringify(value) : value;
-      localStorage.setItem(key, valueToStore);
-    } catch (error) {
-      console.error('Error storing data:', error);
-    }
-  },
-  
-  getItem: (key) => {
-    try {
-      const value = localStorage.getItem(key);
-      
-      // Try to parse as JSON in case it's an object
-      try {
-        return JSON.parse(value);
-      } catch {
-        // If parsing fails, it's a simple string
-        return value;
+      // Lấy dữ liệu đã mã hóa từ localStorage
+      const encrypted = localStorage.getItem(key);
+
+      if (!encrypted) {
+        return null;
       }
+
+      // Giải mã dữ liệu
+      const decrypted = CryptoJS.AES.decrypt(
+        encrypted,
+        ENCRYPTION_KEY
+      ).toString(CryptoJS.enc.Utf8);
+
+      if (!decrypted) {
+        return null;
+      }
+
+      // Chuyển đổi chuỗi JSON thành object
+      return JSON.parse(decrypted);
     } catch (error) {
-      console.error('Error retrieving data:', error);
+      console.error("Error decrypting data:", key);
       return null;
     }
-  },
-  
-  removeItem: (key) => {
-    try {
-      localStorage.removeItem(key);
-    } catch (error) {
-      console.error('Error removing data:', error);
-    }
   }
-};
+
+  /**
+   * Xóa dữ liệu
+   * @param {string} key - Khóa cần xóa
+   */
+  removeItem(key) {
+    localStorage.removeItem(key);
+  }
+
+  /**
+   * Xóa tất cả dữ liệu
+   */
+  clear() {
+    localStorage.clear();
+  }
+}
+
+// Export một instance duy nhất
+export const secureStorage = new SecureStorage();
+
+// Để tương thích với API cũ
+export default secureStorage;

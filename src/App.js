@@ -1,35 +1,51 @@
+import React, { useEffect, useContext } from "react";
+import { ToastContainer } from "react-toastify";
+import { AuthProvider, AuthContext } from "./contexts/start/AuthContext";
+import {
+  setupActivityTracking,
+  isSessionExpired,
+  clearActivityData,
+} from "./utils/sessionUtils";
+import "react-toastify/dist/ReactToastify.css";
+import { Routers } from "./routers";
+import { errorToast } from "./ui/CustomToast";
 
-import React, { useEffect } from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import { AuthProvider } from './contexts/start/AuthContext';
-import { setupActivityTracking, isSessionExpired } from './utils/sessionUtils';
-import { logout } from './services/user';
-import 'react-toastify/dist/ReactToastify.css';
-import { Routers } from './routers';
-import { errorToast } from './ui/CustomToast';
+const AppContent = () => {
+  const { logoutUser } = useContext(AuthContext);
 
-export default function App() {
   useEffect(() => {
     const cleanup = setupActivityTracking();
-    
+
     const sessionCheckInterval = setInterval(() => {
-      const hasToken = localStorage.getItem('token');
-      
-      if (hasToken && isSessionExpired()) {
-        // Phiên đã hết hạn do không hoạt động
+      const token = localStorage.getItem("token");
+
+      if (token && isSessionExpired()) {
         clearInterval(sessionCheckInterval);
-        logout();
-        errorToast('Phiên làm việc đã hết hạn do không hoạt động. Vui lòng đăng nhập lại.');
-        window.location.href = '/login';
+
+        clearActivityData();
+
+        logoutUser();
+
+        errorToast(
+          "Phiên làm việc đã hết hạn do không hoạt động. Vui lòng đăng nhập lại."
+        );
       }
-    }, 60000); // Kiểm tra mỗi phút
-    
+    }, 60000);
+
     return () => {
       cleanup();
       clearInterval(sessionCheckInterval);
     };
-  }, []);
+  }, [logoutUser]);
 
   return <Routers />;
+};
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+      <ToastContainer position="top-right" autoClose={3000} />
+    </AuthProvider>
+  );
 }
