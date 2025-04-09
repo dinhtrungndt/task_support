@@ -58,16 +58,16 @@ export const BusinessList = ({
                   />
                 </div>
               </th>
-              <th className="p-3 border-b">MST</th>
-              <th className="p-3 border-b">Tên công ty</th>
-              <th className="p-3 border-b">Địa chỉ</th>
-              <th className="p-3 border-b">Tổng</th>
-              <th className="p-3 border-b">Hoàn thành</th>
-              <th className="p-3 border-b">Đang làm</th>
-              <th className="p-3 border-b">Từ chối</th>
-              <th className="p-3 border-b">Loại dữ liệu</th>
-              <th className="p-3 border-b">Ngày cập nhật</th>
-              <th className="p-3 border-b"></th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MST</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên công ty</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Địa chỉ</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hoàn thành</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Đang làm</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Từ chối</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại dữ liệu</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày cập nhật</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
             </tr>
           </thead>
           <tbody>

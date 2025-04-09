@@ -39,7 +39,7 @@ export const HeaderPages = () => {
     }
     
     return (
-        <div className='flex justify-between w-full py-2 px-6 bg-gradient-to-r from-indigo-50 to-white rounded-lg shadow-md border border-indigo-100 sticky top-0 z-500'>
+        <div className='flex justify-between w-full py-2 px-6 bg-gradient-to-r from-indigo-50 to-white rounded-lg shadow-md border border-indigo-100 sticky top-0 z-500 mb-4'>
             {/* Left section */}
             <div className='flex items-center'>
                 <div className='bg-indigo-600 text-white p-2 rounded-lg shadow-md mr-4 hidden md:flex'>

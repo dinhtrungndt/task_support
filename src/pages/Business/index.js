@@ -221,7 +221,7 @@ export const BusinessPages = () => {
   return (
     <div className="min-h-screen bg-gray-50" ref={topRef}>
       <HeaderPages title="Quản lý doanh nghiệp" />
-      <div className="container mx-auto p-4 pb-6">
+      <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 max-w-full">
         {/* Top Controls */}
         <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -269,14 +269,6 @@ export const BusinessPages = () => {
                   )}
                 </button>
               )}
-              
-              <button 
-                className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-              >
-                <Filter size={16} className="mr-1.5" />
-                Lọc
-              </button>
-              
               <button 
                 className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                 onClick={handleExportToExcel}

@@ -250,7 +250,7 @@ export const TaskPages = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <HeaderPages title="Quản lý công việc" />
-      <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 max-w-6xl">
+      <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 max-w-full">
         {/* Top Controls */}
         <div className="bg-white p-3 rounded-lg shadow-sm mb-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">

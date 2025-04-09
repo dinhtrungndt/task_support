@@ -90,17 +90,18 @@ export const Tasks = ({
                   />
                 </div>
               </th>
-              <th className="p-3 border-b">MST</th>
-              <th className="p-3 border-b">Tên công ty</th>
-              <th className="p-3 border-b">Địa chỉ</th>
-              <th className="p-3 border-b">Loại kết nối</th>
-              <th className="p-3 border-b">Người lắp đặt</th>
-              <th className="p-3 border-b">Mã dữ liệu</th>
-              <th className="p-3 border-b">Loại dữ liệu</th>
-              <th className="p-3 border-b">Ngày lắp</th>
-              <th className="p-3 border-b">Trạng thái</th>
-              <th className="p-3 border-b">Người tạo</th>
-              <th className="p-3 border-b text-right">Thao tác</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MST</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên công ty</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Địa chỉ</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại kết nối</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Người lắp đặt</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã dữ liệu</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại dữ liệu</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày lắp</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày cập nhập</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Người tạo</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -132,6 +133,7 @@ export const Tasks = ({
                   <td className="p-3 border-b">{task.codeData || 'N/A'}</td>
                   <td className="p-3 border-b">{task.typeData || 'N/A'}</td>
                   <td className="p-3 border-b">{formatDate(task.installDate)}</td>
+                  <td className="p-3 border-b">{formatDate(task.updatedAt)}</td>
                   <td className="p-3 border-b">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClassName(task.status || 'Pending')}`}>
                       {task.status || 'Pending'}

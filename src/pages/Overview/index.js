@@ -98,7 +98,7 @@ export const OverviewPages = () => {
       <HeaderPages title="Tổng quan" />
       
       {/* Main Content */}
-      <div className="container mx-auto px-2 py-2 max-w-7xl">
+      <div className="container mx-auto px-2 py-2 max-w-full">
         {/* Status Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
           <div 
