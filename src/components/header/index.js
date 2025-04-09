@@ -39,7 +39,7 @@ export const HeaderPages = () => {
     }
     
     return (
-        <div className='flex justify-between w-full py-5 px-6 bg-gradient-to-r from-indigo-50 to-white rounded-lg shadow-md border border-indigo-100'>
+        <div className='flex justify-between w-full py-2 px-6 bg-gradient-to-r from-indigo-50 to-white rounded-lg shadow-md border border-indigo-100 sticky top-0 z-500'>
             {/* Left section */}
             <div className='flex items-center'>
                 <div className='bg-indigo-600 text-white p-2 rounded-lg shadow-md mr-4 hidden md:flex'>
@@ -47,7 +47,7 @@ export const HeaderPages = () => {
                 </div>
                 <div className='flex flex-col'>
                     <p className='text-xl font-bold text-gray-800 mb-1'>{auth?.user?.name || 'User Name'}</p>
-                    <p className='text-sm text-indigo-600 font-medium'>Let's finish your task today!</p>
+                    <p className='text-sm text-indigo-600 font-medium'>Hãy tích cực làm việc nào!</p>
                 </div>
             </div>
             

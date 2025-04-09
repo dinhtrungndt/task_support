@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import React from "react";
 import { toast } from "react-toastify";
@@ -12,7 +12,33 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [greeting, setGreeting] = useState("");
   const navigate = useNavigate();
+
+  // Xác định lời chào theo thời gian
+  useEffect(() => {
+    const getTimeBasedGreeting = () => {
+      const hours = new Date().getHours();
+      let greetingText = "";
+      
+      if (hours >= 5 && hours < 12) {
+        greetingText = "sáng";
+      } else if (hours >= 12 && hours < 18) {
+        greetingText = "chiều";
+      } else {
+        greetingText = "tối";
+      }
+      
+      setGreeting(greetingText);
+    };
+    
+    getTimeBasedGreeting();
+    
+    // Cập nhật lời chào mỗi phút để đảm bảo chính xác
+    const intervalId = setInterval(getTimeBasedGreeting, 60000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
 
   const validateForm = () => {
     let isValid = true;
@@ -166,16 +192,16 @@ const Register = () => {
               <div className="w-10 h-10 rounded-full border-2 border-white flex items-center justify-center mr-2">
                 <span className="text-white text-lg font-bold">T</span>
               </div>
-              <span className="font-semibold tracking-wide text-lg">Task Support</span>
+              <span className="font-semibold tracking-wide text-lg">Hỗ Trợ Quản Lý</span>
             </div>
             
             {/* Welcome message */}
             <div className="text-center mb-16">
-              <p className="text-xl mb-3 font-light tracking-wide">Create an account</p>
-              <h1 className="text-6xl font-bold mb-8">JOIN US NOW</h1>
+              <p className="text-xl mb-3 font-light tracking-wide">Chào buổi {greeting}</p>
+              <h1 className="text-6xl font-bold mb-8">THAM GIA NGAY</h1>
               <div className="w-16 h-1 bg-white mx-auto mb-8"></div>
               <p className="text-md opacity-90 max-w-xs mx-auto leading-relaxed">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud.
+                Hệ thống hỗ trợ quản lý công việc giúp doanh nghiệp của bạn vận hành hiệu quả hơn. Đăng ký ngay để trải nghiệm dịch vụ.
               </p>
             </div>
           </div>
@@ -185,9 +211,9 @@ const Register = () => {
         <div className="w-full md:w-1/2 flex justify-center items-center p-12">
           <div className="w-full max-w-md">
             <div className="text-center mb-8">
-              <h2 className="text-4xl font-bold text-blue-500 mb-4">Create Account</h2>
+              <h2 className="text-4xl font-bold text-blue-500 mb-4">Tạo Tài Khoản</h2>
               <p className="text-gray-500 text-md max-w-md mx-auto leading-relaxed">
-                Join our community today and enjoy all the benefits of our service.
+                Tham gia cộng đồng của chúng tôi ngay hôm nay và tận hưởng tất cả các tiện ích của dịch vụ.
               </p>
             </div>
             
@@ -199,7 +225,7 @@ const Register = () => {
                   type="text"
                   name="name"
                   value={form.name}
-                  placeholder="Full Name"
+                  placeholder="Họ và tên"
                   className={`w-full p-4 border ${
                     errors.name ? "border-red-500" : "border-gray-200"
                   } rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50`}
@@ -215,7 +241,7 @@ const Register = () => {
                   type="email"
                   name="email"
                   value={form.email}
-                  placeholder="Email Address"
+                  placeholder="Địa chỉ email"
                   className={`w-full p-4 border ${
                     errors.email ? "border-red-500" : "border-gray-200"
                   } rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50`}
@@ -231,7 +257,7 @@ const Register = () => {
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={form.password}
-                  placeholder="Create Password"
+                  placeholder="Tạo mật khẩu"
                   className={`w-full p-4 border ${
                     errors.password ? "border-red-500" : "border-gray-200"
                   } rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50`}
@@ -262,7 +288,7 @@ const Register = () => {
                   type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
                   value={form.confirmPassword}
-                  placeholder="Confirm Password"
+                  placeholder="Xác nhận mật khẩu"
                   className={`w-full p-4 border ${
                     errors.confirmPassword ? "border-red-500" : "border-gray-200"
                   } rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50`}
@@ -296,7 +322,7 @@ const Register = () => {
                   className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <label htmlFor="terms" className="ml-2 block text-sm text-gray-500">
-                  I agree to the <a href="#" className="text-blue-500 hover:underline">Terms of Service</a> and <a href="#" className="text-blue-500 hover:underline">Privacy Policy</a>
+                  Tôi đồng ý với <a href="#" className="text-blue-500 hover:underline">Điều khoản dịch vụ</a> và <a href="#" className="text-blue-500 hover:underline">Chính sách bảo mật</a>
                 </label>
               </div>
               
@@ -317,7 +343,7 @@ const Register = () => {
                     Đang xử lý...
                   </>
                 ) : (
-                  "REGISTER NOW"
+                  "ĐĂNG KÝ NGAY"
                 )}
               </button>
             </form>
@@ -325,12 +351,12 @@ const Register = () => {
             {/* Login link */}
             <div className="mt-6 text-center">
               <p className="text-gray-600">
-                Already have an account?{" "}
+                Đã có tài khoản?{" "}
                 <span 
                   className="text-blue-500 font-medium hover:underline cursor-pointer" 
                   onClick={() => navigate("/login")}
                 >
-                  Login here
+                  Đăng nhập tại đây
                 </span>
               </p>
             </div>

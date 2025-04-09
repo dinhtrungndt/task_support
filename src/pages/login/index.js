@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import React from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -11,8 +11,32 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
+  const [greeting, setGreeting] = useState("");
   const navigate = useNavigate();
   const auth = useContext(AuthContext);
+
+  useEffect(() => {
+    const getTimeBasedGreeting = () => {
+      const hours = new Date().getHours();
+      let greetingText = "";
+      
+      if (hours >= 5 && hours < 12) {
+        greetingText = "sáng";
+      } else if (hours >= 12 && hours < 18) {
+        greetingText = "chiều";
+      } else {
+        greetingText = "tối";
+      }
+      
+      setGreeting(greetingText);
+    };
+    
+    getTimeBasedGreeting();
+    
+    const intervalId = setInterval(getTimeBasedGreeting, 60000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -95,16 +119,16 @@ const Login = () => {
               <div className="w-10 h-10 rounded-full border-2 border-white flex items-center justify-center mr-2">
                 <span className="text-white text-lg font-bold">T</span>
               </div>
-              <span className="font-semibold tracking-wide text-lg">Task Support</span>
+              <span className="font-semibold tracking-wide text-lg">Hỗ Trợ Quản Lý</span>
             </div>
             
             {/* Welcome message */}
             <div className="text-center mb-16">
-              <p className="text-xl mb-3 font-light tracking-wide">Nice to see you again</p>
-              <h1 className="text-6xl font-bold mb-8">WELCOME BACK</h1>
+              <p className="text-xl mb-3 font-light tracking-wide">Chào buổi {greeting}</p>
+              <h1 className="text-5xl font-bold mb-8">TASK SUPPPORT !</h1>
               <div className="w-16 h-1 bg-white mx-auto mb-8"></div>
               <p className="text-md opacity-90 max-w-xs mx-auto leading-relaxed">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud.
+                Hệ thống hỗ trợ quản lý công việc giúp doanh nghiệp của bạn vận hành hiệu quả hơn. Đăng nhập để tiếp tục công việc của bạn.
               </p>
             </div>
           </div>
@@ -114,9 +138,9 @@ const Login = () => {
         <div className="w-full md:w-1/2 flex justify-center items-center p-12">
           <div className="w-full max-w-md">
             <div className="text-center mb-10">
-              <h2 className="text-4xl font-bold text-blue-500 mb-4">Login Account</h2>
+              <h2 className="text-4xl font-bold text-blue-500 mb-4">Đăng Nhập</h2>
               <p className="text-gray-500 text-md max-w-md mx-auto leading-relaxed">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna.
+                Chào mừng bạn đến với hệ thống quản lý doanh nghiệp. Vui lòng đăng nhập để tiếp tục sử dụng dịch vụ.
               </p>
             </div>
             
@@ -128,7 +152,7 @@ const Login = () => {
                   type="email"
                   name="email"
                   value={form.email}
-                  placeholder="Email ID"
+                  placeholder="Địa chỉ email"
                   className="w-full p-4 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50"
                   onChange={handleChange}
                   required
@@ -142,7 +166,7 @@ const Login = () => {
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={form.password}
-                  placeholder="Password"
+                  placeholder="Mật khẩu"
                   className="w-full p-4 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50"
                   required
                   onChange={handleChange}
@@ -175,7 +199,7 @@ const Login = () => {
                     className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                   <label htmlFor="remember" className="ml-2 block text-sm text-gray-500">
-                    Keep me signed in
+                    Giữ đăng nhập
                   </label>
                 </div>
                 <div>
@@ -183,7 +207,7 @@ const Login = () => {
                     className="text-blue-500 text-sm cursor-pointer hover:underline font-medium"
                     onClick={() => navigate("/register")}
                   >
-                    Already a member?
+                    Chưa có tài khoản?
                   </span>
                 </div>
               </div>
@@ -205,7 +229,7 @@ const Login = () => {
                     Đang xử lý...
                   </>
                 ) : (
-                  "SUBSCRIBE"
+                  "ĐĂNG NHẬP"
                 )}
               </button>
             </form>

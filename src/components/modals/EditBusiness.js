@@ -9,15 +9,155 @@ export const EditBusinessModal = ({
 }) => {
   const [editedBusiness, setEditedBusiness] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Thêm các state cho địa chỉ đa cấp
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [addressInitialized, setAddressInitialized] = useState(false);
+
+  // Fetch provinces when component mounts
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('https://raw.githubusercontent.com/daohoangson/dvhcvn/master/data/dvhcvn.json');
+        const data = await response.json();
+        setProvinces(data.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách tỉnh/thành phố:", error);
+        toast.error("Không thể tải danh sách tỉnh/thành phố");
+        setLoading(false);
+      }
+    };
+    
+    fetchProvinces();
+  }, []);
 
   useEffect(() => {
     if (business) {
       // Initialize the form with the business data
       setEditedBusiness({
-        ...business
+        ...business,
+        province: "",
+        district: "",
+        ward: "",
+        specificAddress: ""
       });
     }
   }, [business]);
+
+  // Phân tích địa chỉ hiện tại để tách thành các thành phần
+  useEffect(() => {
+    if (editedBusiness?.address && provinces.length > 0 && !addressInitialized) {
+      // Split address into parts (assuming format: 'specific, ward, district, province')
+      const addressParts = editedBusiness.address.split(', ').filter(part => part.trim());
+      
+      // Reverse to get from highest level (province) to lowest (specific)
+      const reversedParts = [...addressParts].reverse();
+      
+      if (reversedParts.length >= 3) {
+        // Try to find province
+        const province = provinces.find(p => p.name === reversedParts[0]);
+        
+        if (province) {
+          setEditedBusiness(prev => ({...prev, province: province.name}));
+          
+          // Try to find district
+          const district = province.level2s.find(d => d.name === reversedParts[1]);
+          
+          if (district) {
+            setDistricts(province.level2s);
+            setEditedBusiness(prev => ({...prev, district: district.name}));
+            
+            // Try to find ward
+            const ward = district.level3s.find(w => w.name === reversedParts[2]);
+            
+            if (ward) {
+              setWards(district.level3s);
+              setEditedBusiness(prev => ({...prev, ward: ward.name}));
+              
+              // Get specific address (remaining parts)
+              const specificParts = addressParts.slice(0, addressParts.length - 3);
+              const specificAddress = specificParts.join(', ');
+              
+              setEditedBusiness(prev => ({...prev, specificAddress}));
+            }
+          }
+        }
+      } else {
+        // If address format doesn't match expected structure, just use it as specificAddress
+        setEditedBusiness(prev => ({...prev, specificAddress: editedBusiness.address}));
+      }
+      
+      setAddressInitialized(true);
+    }
+  }, [editedBusiness?.address, provinces, addressInitialized]);
+
+  // Update districts when province changes
+  useEffect(() => {
+    if (editedBusiness?.province) {
+      const selectedProvince = provinces.find(p => p.name === editedBusiness.province);
+      if (selectedProvince && selectedProvince.level2s) {
+        setDistricts(selectedProvince.level2s);
+        
+        // Only reset district and ward if this isn't part of initialization
+        if (addressInitialized && !selectedProvince.level2s.some(d => d.name === editedBusiness.district)) {
+          setEditedBusiness(prev => ({
+            ...prev,
+            district: "",
+            ward: ""
+          }));
+          setWards([]);
+        }
+      }
+    } else {
+      setDistricts([]);
+      setWards([]);
+    }
+  }, [editedBusiness?.province, provinces, addressInitialized]);
+
+  // Update wards when district changes
+  useEffect(() => {
+    if (editedBusiness?.district && districts.length > 0) {
+      const selectedDistrict = districts.find(d => d.name === editedBusiness.district);
+      if (selectedDistrict && selectedDistrict.level3s) {
+        setWards(selectedDistrict.level3s);
+        
+        // Only reset ward if this isn't part of initialization
+        if (addressInitialized && !selectedDistrict.level3s.some(w => w.name === editedBusiness.ward)) {
+          setEditedBusiness(prev => ({
+            ...prev,
+            ward: ""
+          }));
+        }
+      }
+    } else {
+      setWards([]);
+    }
+  }, [editedBusiness?.district, districts, addressInitialized]);
+
+  // Update combined address when any address component changes
+  useEffect(() => {
+    if (editedBusiness && addressInitialized) {
+      const { province, district, ward, specificAddress } = editedBusiness;
+      const addressParts = [];
+      
+      if (specificAddress) addressParts.push(specificAddress);
+      if (ward) addressParts.push(ward);
+      if (district) addressParts.push(district);
+      if (province) addressParts.push(province);
+      
+      const combinedAddress = addressParts.join(', ');
+      
+      setEditedBusiness(prev => ({
+        ...prev,
+        address: combinedAddress
+      }));
+    }
+  }, [editedBusiness?.province, editedBusiness?.district, editedBusiness?.ward, editedBusiness?.specificAddress, addressInitialized]);
 
   const handleInputChange = (e) => {
     if (editedBusiness) {
@@ -34,6 +174,12 @@ export const EditBusinessModal = ({
     // Validate required fields
     if (!editedBusiness.mst || !editedBusiness.name || !editedBusiness.address) {
       toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
+      return;
+    }
+    
+    // Validate address components
+    if (!editedBusiness.province || !editedBusiness.district || !editedBusiness.ward || !editedBusiness.specificAddress) {
+      toast.error("Vui lòng điền đầy đủ thông tin địa chỉ");
       return;
     }
     
@@ -107,20 +253,105 @@ export const EditBusinessModal = ({
               required
             />
           </div>
-          <div className="col-span-1 sm:col-span-2">
+        </div>
+
+        {/* Address Fields */}
+        <div className="mt-5 space-y-4">
+          <h3 className="text-md font-medium text-gray-700">Địa chỉ <span className="text-red-500">*</span></h3>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Province */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tỉnh/Thành phố <span className="text-red-500">*</span>
+              </label>
+              <select
+                name="province"
+                value={editedBusiness.province || ''}
+                onChange={handleInputChange}
+                className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                required
+                disabled={loading}
+              >
+                <option value="">Chọn Tỉnh/Thành phố</option>
+                {provinces.map((province) => (
+                  <option key={province.id} value={province.name}>
+                    {province.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            {/* District */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Quận/Huyện <span className="text-red-500">*</span>
+              </label>
+              <select
+                name="district"
+                value={editedBusiness.district || ''}
+                onChange={handleInputChange}
+                className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                required
+                disabled={!editedBusiness.province}
+              >
+                <option value="">Chọn Quận/Huyện</option>
+                {districts.map((district) => (
+                  <option key={district.id} value={district.name}>
+                    {district.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Ward */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Phường/Xã <span className="text-red-500">*</span>
+              </label>
+              <select
+                name="ward"
+                value={editedBusiness.ward || ''}
+                onChange={handleInputChange}
+                className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                required
+                disabled={!editedBusiness.district}
+              >
+                <option value="">Chọn Phường/Xã</option>
+                {wards.map((ward) => (
+                  <option key={ward.id} value={ward.name}>
+                    {ward.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          
+          {/* Specific Address */}
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Địa chỉ <span className="text-red-500">*</span>
+              Địa chỉ cụ thể <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              name="address"
-              value={editedBusiness.address || ''}
+              name="specificAddress"
+              value={editedBusiness.specificAddress || ''}
               onChange={handleInputChange}
               className="w-full p-2.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Nhập địa chỉ"
+              placeholder="Nhập số nhà, tên đường, tòa nhà, v.v."
               required
             />
           </div>
+          
+          {/* Combined Address Preview */}
+          {editedBusiness.address && (
+            <div className="p-3 bg-gray-50 rounded-md border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Địa chỉ đầy đủ:
+              </label>
+              <p className="text-sm text-gray-600">{editedBusiness.address}</p>
+            </div>
+          )}
         </div>
         
         {/* Read-only information */}

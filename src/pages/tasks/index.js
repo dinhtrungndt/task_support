@@ -50,14 +50,14 @@ export const TaskPages = () => {
         setShowScrollTop(false);
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
-  
+
   // Scroll to top
   const scrollToTop = () => {
     window.scrollTo({
@@ -68,21 +68,21 @@ export const TaskPages = () => {
 
   const filterTasks = () => {
     let results = tasks || [];
-    
+
     // Apply status filter
     if (activeFilter !== 'All') {
-      results = results.filter(task => 
+      results = results.filter(task =>
         task.status === activeFilter
       );
     }
-    
+
     // Apply search filter
     if (searchTerm.trim() !== '') {
       const searchTermLower = searchTerm.toLowerCase().trim();
       results = results.filter(task => {
         // Guard against missing properties
         if (!task) return false;
-        
+
         return (
           (task.companyName || '').toLowerCase().includes(searchTermLower) ||
           (task.mst || '').toLowerCase().includes(searchTermLower) ||
@@ -96,11 +96,11 @@ export const TaskPages = () => {
           (task.status || '').toLowerCase().includes(searchTermLower) ||
           (task.installDate ? new Date(task.installDate).toLocaleDateString() : '').includes(searchTermLower) ||
           (task.lastModified ? new Date(task.lastModified).toLocaleDateString() : '').includes(searchTermLower) ||
-          (task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '').includes(searchTermLower) 
+          (task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '').includes(searchTermLower)
         );
       });
     }
-    
+
     setFilteredTasks(results);
   };
 
@@ -159,20 +159,20 @@ export const TaskPages = () => {
 
   const handleDeleteSelected = async () => {
     if (selectedIds.length === 0) return;
-    
-    const confirmMessage = selectedIds.length === 1 
-      ? "Bạn có chắc chắn muốn xóa công việc này?" 
+
+    const confirmMessage = selectedIds.length === 1
+      ? "Bạn có chắc chắn muốn xóa công việc này?"
       : `Bạn có chắc chắn muốn xóa ${selectedIds.length} công việc?`;
-    
+
     const confirmation = window.confirm(confirmMessage);
-    
+
     if (confirmation) {
       try {
         setIsDeleting(true);
-        
+
         // Call API through Redux action
         await dispatch(deleteTasks(selectedIds));
-        
+
         setSelectedIds([]);
         setSelectAll(false);
         toast.success(`Đã xóa ${selectedIds.length} công việc thành công`);
@@ -187,13 +187,13 @@ export const TaskPages = () => {
   // Handle export to Excel
   const handleExportToExcel = () => {
     let dataToExport = filteredTasks;
-    
+
     if (selectedIds.length > 0) {
-      dataToExport = filteredTasks.filter(task => 
+      dataToExport = filteredTasks.filter(task =>
         selectedIds.includes(task._id)
       );
     }
-    
+
     // Prepare data for Excel
     const exportData = dataToExport.map((task) => {
       return {
@@ -210,40 +210,40 @@ export const TaskPages = () => {
         'Ngày cập nhật': task.lastModified ? new Date(task.lastModified).toLocaleDateString() : ''
       };
     });
-    
+
     // Create workbook
     const workbook = XLSX.utils.book_new();
-    
+
     // Create worksheet
     const worksheet = XLSX.utils.json_to_sheet(exportData);
-    
+
     // Add worksheet to workbook
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Công việc');
-    
+
     // Generate file name with current date
     const date = new Date();
     const fileName = `danh_sach_cong_viec_${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}.xlsx`;
-    
+
     // Export file
     XLSX.writeFile(workbook, fileName);
-    
+
     toast.success(`Đã xuất ${exportData.length} công việc ra file Excel`);
   };
 
   // Get counts for each status
   const getCounts = () => {
     if (!tasks || !Array.isArray(tasks)) return { all: 0, done: 0, pending: 0, rejected: 0 };
-    
+
     const counts = {
       all: tasks.length,
       done: tasks.filter(task => task.status === 'Done').length,
       pending: tasks.filter(task => task.status === 'Pending').length,
       rejected: tasks.filter(task => task.status === 'Rejected').length
     };
-    
+
     return counts;
   };
-  
+
   const counts = getCounts();
 
   return (
@@ -265,17 +265,17 @@ export const TaskPages = () => {
               />
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
             </div>
-            
+
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-1.5">
-              <button 
+              <button
                 className="inline-flex items-center justify-center px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
                 onClick={() => setOpenModalCreateTask(true)}
               >
                 <Plus size={14} className="mr-1" />
                 Thêm công việc
               </button>
-              
+
               {selectedIds.length > 0 && (
                 <button
                   className="inline-flex items-center justify-center px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-500 focus:ring-offset-1 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
@@ -298,15 +298,7 @@ export const TaskPages = () => {
                   )}
                 </button>
               )}
-              
-              <button 
-                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 bg-white text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
-              >
-                <Filter size={14} className="mr-1" />
-                Lọc
-              </button>
-              
-              <button 
+              <button
                 className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 bg-white text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
                 onClick={handleExportToExcel}
               >
@@ -316,13 +308,12 @@ export const TaskPages = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Status Filters */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-          <div 
-            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${
-              activeFilter === 'All' ? 'border-blue-500 shadow-sm' : 'border-gray-200 hover:border-blue-200'
-            }`}
+          <div
+            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${activeFilter === 'All' ? 'border-blue-500 shadow-sm' : 'border-gray-200 hover:border-blue-200'
+              }`}
             onClick={() => handleFilterClick('All')}
           >
             <div className="flex items-center justify-between">
@@ -335,11 +326,10 @@ export const TaskPages = () => {
               </div>
             </div>
           </div>
-          
-          <div 
-            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${
-              activeFilter === 'Done' ? 'border-green-500 shadow-sm' : 'border-gray-200 hover:border-green-200'
-            }`}
+
+          <div
+            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${activeFilter === 'Done' ? 'border-green-500 shadow-sm' : 'border-gray-200 hover:border-green-200'
+              }`}
             onClick={() => handleFilterClick('Done')}
           >
             <div className="flex items-center justify-between">
@@ -352,11 +342,10 @@ export const TaskPages = () => {
               </div>
             </div>
           </div>
-          
-          <div 
-            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${
-              activeFilter === 'Pending' ? 'border-amber-500 shadow-sm' : 'border-gray-200 hover:border-amber-200'
-            }`}
+
+          <div
+            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${activeFilter === 'Pending' ? 'border-amber-500 shadow-sm' : 'border-gray-200 hover:border-amber-200'
+              }`}
             onClick={() => handleFilterClick('Pending')}
           >
             <div className="flex items-center justify-between">
@@ -369,11 +358,10 @@ export const TaskPages = () => {
               </div>
             </div>
           </div>
-          
-          <div 
-            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${
-              activeFilter === 'Rejected' ? 'border-red-500 shadow-sm' : 'border-gray-200 hover:border-red-200'
-            }`}
+
+          <div
+            className={`bg-white p-2 sm:p-3 rounded-lg border cursor-pointer transition-all ${activeFilter === 'Rejected' ? 'border-red-500 shadow-sm' : 'border-gray-200 hover:border-red-200'
+              }`}
             onClick={() => handleFilterClick('Rejected')}
           >
             <div className="flex items-center justify-between">
@@ -387,16 +375,16 @@ export const TaskPages = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Status Line */}
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs sm:text-sm text-gray-600">
-            {filteredTasks.length > 0 
+            {filteredTasks.length > 0
               ? <span className="font-medium">Tổng <span className="text-blue-600 font-semibold">{filteredTasks.length}</span> công việc</span>
               : "Không tìm thấy công việc nào"}
           </p>
           <p className="text-xs sm:text-sm text-gray-500">
-            {activeFilter !== 'All' && 
+            {activeFilter !== 'All' &&
               `Hiển thị: ${activeFilter === 'Done' ? 'Hoàn thành' : activeFilter === 'Pending' ? 'Đang xử lý' : 'Từ chối'}`
             }
           </p>
@@ -444,16 +432,16 @@ export const TaskPages = () => {
         <MoreDetailsModal task={selectedTask} />
       </Modal>
 
-       {/* Scroll to top button */}
-       {showScrollTop && (
-          <button
-            onClick={scrollToTop}
-            className="fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all z-50"
-            aria-label="Lên đầu trang"
-          >
-            <ChevronUp size={20} />
-          </button>
-        )}
+      {/* Scroll to top button */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all z-50"
+          aria-label="Lên đầu trang"
+        >
+          <ChevronUp size={20} />
+        </button>
+      )}
     </div>
   );
 };
