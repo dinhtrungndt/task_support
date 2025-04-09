@@ -19,8 +19,8 @@ const processQueue = (error, token = null) => {
 };
 
 const axiosClient = axios.create({
-  // baseURL: process.env.REACT_APP_API_URL,
-  baseURL: "http://10.5.50.245:8080/",
+  baseURL: process.env.REACT_APP_API_URL,
+  // baseURL: "http://10.5.50.245:8080/",
   headers: {
     "Content-Type": "application/json",
   },
