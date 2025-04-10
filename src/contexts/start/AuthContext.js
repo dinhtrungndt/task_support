@@ -45,8 +45,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const token = secureStorage.getItem("token");
-        const storedUser = secureStorage.getItem("user");
+        const token = secureStorage.getItem("tz");
+        const storedUser = secureStorage.getItem("ts");
 
         if (token && storedUser) {
           try {
@@ -146,7 +146,7 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
 
     // Get token from secureStorage
-    const token = secureStorage.getItem("token");
+    const token = secureStorage.getItem("tz");
     if (token) {
       const decodedToken = safelyDecodeToken(token);
       if (decodedToken && decodedToken.exp) {

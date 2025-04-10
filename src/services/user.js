@@ -1,4 +1,3 @@
-// services/user.js
 import axiosClient from "../api/axiosClient";
 import { secureStorage } from "../utils/secureDataUtils";
 
@@ -27,21 +26,21 @@ export const login = async ({ email, password }) => {
 
     // Lưu token và dữ liệu người dùng an toàn
     if (data.accessToken) {
-      secureStorage.setItem("token", data.accessToken);
+      secureStorage.setItem("tz", data.accessToken);
     } else if (data.token) {
-      secureStorage.setItem("token", data.token);
+      secureStorage.setItem("tz", data.token);
     }
 
     // Lưu refresh token nếu có
     if (data.refreshToken) {
-      secureStorage.setItem("refreshToken", data.refreshToken);
+      secureStorage.setItem("rtk", data.refreshToken);
     }
 
     // Lưu thông tin người dùng
     if (data.user) {
       // Loại bỏ thông tin nhạy cảm trước khi lưu
       const { password, ...safeUserData } = data.user;
-      secureStorage.setItem("user", safeUserData);
+      secureStorage.setItem("ts", safeUserData);
 
       // Trả về dữ liệu người dùng không chứa thông tin nhạy cảm
       return safeUserData;
@@ -58,7 +57,7 @@ export const login = async ({ email, password }) => {
 // Refresh token
 export const refreshToken = async () => {
   try {
-    const refreshToken = secureStorage.getItem("refreshToken");
+    const refreshToken = secureStorage.getItem("rtk");
     if (!refreshToken) {
       console.warn("Không có refresh token");
       return null;
@@ -69,11 +68,11 @@ export const refreshToken = async () => {
     });
 
     if (data && data.accessToken) {
-      secureStorage.setItem("token", data.accessToken);
+      secureStorage.setItem("tz", data.accessToken);
 
       // Nếu server trả về refreshToken mới, cập nhật luôn
       if (data.refreshToken) {
-        secureStorage.setItem("refreshToken", data.refreshToken);
+        secureStorage.setItem("rtk", data.refreshToken);
       }
 
       return data.accessToken;
@@ -97,9 +96,9 @@ export const refreshToken = async () => {
 
 // Phương thức đăng xuất
 export const logout = () => {
-  secureStorage.removeItem("token");
-  secureStorage.removeItem("refreshToken");
-  secureStorage.removeItem("user");
+  secureStorage.removeItem("tz");
+  secureStorage.removeItem("rtk");
+  secureStorage.removeItem("ts");
 };
 
 // get idUser

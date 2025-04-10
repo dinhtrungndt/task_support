@@ -1,8 +1,9 @@
 import axios from "axios";
 import { refreshToken } from "../services/user";
 import { secureStorage } from "../utils/secureDataUtils";
+import { toast } from "react-toastify";
+import { clearActivityData } from "../utils/sessionUtils";
 
-// Biến để theo dõi trạng thái đang refresh token
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -19,8 +20,8 @@ const processQueue = (error, token = null) => {
 };
 
 const axiosClient = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
-  // baseURL: "http://10.5.50.245:8080/",
+  // baseURL: process.env.REACT_APP_API_URL,
+  baseURL: "http://192.168.1.11:8080/",
   headers: {
     "Content-Type": "application/json",
   },
@@ -31,7 +32,7 @@ const axiosClient = axios.create({
 // Request interceptor - Thêm token vào header
 axiosClient.interceptors.request.use(
   (config) => {
-    const token = secureStorage.getItem("token");
+    const token = secureStorage.getItem("tz");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -55,14 +56,38 @@ axiosClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Xử lý khi token hết hạn (401 Unauthorized)
+    if (
+      error.response &&
+      error.response.data &&
+      error.response.data.code === 'SESSION_EXPIRED'
+    ) {
+      toast.error("Tài khoản đang đăng nhập ở thiết bị khác", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      // Clear all auth data
+      secureStorage.removeItem("tz");
+      secureStorage.removeItem("rtk");
+      secureStorage.removeItem("ts");
+      clearActivityData();
+
+      // Redirect to login
+      window.location.href = "/login";
+      return Promise.reject(error);
+    }
+
     if (
       error.response &&
       error.response.status === 401 &&
       !originalRequest._retry
     ) {
       if (isRefreshing) {
-        // Nếu đang refresh token, thêm request này vào hàng đợi
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -83,7 +108,7 @@ axiosClient.interceptors.response.use(
 
         if (newToken) {
           // Cập nhật token trong secure storage
-          secureStorage.setItem("token", newToken);
+          secureStorage.setItem("tz", newToken);
 
           // Cập nhật Authorization header cho request hiện tại
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
@@ -99,7 +124,7 @@ axiosClient.interceptors.response.use(
 
           // Đảm bảo điều hướng đến trang đăng nhập chỉ xảy ra một lần
           if (window.location.pathname !== "/login") {
-            secureStorage.removeItem("token");
+            secureStorage.removeItem("tz");
             window.location.href = "/login";
           }
 
@@ -113,7 +138,7 @@ axiosClient.interceptors.response.use(
 
         // Kiểm tra xem đã ở trang login chưa để tránh chuyển hướng lặp lại
         if (window.location.pathname !== "/login") {
-          secureStorage.removeItem("token");
+          secureStorage.removeItem("tz");
           window.location.href = "/login";
         }
 

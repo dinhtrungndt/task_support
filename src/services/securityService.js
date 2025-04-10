@@ -3,22 +3,22 @@ import { secureStorage } from '../utils/secureDataUtils';
 
 // Kiểm tra quyền người dùng
 export const checkPermission = (requiredRole) => {
-  const user = secureStorage.getItem('user');
+  const user = secureStorage.getItem('ts');
   if (!user || !user.role) return false;
-  
+
   if (requiredRole === 'admin') {
     return user.role === 'admin';
   }
-  
+
   return true; // Mặc định cho người dùng thông thường
 };
 
 // Ghi log sự cố bảo mật
 export const logSecurityEvent = async (eventType, details) => {
   try {
-    const user = secureStorage.getItem('user');
+    const user = secureStorage.getItem('ts');
     const userId = user?.id || 'unauthenticated';
-    
+
     await axiosClient.post('/security-log', {
       eventType,
       userId,
@@ -35,15 +35,15 @@ export const logSecurityEvent = async (eventType, details) => {
 // Kiểm tra tính hợp lệ của dữ liệu đầu vào
 export const validateInput = (value, type) => {
   if (value === null || value === undefined) return false;
-  
+
   switch (type) {
     case 'email':
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
     case 'password':
       // Mật khẩu ít nhất 8 ký tự, chứa chữ hoa, chữ thường và số
-      return value.length >= 8 && 
-        /[A-Z]/.test(value) && 
-        /[a-z]/.test(value) && 
+      return value.length >= 8 &&
+        /[A-Z]/.test(value) &&
+        /[a-z]/.test(value) &&
         /[0-9]/.test(value);
     case 'text':
       return typeof value === 'string' && value.trim().length > 0;

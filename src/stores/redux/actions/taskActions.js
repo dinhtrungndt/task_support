@@ -85,20 +85,19 @@ export const updateTask = (taskData) => async (dispatch) => {
       throw new Error("Task ID is required for update");
     }
 
-    // Prepare data according to the updated Task model
     const taskToUpdate = {
       mst: taskData.mst || "",
       companyName: taskData.name || taskData.companyName || "",
       address: taskData.address || "",
       connectionType: taskData.connectionType || "",
-      installer: taskData.PInstaller || taskData.installer || "N/A", // Default value
-      codeData: taskData.codeData || "N/A", // Default value
+      installer: taskData.PInstaller || taskData.installer || "N/A",
+      codeData: taskData.codeData || "N/A",
       typeData: taskData.typeData || "Data",
       installDate:
         taskData.AtSetting || taskData.installDate || new Date().toISOString(),
       status: taskData.status || "Pending",
       notes: taskData.cancellationReason || taskData.notes || "",
-      userAdd: taskData.userAdd, // Keep the original user who created the task
+      userAdd: taskData.userAdd,
     };
 
     // Use the updated endpoint
@@ -111,7 +110,7 @@ export const updateTask = (taskData) => async (dispatch) => {
       type: UPDATE_TASK,
       payload: {
         ...response.data,
-        _id: taskData._id, // Ensure ID is in the response
+        _id: taskData._id,
       },
     });
 

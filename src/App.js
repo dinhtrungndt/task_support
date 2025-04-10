@@ -17,7 +17,7 @@ const AppContent = () => {
     const cleanup = setupActivityTracking();
 
     const sessionCheckInterval = setInterval(() => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("tz");
 
       if (token && isSessionExpired()) {
         clearInterval(sessionCheckInterval);
