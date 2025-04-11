@@ -39,12 +39,12 @@ export const BusinessPages = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Fetch businesses when component mounts
+  console.log("BusinessPages rendered", businesses);
+
   useEffect(() => {
     dispatch(fetchBusinesses());
   }, [dispatch]);
 
-  // Handle scroll top button visibility
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 300) {
@@ -137,7 +137,7 @@ export const BusinessPages = () => {
     } else {
       setSelectedBusinessIds(
         filteredBusinesses.map((business) => business._id)
-      ); // Select all
+      );
     }
   };
 

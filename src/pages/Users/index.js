@@ -8,7 +8,6 @@ export const UserPages = () => {
   const dispatch = useDispatch();
   const {users, loading} = useSelector((state) => state.users);
   const {businesses} = useSelector((state) => state.business);
-  console.log("business", businesses);
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -33,7 +32,7 @@ export const UserPages = () => {
             {/* Team Members Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 overflow-auto max-h-[calc(100vh-200px)]">
               {users.map((member) => (
-                <div key={member.id} className="bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md transform hover:-translate-y-1 border border-gray-100 ">
+                <div key={member._id} className="bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md transform hover:-translate-y-1 border border-gray-100 ">
                   <div className="p-6">
                     <div className="flex items-start">
                       <div className="relative">
@@ -94,7 +93,7 @@ export const UserPages = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {businesses.map((project) => (
-                    <tr key={project.id} className="hover:bg-gray-50 transition-colors duration-150">
+                    <tr key={project._id} className="hover:bg-gray-50 transition-colors duration-150">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-indigo-900">{project.mst}</div>
                       </td>
