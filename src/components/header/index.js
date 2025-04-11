@@ -76,7 +76,7 @@ export const HeaderPages = () => {
   };
 
   return (
-    <div className="flex justify-between w-full py-2 px-6 bg-gradient-to-r from-indigo-50 to-white rounded-lg shadow-md border border-indigo-100 sticky top-0 z-500 mb-4">
+    <div className="flex justify-between w-full py-2 px-6 bg-gradient-to-r from-indigo-50 to-white rounded-lg shadow-md border border-indigo-100 sticky top-0 z-1000 mb-4">
       {/* Left section */}
       <div className="flex items-center">
         <div className="bg-indigo-600 text-white p-2 rounded-lg shadow-md mr-4 hidden md:flex">
@@ -223,7 +223,7 @@ export const HeaderPages = () => {
         <div className="h-8 w-px bg-gray-200"></div>
 
         {/* User avatar */}
-        <div className="relative group">
+        <div className="relative group" onClick={() => navigate("/profile")}>
           <img
             src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
             alt="User avatar"

@@ -40,24 +40,24 @@ export default function Sidebar({ children }) {
           {
             expanded ? (
               <img
-            src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
-            alt=""
-            className="w-8 h-8 rounded-md"
-          />
+                src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
+                alt=""
+                className="w-8 h-8 rounded-md"
+              />
             ) : (
               <div onClick={() => setDropdownOpen(!dropdownOpen)} className="w-8 h-8 rounded-md bg-gray-200 flex items-center justify-center cursor-pointer">
-              <img
-            src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
-            alt=""
-            className="w-8 h-8 rounded-md"
-          />
-          {
-            dropdownOpen && (
-              <div className="absolute z-50 left-52 top-4">
-                <DropdownMenuLogout />
+                <img
+                  src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
+                  alt=""
+                  className="w-8 h-8 rounded-md"
+                />
+                {
+                  dropdownOpen && (
+                    <div className="absolute z-50 left-52 top-4">
+                      <DropdownMenuLogout />
+                    </div>
+                  )}
               </div>
-            )}
-            </div>
             )
           }
           <div

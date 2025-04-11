@@ -40,15 +40,15 @@ export const addTask = (taskData, userId) => async (dispatch) => {
       companyName: taskData.name || taskData.companyName || "",
       address: taskData.address || "",
       connectionType: taskData.connectionType || "",
-      installer: taskData.PInstaller || taskData.installer || "N/A", // Default value for required field
-      codeData: taskData.codeData || "N/A", // Default value for required field
+      installer: taskData.PInstaller || taskData.installer || "N/A",
+      codeData: taskData.codeData || "N/A",
       typeData: taskData.typeData || "Data",
       installDate:
         taskData.AtSetting || taskData.installDate || new Date().toISOString(),
       status: taskData.status || "Pending",
       notes: taskData.cancellationReason || taskData.notes || "",
-      companyId: taskData.companyId || taskData.businessId, // Make sure the company ID is passed
-      userAdd: userId, // Add the user ID passed from the component
+      companyId: taskData.companyId || taskData.businessId,
+      userAdd: userId,
     };
 
     let response;

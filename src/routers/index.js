@@ -31,7 +31,7 @@ export const Routers = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
             </Route>
-            
+
             {/* Protected routes - Bắt buộc đăng nhập để truy cập */}
             <Route element={<PrivateRoute />}>
               <Route path="/" element={<OverviewPages />} />
@@ -39,11 +39,12 @@ export const Routers = () => {
               <Route path="/message" element={<MessagesPage />} />
               <Route path="/service" element={<ServicePages />} />
               <Route path="/business" element={<BusinessPages />} />
-              <Route path="/users" element={<UserPages />} />
+              {/* <Route path="/users" element={<UserPages />} /> */}
               <Route path="/settings" element={<SettingPages />} />
               <Route path="/search" element={<SearchResultsPage />} />
+              <Route path="/profile" element={<UserPages />} />
             </Route>
-            
+
             {/* Route 404 - Trang không tìm thấy */}
             <Route path="*" element={<NotFound />} />
           </Routes>
