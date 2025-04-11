@@ -5,6 +5,7 @@ import { AppearanceSetting } from './appearance/appearance';
 import { SecuritySetting } from './security/security';
 import { NotificationsSetting } from './notifications/notifications';
 import { ProfileSetting } from './Profile/Profile';
+import addressData from '../../assets/json/timezones.json';
 
 export const SettingPages = () => {
   const auth = useContext(AuthContext);
@@ -32,17 +33,7 @@ export const SettingPages = () => {
   });
 
   useEffect(() => {
-    const fetchTimeZone = async () => {
-      try {
-        const response = await fetch('https://raw.githubusercontent.com/dmfilipenko/timezones.json/refs/heads/master/timezones.json');
-        const data = await response.json();
-        setTimeZone(data);
-      } catch (error) {
-        console.error("Lỗi khi tải danh sách tỉnh/thành phố:", error);
-        toast.error("Không thể tải danh sách tỉnh/thành phố");
-      }
-    };
-    fetchTimeZone();
+    setTimeZone(addressData);
   }, []);
 
   useEffect(() => {

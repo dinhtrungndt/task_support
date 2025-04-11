@@ -3,10 +3,11 @@ import { X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { addBusiness } from '../../stores/redux/actions/businessActions';
+import addressData from '../../assets/json/Danhsach_diachi_json.json';
 
 export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) => {
     const dispatch = useDispatch();
-    
+
     const [formData, setFormData] = useState({
         mst: "",
         name: "",
@@ -22,23 +23,8 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
     const [wards, setWards] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Fetch provinces on component mount
     useEffect(() => {
-        const fetchProvinces = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch('https://raw.githubusercontent.com/daohoangson/dvhcvn/master/data/dvhcvn.json');
-                const data = await response.json();
-                setProvinces(data.data);
-                setLoading(false);
-            } catch (error) {
-                console.error("Lỗi khi tải danh sách tỉnh/thành phố:", error);
-                toast.error("Không thể tải danh sách tỉnh/thành phố");
-                setLoading(false);
-            }
-        };
-        
-        fetchProvinces();
+        setProvinces(addressData.data);
     }, []);
 
     // Update districts when province changes
@@ -80,14 +66,14 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
     useEffect(() => {
         const { province, district, ward, specificAddress } = formData;
         const addressParts = [];
-        
+
         if (specificAddress) addressParts.push(specificAddress);
         if (ward) addressParts.push(ward);
         if (district) addressParts.push(district);
         if (province) addressParts.push(province);
-        
+
         const combinedAddress = addressParts.join(', ');
-        
+
         setFormData(prev => ({
             ...prev,
             address: combinedAddress
@@ -108,7 +94,7 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
             toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
             return;
         }
-        
+
         if (!formData.province || !formData.district || !formData.ward || !formData.specificAddress) {
             toast.error("Vui lòng điền đầy đủ thông tin địa chỉ");
             return;
@@ -127,7 +113,7 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
             name: formData.name,
             address: formData.address // Đã được tổng hợp từ các thành phần địa chỉ
         };
-        
+
         try {
             const createdBusiness = await dispatch(addBusiness(newBusiness));
             toast.success("Tạo doanh nghiệp thành công");
@@ -144,14 +130,14 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
                 {/* Header */}
                 <div className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                     <h2 className="text-lg font-semibold">Tạo doanh nghiệp mới</h2>
-                    <button 
+                    <button
                         onClick={closeModal}
                         className="p-1 rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
                     >
                         <X size={20} />
                     </button>
                 </div>
-                
+
                 {/* Form Body */}
                 <div className="p-6 max-h-[70vh] overflow-y-auto">
                     <div className="space-y-5">
@@ -189,7 +175,7 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
                         {/* Address Fields */}
                         <div className="space-y-4">
                             <h3 className="text-md font-medium text-gray-700">Địa chỉ <span className="text-red-500">*</span></h3>
-                            
+
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 {/* Province */}
                                 <div>
@@ -212,7 +198,7 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
                                         ))}
                                     </select>
                                 </div>
-                                
+
                                 {/* District */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -234,7 +220,7 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
                                         ))}
                                     </select>
                                 </div>
-                                
+
                                 {/* Ward */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -257,7 +243,7 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
                                     </select>
                                 </div>
                             </div>
-                            
+
                             {/* Specific Address */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -273,7 +259,7 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
                                     required
                                 />
                             </div>
-                            
+
                             {/* Combined Address Preview */}
                             {formData.address && (
                                 <div className="p-3 bg-gray-50 rounded-md border border-gray-200">
@@ -292,7 +278,7 @@ export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) =>
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Footer with buttons */}
                 <div className="px-6 py-4 bg-gray-50 flex justify-end space-x-3 border-t">
                     <button
