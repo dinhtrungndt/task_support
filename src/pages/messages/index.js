@@ -1,8 +1,24 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchMessageSR } from '../../stores/redux/actions/messageAction';
+import { fetchUsers, fetchUsersExceptId } from '../../stores/redux/actions/userActions';
+import { AuthContext } from '../../contexts/start/AuthContext';
 
 export const MessagesPage = () => {
+  const dispatch = useDispatch();
   const [message, setMessage] = useState('');
-  
+  const {messageses} = useSelector((state) => state.messages);
+  const {users} = useSelector((state) => state.users);
+  const auth = useContext(AuthContext);
+
+  console.log("Messages:", messageses);
+  console.log("Users:", users);
+
+  useEffect(() => {
+    // dispatch(fetchMessageSR(1, 2));
+    dispatch(fetchUsersExceptId(auth.user.id));
+  }, []);
+
   const contacts = [
     { id: 1, name: "Mark Magnum", status: "Online", avatar: "https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=MM", time: "1m Ago", message: "Thank you very much. I'm glad...", read: true },
     { id: 2, name: "Mark Magn", time: "3m Ago", avatar: "https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=MM", message: "Hey, Surya let me tell you about...", read: true },
@@ -160,20 +176,20 @@ export const MessagesPage = () => {
                 Today, {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
               </div>
             </div>
-            
+
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.isSender ? 'justify-end' : 'justify-start'}`}>
                 {!msg.isSender && (
-                  <img 
-                    src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=MM" 
-                    alt="Contact" 
+                  <img
+                    src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=MM"
+                    alt="Contact"
                     className="w-8 h-8 rounded-full mr-2 self-end mb-1"
                   />
                 )}
-                <div 
+                <div
                   className={`max-w-xs md:max-w-md lg:max-w-lg ${
-                    msg.isSender 
-                      ? 'bg-indigo-600 text-white rounded-tl-xl rounded-tr-xl rounded-bl-xl' 
+                    msg.isSender
+                      ? 'bg-indigo-600 text-white rounded-tl-xl rounded-tr-xl rounded-bl-xl'
                       : 'bg-white text-gray-800 rounded-tl-xl rounded-tr-xl rounded-br-xl shadow-md'
                   } px-4 py-3 text-sm`}
                 >
@@ -188,9 +204,9 @@ export const MessagesPage = () => {
                   </div>
                 </div>
                 {msg.isSender && (
-                  <img 
-                    src="https://ui-avatars.com/api/?background=4f46e5&color=ffffff&bold=true&name=SU" 
-                    alt="You" 
+                  <img
+                    src="https://ui-avatars.com/api/?background=4f46e5&color=ffffff&bold=true&name=SU"
+                    alt="You"
                     className="w-8 h-8 rounded-full ml-2 self-end mb-1"
                   />
                 )}

@@ -1,4 +1,4 @@
-import { FETCH_USERS, FETCH_USERS_ERROR } from '../actions/types';
+import { FETCH_USERS, FETCH_USERS_ERROR, FETCH_USERS_EXCEPT_ID } from '../actions/types';
 
 const initialState = {
   users: [],
@@ -9,19 +9,25 @@ const initialState = {
 const userReducer = (state = initialState, action) => {
   switch (action.type) {
     case FETCH_USERS:
-      return { 
-        ...state, 
-        users: action.payload, 
-        loading: false 
+      return {
+        ...state,
+        users: action.payload,
+        loading: false
       };
-      
+      case FETCH_USERS_EXCEPT_ID:
+        return {
+          ...state,
+          users: state.users.filter(user => user._id !== action.payload),
+          loading: false
+        };
+
     case FETCH_USERS_ERROR:
-      return { 
-        ...state, 
-        error: action.payload, 
-        loading: false 
+      return {
+        ...state,
+        error: action.payload,
+        loading: false
       };
-      
+
     default:
       return state;
   }
