@@ -39,8 +39,6 @@ export const BusinessPages = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  console.log("BusinessPages rendered", businesses);
-
   useEffect(() => {
     dispatch(fetchBusinesses());
   }, [dispatch]);

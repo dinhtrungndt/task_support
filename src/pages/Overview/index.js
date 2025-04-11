@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchBusinesses } from "../../stores/redux/actions/businessActions";
 import { fetchTasks } from "../../stores/redux/actions/taskActions";
 import { fetchServices } from "../../stores/redux/actions/serviceAction";
+import { fetchUsers } from "../../stores/redux/actions/userActions";
 
 export const OverviewPages = () => {
   const dispatch = useDispatch();
@@ -32,6 +33,7 @@ export const OverviewPages = () => {
     dispatch(fetchBusinesses());
     dispatch(fetchTasks());
     dispatch(fetchServices());
+    dispatch(fetchUsers());
   }, [dispatch]);
 
   useEffect(() => {
