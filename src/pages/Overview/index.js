@@ -80,11 +80,10 @@ export const OverviewPages = () => {
         {/* Status Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
           <div
-            className={`rounded-md border shadow-sm overflow-hidden transition-all ${
-              activeFilter === "Assigned"
-                ? "border-blue-500 ring-1 ring-blue-500 bg-white"
-                : "border-gray-200 bg-white hover:border-blue-200"
-            }`}
+            className={`rounded-md border shadow-sm overflow-hidden transition-all ${activeFilter === "Assigned"
+              ? "border-blue-500 ring-1 ring-blue-500 bg-white"
+              : "border-gray-200 bg-white hover:border-blue-200"
+              }`}
             onClick={() => handleFilterClick("Assigned")}
           >
             <div className="p-3">
@@ -103,18 +102,16 @@ export const OverviewPages = () => {
               </div>
             </div>
             <div
-              className={`h-1 w-full ${
-                activeFilter === "Assigned" ? "bg-blue-500" : "bg-transparent"
-              }`}
+              className={`h-1 w-full ${activeFilter === "Assigned" ? "bg-blue-500" : "bg-transparent"
+                }`}
             ></div>
           </div>
 
           <div
-            className={`rounded-md border shadow-sm overflow-hidden transition-all ${
-              activeFilter === "Done"
-                ? "border-green-500 ring-1 ring-green-500 bg-white"
-                : "border-gray-200 bg-white hover:border-green-200"
-            }`}
+            className={`rounded-md border shadow-sm overflow-hidden transition-all ${activeFilter === "Done"
+              ? "border-green-500 ring-1 ring-green-500 bg-white"
+              : "border-gray-200 bg-white hover:border-green-200"
+              }`}
             onClick={() => handleFilterClick("Done")}
           >
             <div className="p-3">
@@ -133,18 +130,16 @@ export const OverviewPages = () => {
               </div>
             </div>
             <div
-              className={`h-1 w-full ${
-                activeFilter === "Done" ? "bg-green-500" : "bg-transparent"
-              }`}
+              className={`h-1 w-full ${activeFilter === "Done" ? "bg-green-500" : "bg-transparent"
+                }`}
             ></div>
           </div>
 
           <div
-            className={`rounded-md border shadow-sm overflow-hidden transition-all ${
-              activeFilter === "Pending"
-                ? "border-amber-500 ring-1 ring-amber-500 bg-white"
-                : "border-gray-200 bg-white hover:border-amber-200"
-            }`}
+            className={`rounded-md border shadow-sm overflow-hidden transition-all ${activeFilter === "Pending"
+              ? "border-amber-500 ring-1 ring-amber-500 bg-white"
+              : "border-gray-200 bg-white hover:border-amber-200"
+              }`}
             onClick={() => handleFilterClick("Pending")}
           >
             <div className="p-3">
@@ -163,18 +158,16 @@ export const OverviewPages = () => {
               </div>
             </div>
             <div
-              className={`h-1 w-full ${
-                activeFilter === "Pending" ? "bg-amber-500" : "bg-transparent"
-              }`}
+              className={`h-1 w-full ${activeFilter === "Pending" ? "bg-amber-500" : "bg-transparent"
+                }`}
             ></div>
           </div>
 
           <div
-            className={`rounded-md border shadow-sm overflow-hidden transition-all ${
-              activeFilter === "Rejected"
-                ? "border-red-500 ring-1 ring-red-500 bg-white"
-                : "border-gray-200 bg-white hover:border-red-200"
-            }`}
+            className={`rounded-md border shadow-sm overflow-hidden transition-all ${activeFilter === "Rejected"
+              ? "border-red-500 ring-1 ring-red-500 bg-white"
+              : "border-gray-200 bg-white hover:border-red-200"
+              }`}
             onClick={() => handleFilterClick("Rejected")}
           >
             <div className="p-3">
@@ -191,9 +184,8 @@ export const OverviewPages = () => {
               </div>
             </div>
             <div
-              className={`h-1 w-full ${
-                activeFilter === "Rejected" ? "bg-red-500" : "bg-transparent"
-              }`}
+              className={`h-1 w-full ${activeFilter === "Rejected" ? "bg-red-500" : "bg-transparent"
+                }`}
             ></div>
           </div>
         </div>

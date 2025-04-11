@@ -12,11 +12,17 @@ import {
 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchTasks } from "../../../stores/redux/actions/taskActions";
+import { fetchUsers } from "../../../stores/redux/actions/userActions";
 
 export const TodayTasks = () => {
   const dispatch = useDispatch();
   const { tasks, loading } = useSelector((state) => state.tasks);
   const [todayTasks, setTodayTasks] = useState([]);
+  const { users } = useSelector((state) => state.users);
+
+  useEffect(() => {
+    dispatch(fetchUsers());
+  }, [dispatch]);
 
   useEffect(() => {
     if (!tasks.length) {
@@ -89,13 +95,12 @@ export const TodayTasks = () => {
                     className="flex items-center p-2 rounded-md border border-gray-100 hover:bg-gray-50 transition-colors"
                   >
                     <div
-                      className={`rounded-full w-5 h-5 flex items-center justify-center mr-2 ${
-                        task.status === "Done"
-                          ? "bg-blue-600"
-                          : task.status === "Pending"
+                      className={`rounded-full w-5 h-5 flex items-center justify-center mr-2 ${task.status === "Done"
+                        ? "bg-blue-600"
+                        : task.status === "Pending"
                           ? "bg-amber-500"
                           : "bg-red-500"
-                      } text-white flex-shrink-0`}
+                        } text-white flex-shrink-0`}
                     >
                       <CheckSquare size={12} />
                     </div>
@@ -186,6 +191,12 @@ export const TodayTasks = () => {
                       scope="col"
                       className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
+                      Người cài
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Trạng thái
                     </th>
                   </tr>
@@ -227,6 +238,21 @@ export const TodayTasks = () => {
                           {task.installDate
                             ? new Date(task.installDate).toLocaleDateString()
                             : "N/A"}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-5 h-5 rounded-full overflow-hidden bg-gray-200 mr-1.5">
+                            <img
+                              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                task.userAdd.name || "N/A"
+                              )}&background=random&size=20`}
+                              alt={task.userAdd.name || "N/A"}
+                            />
+                          </div>
+                          <span className="text-xs text-gray-600">
+                            {task.userAdd.name || "N/A"}
+                          </span>
                         </div>
                       </td>
                       <td className="px-3 py-2 whitespace-nowrap">
@@ -319,9 +345,8 @@ export const TodayTasks = () => {
                   {Array.from({ length: 5 }).map((_, i) => (
                     <div
                       key={i}
-                      className={`h-1 rounded-full ${
-                        i < 3 ? "bg-green-500" : "bg-gray-200"
-                      }`}
+                      className={`h-1 rounded-full ${i < 3 ? "bg-green-500" : "bg-gray-200"
+                        }`}
                     ></div>
                   ))}
                 </div>
@@ -373,9 +398,8 @@ export const TodayTasks = () => {
                 return (
                   <div key={i} className="flex-1 group relative">
                     <div
-                      className={`w-full rounded-t-sm ${
-                        i === 5 ? "bg-blue-500" : "bg-blue-200"
-                      }`}
+                      className={`w-full rounded-t-sm ${i === 5 ? "bg-blue-500" : "bg-blue-200"
+                        }`}
                       style={{ height: `${height}%` }}
                     ></div>
                   </div>
@@ -401,21 +425,24 @@ export const TodayTasks = () => {
           </div>
 
           <div className="flex flex-wrap -m-0.5">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="p-0.5">
-                <div className="group relative">
-                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer overflow-hidden border-2 border-white hover:border-blue-500 transition-all">
-                    <img
-                      src={`https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=User+${
-                        index + 1
-                      }&size=32`}
-                      alt={`User ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+            {users
+              .filter((user) => user.role === "user")
+              .slice(0, 10)
+              .map((user, index) => (
+                <div key={user._id} className="p-0.5">
+                  <div className="group relative">
+                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer overflow-hidden border-2 border-white hover:border-blue-500 transition-all">
+                      <img
+                        src={`https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${encodeURIComponent(
+                          user.name
+                        )}&size=32`}
+                        alt={user.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
             <div className="p-0.5">
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center cursor-pointer text-blue-600 hover:bg-blue-200 transition-colors">
                 <span className="text-sm font-medium">+</span>
