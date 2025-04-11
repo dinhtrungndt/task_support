@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { HeaderPages } from "../../components/header";
 import Modal from "../../components/modals";
 import EditTaskModal from "../../components/modals/EditTask";
@@ -17,24 +17,55 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchBusinesses } from "../../stores/redux/actions/businessActions";
 import { fetchTasks } from "../../stores/redux/actions/taskActions";
 import { fetchServices } from "../../stores/redux/actions/serviceAction";
-import { fetchUsers } from "../../stores/redux/actions/userActions";
+import { fetchUsers, fetchUsersExceptId } from "../../stores/redux/actions/userActions";
+import { AuthContext } from "../../contexts/start/AuthContext";
+import io from "socket.io-client";
+
+const socket = io("http://192.168.1.18:8080/");
 
 export const OverviewPages = () => {
   const dispatch = useDispatch();
+  const auth = useContext(AuthContext);
   const { tasks, loading } = useSelector((state) => state.tasks);
+  const { users } = useSelector((state) => state.users);
   const [activeFilter, setActiveFilter] = useState("Assigned");
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [openModalCreateTask, setOpenModalCreateTask] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [userStatus, setUserStatus] = useState({});
+
+  useEffect(() => {
+    if (auth.user && auth.user.id) {
+      socket.emit("user_online", auth.user.id);
+
+      socket.on("update_user_status", (onlineUsers) => {
+        const statusObj = {};
+        users.forEach(user => {
+          statusObj[user._id] = onlineUsers.includes(user._id) ? "Đang hoạt động" : "Không hoạt động";
+        });
+        setUserStatus(statusObj);
+      });
+    }
+
+    return () => {
+      socket.off("user_online");
+      socket.off("update_user_status");
+    };
+  }, [auth.user, users]);
 
   useEffect(() => {
     dispatch(fetchBusinesses());
     dispatch(fetchTasks());
     dispatch(fetchServices());
-    dispatch(fetchUsers());
-  }, [dispatch]);
+
+    if (auth.user && auth.user.id) {
+      dispatch(fetchUsersExceptId(auth.user.id));
+    } else {
+      dispatch(fetchUsers());
+    }
+  }, [dispatch, auth.user]);
 
   useEffect(() => {
     if (activeFilter === "Assigned") {
@@ -64,12 +95,22 @@ export const OverviewPages = () => {
     );
   };
 
-  // Count tasks by status
   const taskCounts = {
     total: tasks.length,
     done: tasks.filter((task) => task.status === "Done").length,
     pending: tasks.filter((task) => task.status === "Pending").length,
     rejected: tasks.filter((task) => task.status === "Rejected").length,
+  };
+
+  const renderOnlineStatusDot = (userId) => {
+    if (userStatus[userId] === "Đang hoạt động") {
+      return (
+        <div className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+      );
+    }
+    return (
+      <div className="inline-block w-2 h-2 bg-gray-300 rounded-full mr-1"></div>
+    );
   };
 
   return (
@@ -192,9 +233,34 @@ export const OverviewPages = () => {
           </div>
         </div>
 
+        {/* Active Users Section (New) */}
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Active Team Members</h3>
+          <div className="flex flex-wrap gap-2">
+            {users.map((user) => (
+              <div
+                key={user._id}
+                className="flex items-center bg-white p-2 rounded-lg shadow-sm"
+              >
+                <div className="relative">
+                  <img
+                    src={user.avatar || `https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${user.name}`}
+                    alt={user.name}
+                    className="w-8 h-8 rounded-full mr-2"
+                  />
+                  {userStatus[user._id] === "Đang hoạt động" && (
+                    <div className="absolute bottom-0 right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
+                  )}
+                </div>
+                <span className="text-xs font-medium text-gray-700">{user.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Content based on active filter */}
         {activeFilter === "Assigned" ? (
-          <TodayTasks />
+          <TodayTasks userStatus={userStatus} renderOnlineStatusDot={renderOnlineStatusDot} />
         ) : (
           <Tasks
             filteredTasks={filteredTasks}
@@ -207,6 +273,8 @@ export const OverviewPages = () => {
             openModalCreateTask={openModalCreateTask}
             setOpenModalCreateTask={setOpenModalCreateTask}
             loading={loading}
+            userStatus={userStatus}
+            renderOnlineStatusDot={renderOnlineStatusDot}
           />
         )}
       </div>

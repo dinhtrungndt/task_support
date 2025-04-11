@@ -22,8 +22,6 @@ export const fetchUsers = () => async (dispatch) => {
 export const fetchUsersExceptId = (userId) => async (dispatch) => {
   try {
     const response = await axiosClient.get(`/users/get-users-except-id/${userId}`);
-    console.log("Response from fetchUsersExceptId:", response);
-
     dispatch({
       type: FETCH_USERS_EXCEPT_ID,
       payload: response.data,

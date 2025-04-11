@@ -17,7 +17,7 @@ const userReducer = (state = initialState, action) => {
       case FETCH_USERS_EXCEPT_ID:
         return {
           ...state,
-          users: state.users.filter(user => user._id !== action.payload),
+          users: action.payload,
           loading: false
         };
 
