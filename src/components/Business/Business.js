@@ -3,9 +3,9 @@ import { MoreHorizontal, MoreVertical } from 'lucide-react';
 import DropdownMenu from '../../components/DropdownMenu';
 import moment from 'moment';
 
-export const BusinessList = ({ 
-  filteredBusinesses, 
-  loading, 
+export const BusinessList = ({
+  filteredBusinesses,
+  loading,
   searchTerm,
   activeDropdown,
   selectedBusinessIds,
@@ -18,29 +18,31 @@ export const BusinessList = ({
   setActiveDropdown
 }) => {
 
-   const formatDate = (dateString) => {
-      const currentTime = moment();
-      const postTime = moment(dateString);
-      const diffInSeconds = currentTime.diff(postTime, 'seconds');
-  
-      if (diffInSeconds < 1) {
-        return 'Vừa đăng';
-      } else if (diffInSeconds < 60) {
-        return `${diffInSeconds} giây trước`;
-      } else if (diffInSeconds < 3600) {
-        return `${Math.floor(diffInSeconds / 60)} phút trước`;
-      } else if (diffInSeconds < 24 * 3600) {
-        return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
-      } else if (diffInSeconds < 30 * 24 * 3600) {
-        return `${Math.floor(diffInSeconds / (24 * 3600))} ngày trước`;
-      } else if (diffInSeconds < 12 * 30 * 24 * 3600) {
-        return `${Math.floor(diffInSeconds / (30 * 24 * 3600))} tháng trước`;
-      } else if (diffInSeconds < 12 * 365 * 24 * 3600) {
-        return `${Math.floor(diffInSeconds / (12 * 30 * 24 * 3600))} năm trước`;
-      } else {
-        return postTime.format('DD/MM/YYYY');
-      }
-    };
+  const formatDate = (dateString) => {
+    const currentTime = moment();
+    const postTime = moment(dateString);
+    const diffInSeconds = currentTime.diff(postTime, 'seconds');
+
+    if (diffInSeconds < 1) {
+      return 'Vừa đăng';
+    } else if (diffInSeconds < 60) {
+      return `${diffInSeconds} giây trước`;
+    } else if (diffInSeconds < 3600) {
+      return `${Math.floor(diffInSeconds / 60)} phút trước`;
+    } else if (diffInSeconds < 24 * 3600) {
+      return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+    } else if (diffInSeconds < 30 * 24 * 3600) {
+      return `${Math.floor(diffInSeconds / (24 * 3600))} ngày trước`;
+    } else if (diffInSeconds < 12 * 30 * 24 * 3600) {
+      return `${Math.floor(diffInSeconds / (30 * 24 * 3600))} tháng trước`;
+    } else if (diffInSeconds < 12 * 365 * 24 * 3600) {
+      return `${Math.floor(diffInSeconds / (12 * 30 * 24 * 3600))} năm trước`;
+    } else {
+      return postTime.format('DD/MM/YYYY');
+    }
+  };
+
+  console.log('filteredBusinesses', filteredBusinesses);
 
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
@@ -53,7 +55,7 @@ export const BusinessList = ({
                   <input
                     type="checkbox"
                     className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    onChange={handleSelectAllChange} 
+                    onChange={handleSelectAllChange}
                     checked={selectedBusinessIds.length === filteredBusinesses.length && filteredBusinesses.length > 0}
                   />
                 </div>
@@ -66,8 +68,12 @@ export const BusinessList = ({
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Đang làm</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Từ chối</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại dữ liệu</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng BH</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BH còn</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BH hết hạn</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại BH</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày cập nhật</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">More</th>
             </tr>
           </thead>
           <tbody>
@@ -115,8 +121,29 @@ export const BusinessList = ({
                     </span>
                   </td>
                   <td className="p-3 border-b">
-                    {business.typeData && business.typeData.length > 0 
+                    {business.typeData && business.typeData.length > 0
                       ? business.typeData.join(', ')
+                      : <span className="text-gray-400">-</span>
+                    }
+                  </td>
+                  <td className="p-3 border-b">
+                    <span className="inline-flex items-center justify-center px-2 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">
+                      {business.totalServices || 0}
+                    </span>
+                  </td>
+                  <td className="p-3 border-b">
+                    <span className="inline-flex items-center justify-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                      {business.activeServices || 0}
+                    </span>
+                  </td>
+                  <td className="p-3 border-b">
+                    <span className="inline-flex items-center justify-center px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+                      {business.inactionServices || 0}
+                    </span>
+                  </td>
+                  <td className="p-3 border-b">
+                    {business.serviceTypes && business.serviceTypes.length > 0
+                      ? business.serviceTypes.join(', ')
                       : <span className="text-gray-400">-</span>
                     }
                   </td>
@@ -125,7 +152,7 @@ export const BusinessList = ({
                   </td>
                   <td className="p-3 border-b text-right relative">
                     <div>
-                      <button 
+                      <button
                         className="p-1 rounded-full hover:bg-gray-100 transition-colors"
                         onClick={() => toggleDropdown(index)}
                       >

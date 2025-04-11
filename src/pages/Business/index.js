@@ -219,6 +219,10 @@ export const BusinessPages = () => {
       "Đang làm": business.pendingTasks || 0,
       "Từ chối": business.rejectedTasks || 0,
       "Loại dữ liệu": business.typeData ? business.typeData.join(", ") : "",
+      "Tổng BH": business.totalServices || 0,
+      "BH còn": business.activeServices || 0,
+      "BH hết hạn": business.inactionServices || 0,
+      "Loại BH": business.serviceTypes[0] || 0,
       "Ngày cập nhật": business.lastModified
         ? new Date(business.lastModified).toLocaleDateString()
         : "",

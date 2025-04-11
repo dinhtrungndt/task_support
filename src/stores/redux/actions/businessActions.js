@@ -30,7 +30,6 @@ export const addBusiness = (business) => async (dispatch) => {
       mst: business.mst,
       name: business.name,
       address: business.address,
-      // Other fields aren't required by the API
     };
 
     const response = await axiosClient.post("/companies/add", businessToAdd);
