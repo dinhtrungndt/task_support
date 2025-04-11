@@ -253,13 +253,6 @@ export const ServicePages = () => {
     toast.success(`Đã xuất ${exportData.length} dịch vụ ra file Excel`);
   };
 
-  // Show error toast when error exists
-  useEffect(() => {
-    if (error) {
-      toast.error("Lỗi khi tải dữ liệu: " + error);
-    }
-  }, [error]);
-
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderPages title="Quản lý dịch vụ" />
