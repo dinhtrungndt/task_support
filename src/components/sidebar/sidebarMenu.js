@@ -1,16 +1,15 @@
 import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react"
-import React, { useContext, createContext, useState } from "react"
+import React, { useContext, createContext, useState, use, useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { AuthContext } from "../../contexts/start/AuthContext";
 import { DropdownMenuLogout } from "../DropdownMenu/logout";
+import {  useSelector } from "react-redux";
 
 const SidebarContext = createContext()
 
 export default function Sidebar({ children }) {
-  const auth = useContext(AuthContext);
   const [expanded, setExpanded] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
+  const { currentUser } = useSelector((state) => state.users);
 
   return (
     <aside className="h-screen sticky top-0">
@@ -40,14 +39,18 @@ export default function Sidebar({ children }) {
           {
             expanded ? (
               <img
-                src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
+                src={
+                  currentUser?.avatar || "https://via.placeholder.com/150"
+                }
                 alt=""
                 className="w-8 h-8 rounded-md"
               />
             ) : (
               <div onClick={() => setDropdownOpen(!dropdownOpen)} className="w-8 h-8 rounded-md bg-gray-200 flex items-center justify-center cursor-pointer">
                 <img
-                  src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
+                  src={
+                    currentUser?.avatar || "https://via.placeholder.com/150"
+                  }
                   alt=""
                   className="w-8 h-8 rounded-md"
                 />
@@ -67,8 +70,8 @@ export default function Sidebar({ children }) {
             `}
           >
             <div className="leading-3 overflow-hidden">
-              <h4 className="font-semibold text-sm truncate">{auth?.user?.name}</h4>
-              <span className="text-xs text-gray-600 truncate">{auth?.user?.email}</span>
+              <h4 className="font-semibold text-sm truncate">{currentUser?.name}</h4>
+              <span className="text-xs text-gray-600 truncate">{currentUser?.email}</span>
             </div>
             <div className="relative">
               <MoreVertical

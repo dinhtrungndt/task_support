@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   CheckCircle,
   ChevronDown,
@@ -35,7 +35,7 @@ export const TodayTasks = () => {
       .slice(0, 5);
 
     setTodayTasks(latestTasks);
-  }, [tasks, dispatch]);
+  }, [dispatch]);
 
   const getStatusClassName = (status) => {
     switch (status) {
@@ -245,13 +245,13 @@ export const TodayTasks = () => {
                           <div className="w-5 h-5 rounded-full overflow-hidden bg-gray-200 mr-1.5">
                             <img
                               src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                task.userAdd.name || "N/A"
+                                task?.userAdd?.name || "N/A"
                               )}&background=random&size=20`}
-                              alt={task.userAdd.name || "N/A"}
+                              alt={task?.userAdd?.name || "N/A"}
                             />
                           </div>
                           <span className="text-xs text-gray-600">
-                            {task.userAdd.name || "N/A"}
+                            {task?.userAdd?.name || "N/A"}
                           </span>
                         </div>
                       </td>

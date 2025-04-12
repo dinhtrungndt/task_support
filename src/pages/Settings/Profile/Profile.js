@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Camera, CheckCircle, X, Loader } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axiosClient from '../../../api/axiosClient';
+import { setCurrentUser } from '../../../stores/redux/actions/userActions';
+import { useDispatch } from 'react-redux';
+import { AuthContext } from '../../../contexts/start/AuthContext';
+import secureStorage from '../../../utils/secureDataUtils';
 
 export const ProfileSetting = ({ darkMode, profileSettings, handleProfileChange, timeZone }) => {
+  const dispatch = useDispatch();
   const [isUploading, setIsUploading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [originalData, setOriginalData] = useState({});
   const [hasChanges, setHasChanges] = useState(false);
+  const { updateUserInfo } = useContext(AuthContext);
 
   useEffect(() => {
     setOriginalData({ ...profileSettings });
@@ -51,8 +57,15 @@ export const ProfileSetting = ({ darkMode, profileSettings, handleProfileChange,
       });
 
       if (response.status === 200) {
-        toast.success('Cập nhật ảnh đại diện thành công');
         handleProfileChange('avatar', response.data.avatar);
+        dispatch(setCurrentUser({ ...profileSettings, avatar: response.data.avatar }));
+
+        const storedUser = secureStorage.getItem("ts");
+        if (storedUser) {
+          secureStorage.setItem("ts", { ...storedUser, avatar: response.data.avatar });
+        }
+
+        toast.success('Cập nhật ảnh đại diện thành công');
       }
     } catch (error) {
       console.error('Upload error:', error);
@@ -70,6 +83,13 @@ export const ProfileSetting = ({ darkMode, profileSettings, handleProfileChange,
       const response = await axiosClient.put('/profile', profileSettings);
 
       if (response.data.status === 200) {
+        dispatch(setCurrentUser({ ...profileSettings }));
+
+        const storedUser = secureStorage.getItem("ts");
+        if (storedUser) {
+          secureStorage.setItem("ts", { ...storedUser, ...profileSettings });
+        }
+
         setSuccessMessage('Thông tin đã được cập nhật thành công!');
         setTimeout(() => setSuccessMessage(null), 3000);
 

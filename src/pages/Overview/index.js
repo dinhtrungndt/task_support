@@ -18,14 +18,12 @@ import { fetchBusinesses } from "../../stores/redux/actions/businessActions";
 import { fetchTasks } from "../../stores/redux/actions/taskActions";
 import { fetchServices } from "../../stores/redux/actions/serviceAction";
 import { fetchUsers, fetchUsersExceptId } from "../../stores/redux/actions/userActions";
-import { AuthContext } from "../../contexts/start/AuthContext";
 import io from "socket.io-client";
 
 const socket = io("http://192.168.2.209:8080");
 
 export const OverviewPages = () => {
   const dispatch = useDispatch();
-  const auth = useContext(AuthContext);
   const { tasks, loading } = useSelector((state) => state.tasks);
   const { users } = useSelector((state) => state.users);
   const [activeFilter, setActiveFilter] = useState("Assigned");
@@ -35,10 +33,12 @@ export const OverviewPages = () => {
   const [openModalCreateTask, setOpenModalCreateTask] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [userStatus, setUserStatus] = useState({});
+  const { currentUser } = useSelector((state) => state.users);
+  const userID = users.find(user => user.email === currentUser.email)?._id;
 
   useEffect(() => {
-    if (auth.user && auth.user.id) {
-      socket.emit("user_online", auth.user.id);
+    if (currentUser && currentUser.id) {
+      socket.emit("user_online", currentUser.id);
 
       socket.on("update_user_status", (onlineUsers) => {
         const statusObj = {};
@@ -53,19 +53,19 @@ export const OverviewPages = () => {
       socket.off("user_online");
       socket.off("update_user_status");
     };
-  }, [auth.user, users]);
+  }, [currentUser, users]);
 
   useEffect(() => {
     dispatch(fetchBusinesses());
     dispatch(fetchTasks());
     dispatch(fetchServices());
 
-    if (auth.user && auth.user.id) {
-      dispatch(fetchUsersExceptId(auth.user.id));
+    if (currentUser && currentUser.id) {
+      dispatch(fetchUsersExceptId(currentUser.id));
     } else {
       dispatch(fetchUsers());
     }
-  }, [dispatch, auth.user]);
+  }, [dispatch, currentUser]);
 
   useEffect(() => {
     if (activeFilter === "Assigned") {
@@ -235,9 +235,10 @@ export const OverviewPages = () => {
 
         {/* Active Users Section (New) */}
         <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Active Team Members</h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Thành viên</h3>
           <div className="flex flex-wrap gap-2">
             {users.map((user) => (
+              user._id === userID ? null :
               <div
                 key={user._id}
                 className="flex items-center bg-white p-2 rounded-lg shadow-sm"

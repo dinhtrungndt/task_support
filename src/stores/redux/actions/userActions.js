@@ -1,4 +1,4 @@
-import { FETCH_USERS, FETCH_USERS_ERROR, FETCH_USERS_EXCEPT_ID } from "./types";
+import { FETCH_USERS, FETCH_USERS_ERROR, FETCH_USERS_EXCEPT_ID, SET_CURRENT_USER } from "./types";
 import axiosClient from "../../../api/axiosClient";
 
 // Fetch all users
@@ -17,6 +17,11 @@ export const fetchUsers = () => async (dispatch) => {
     });
   }
 };
+
+export const setCurrentUser = (user) => ({
+  type: SET_CURRENT_USER,
+  payload: user
+});
 
 // Fetch users except for a specific ID
 export const fetchUsersExceptId = (userId) => async (dispatch) => {

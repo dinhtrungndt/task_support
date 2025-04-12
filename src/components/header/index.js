@@ -1,4 +1,3 @@
-// src/components/header/HeaderPages.jsx
 import React, { useContext, useState, useRef, useEffect } from "react";
 import {
   BellDot,
@@ -9,18 +8,20 @@ import {
   Menu,
 } from "lucide-react";
 import { Calendar } from "../Calendar";
-import { AuthContext } from "../../contexts/start/AuthContext";
 import InlineSearch from "../search/InlineSearch";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export const HeaderPages = () => {
-  const auth = useContext(AuthContext);
   const navigate = useNavigate();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const notificationRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const [greeting, setGreeting] = useState("");
+  const { currentUser } = useSelector((state) => state.users);
+
+  console.log("currentUser", currentUser.avatar);
 
   useEffect(() => {
     const getTimeBasedGreeting = () => {
@@ -84,7 +85,7 @@ export const HeaderPages = () => {
         </div>
         <div className="flex flex-col">
           <p className="text-xl font-bold text-gray-800 mb-1">
-            {auth?.user?.name || "User Name"}
+            {currentUser?.name || "User Name"}
           </p>
           <p className="text-sm text-indigo-600 font-medium">
             Chào buổi {greeting} !
@@ -224,8 +225,8 @@ export const HeaderPages = () => {
 
         {/* User avatar */}
         <div className="relative group" onClick={() => navigate("/profile")}>
-          <img
-            src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
+        <img
+          src={currentUser?.avatar || "https://via.placeholder.com/150"}
             alt="User avatar"
             className="w-10 h-10 rounded-full cursor-pointer ring-2 ring-indigo-100 group-hover:ring-indigo-300 transition-all duration-200 shadow-sm"
           />

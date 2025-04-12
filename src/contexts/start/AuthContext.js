@@ -5,6 +5,8 @@ import {
   resetActivityTimestamp,
   clearActivityData,
 } from "../../utils/sessionUtils";
+import { setCurrentUser } from "../../stores/redux/actions/userActions";
+import { useDispatch } from "react-redux";
 
 export const AuthContext = createContext();
 
@@ -37,11 +39,11 @@ const safelyDecodeToken = (token) => {
 };
 
 export const AuthProvider = ({ children }) => {
+  const dispatch = useDispatch();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tokenExpiryTime, setTokenExpiryTime] = useState(null);
 
-  // Kiểm tra và cài đặt phiên đăng nhập khi khởi động
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -60,34 +62,29 @@ export const AuthProvider = ({ children }) => {
               const timeUntilExpiry =
                 expiryTime.getTime() - new Date().getTime();
               if (timeUntilExpiry < 300000) {
-                // Dưới 5 phút hoặc đã hết hạn
                 try {
                   const newToken = await refreshToken();
                   if (newToken) {
-                    // Nếu refresh thành công, cập nhật token expiry time
                     const newDecodedToken = safelyDecodeToken(newToken);
                     if (newDecodedToken && newDecodedToken.exp) {
                       setTokenExpiryTime(new Date(newDecodedToken.exp * 1000));
                     }
                   }
                 } catch (refreshError) {
-                  // Ẩn chi tiết lỗi để bảo vệ thông tin nhạy cảm
                   console.warn("Token refresh failed during initialization");
                 }
               }
             }
 
-            // Luôn đặt user state nếu có dữ liệu stored user
             setUser(storedUser);
+            dispatch(setCurrentUser(storedUser));
 
-            // Khởi tạo lại timestamp hoạt động
             resetActivityTimestamp();
           } catch (tokenError) {
             console.error("Token validation error");
-            // Vẫn giữ người dùng đăng nhập nếu chỉ là lỗi validate token
             setUser(storedUser);
+            dispatch(setCurrentUser(storedUser));
 
-            // Khởi tạo lại timestamp hoạt động
             resetActivityTimestamp();
           }
         }
@@ -144,6 +141,7 @@ export const AuthProvider = ({ children }) => {
   // Hàm đăng nhập
   const loginUser = (userData) => {
     setUser(userData);
+    dispatch(setCurrentUser(userData));
 
     // Get token from secureStorage
     const token = secureStorage.getItem("tz");
@@ -163,7 +161,17 @@ export const AuthProvider = ({ children }) => {
     return user && user.role === "admin";
   };
 
-  // Cung cấp context
+  const updateUserInfo = (updatedUserData) => {
+    setUser(updatedUserData);
+
+    dispatch(setCurrentUser(updatedUserData));
+
+    const storedUser = secureStorage.getItem("ts");
+    if (storedUser) {
+      secureStorage.setItem("ts", { ...storedUser, ...updatedUserData });
+    }
+  };
+
   const contextValue = {
     user,
     loading,
@@ -171,6 +179,7 @@ export const AuthProvider = ({ children }) => {
     logoutUser: handleLogout,
     isAdmin,
     refreshSession: refreshToken,
+    updateUserInfo
   };
 
   return (
