@@ -7,17 +7,26 @@ export const DropdownMenuLogout = () => {
   const auth = useContext(AuthContext);
 
   const handleLogout = () => {
-    // const socket = io("http://192.168.2.209:8080");
     const socket = io(process.env.REACT_APP_API_URL, {
-      transports: ["websocket"],
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
-    if (auth.user && auth.user.id) {
-      socket.emit("user_logout", auth.user.id);
-      socket.disconnect();
-    }
+    socket.on("connect", () => {
+      console.log("Socket.IO connected for logout");
+      if (auth.user && auth.user.id) {
+        socket.emit("user_logout", auth.user.id);
+        socket.disconnect();
+      }
+      auth.LogOut();
+    });
 
-    auth.logoutUser();
+    socket.on("connect_error", (error) => {
+      console.error("Socket.IO connection error during logout:", error);
+      auth.LogOut();
+    });
   };
 
   return (

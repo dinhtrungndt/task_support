@@ -22,7 +22,22 @@ import io from "socket.io-client";
 
 // const socket = io("http://192.168.2.209:8080");
 const socket = io(process.env.REACT_APP_API_URL, {
-  transports: ["websocket"],
+  transports: ["websocket", "polling"],
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+});
+
+socket.on("connect", () => {
+  console.log("Socket.IO connected successfully");
+});
+
+socket.on("connect_error", (error) => {
+  console.error("Socket.IO connection error:", error);
+});
+
+socket.on("disconnect", (reason) => {
+  console.log("Socket.IO disconnected:", reason);
 });
 
 export const OverviewPages = () => {
