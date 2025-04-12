@@ -8,7 +8,10 @@ export const DropdownMenuLogout = () => {
 
   const handleLogout = () => {
     // const socket = io("http://192.168.2.209:8080");
-    const socket = io(process.env.REACT_APP_API_URL);
+    const socket = io(process.env.REACT_APP_API_URL, {
+      transports: ["websocket"],
+      upgrade: false,
+    });
 
     if (auth.user && auth.user.id) {
       socket.emit("user_logout", auth.user.id);

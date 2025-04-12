@@ -21,7 +21,10 @@ import { fetchUsers, fetchUsersExceptId } from "../../stores/redux/actions/userA
 import io from "socket.io-client";
 
 // const socket = io("http://192.168.2.209:8080");
-const socket = io(process.env.REACT_APP_API_URL);
+const socket = io(process.env.REACT_APP_API_URL, {
+  transports: ["websocket"],
+  upgrade: false,
+});
 
 export const OverviewPages = () => {
   const dispatch = useDispatch();

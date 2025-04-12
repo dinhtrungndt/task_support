@@ -11,7 +11,10 @@ import { LoaderIcon } from 'lucide-react';
 import axiosClient from '../../api/axiosClient';
 
 // const socket = io("http://192.168.2.209:8080");
-const socket = io(process.env.REACT_APP_API_URL);
+const socket = io(process.env.REACT_APP_API_URL, {
+  transports: ["websocket"],
+  upgrade: false,
+});
 
 export const MessagesPage = () => {
   const dispatch = useDispatch();
