@@ -104,8 +104,11 @@ export const MessagesPage = () => {
     formData.append("image", file);
 
     try {
-      const res = await axiosClient.post("/message/upload-image", formData);
-      console.log("Upload response:", res.data);
+      const res = await axiosClient.post("/message/upload-image", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       setImage(res.data.imageUrl);
     } catch (error) {
       console.error("Lỗi chi tiết khi tải ảnh:", error.response ? error.response.data : error.message);
