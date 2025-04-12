@@ -433,7 +433,9 @@ export const TodayTasks = () => {
                   <div className="group relative">
                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer overflow-hidden border-2 border-white hover:border-blue-500 transition-all">
                       <img
-                        src={`https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${encodeURIComponent(
+                        src={
+                          user.avatar ||
+                          `https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${encodeURIComponent(
                           user.name
                         )}&size=32`}
                         alt={user.name}
