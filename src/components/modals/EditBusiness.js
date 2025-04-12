@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { toast } from 'react-toastify';
+import addressData from '../../assets/json/Danhsach_diachi_json.json';
 
-export const EditBusinessModal = ({ 
-  business, 
-  onClose, 
-  onSave 
+export const EditBusinessModal = ({
+  business,
+  onClose,
+  onSave
 }) => {
   const [editedBusiness, setEditedBusiness] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Thêm các state cho địa chỉ đa cấp
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -17,24 +18,9 @@ export const EditBusinessModal = ({
   const [loading, setLoading] = useState(false);
   const [addressInitialized, setAddressInitialized] = useState(false);
 
-  // Fetch provinces when component mounts
   useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('https://raw.githubusercontent.com/daohoangson/dvhcvn/master/data/dvhcvn.json');
-        const data = await response.json();
-        setProvinces(data.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Lỗi khi tải danh sách tỉnh/thành phố:", error);
-        toast.error("Không thể tải danh sách tỉnh/thành phố");
-        setLoading(false);
-      }
-    };
-    
-    fetchProvinces();
-  }, []);
+    setProvinces(addressData.data);
+}, []);
 
   useEffect(() => {
     if (business) {
@@ -54,35 +40,35 @@ export const EditBusinessModal = ({
     if (editedBusiness?.address && provinces.length > 0 && !addressInitialized) {
       // Split address into parts (assuming format: 'specific, ward, district, province')
       const addressParts = editedBusiness.address.split(', ').filter(part => part.trim());
-      
+
       // Reverse to get from highest level (province) to lowest (specific)
       const reversedParts = [...addressParts].reverse();
-      
+
       if (reversedParts.length >= 3) {
         // Try to find province
         const province = provinces.find(p => p.name === reversedParts[0]);
-        
+
         if (province) {
           setEditedBusiness(prev => ({...prev, province: province.name}));
-          
+
           // Try to find district
           const district = province.level2s.find(d => d.name === reversedParts[1]);
-          
+
           if (district) {
             setDistricts(province.level2s);
             setEditedBusiness(prev => ({...prev, district: district.name}));
-            
+
             // Try to find ward
             const ward = district.level3s.find(w => w.name === reversedParts[2]);
-            
+
             if (ward) {
               setWards(district.level3s);
               setEditedBusiness(prev => ({...prev, ward: ward.name}));
-              
+
               // Get specific address (remaining parts)
               const specificParts = addressParts.slice(0, addressParts.length - 3);
               const specificAddress = specificParts.join(', ');
-              
+
               setEditedBusiness(prev => ({...prev, specificAddress}));
             }
           }
@@ -91,7 +77,7 @@ export const EditBusinessModal = ({
         // If address format doesn't match expected structure, just use it as specificAddress
         setEditedBusiness(prev => ({...prev, specificAddress: editedBusiness.address}));
       }
-      
+
       setAddressInitialized(true);
     }
   }, [editedBusiness?.address, provinces, addressInitialized]);
@@ -102,7 +88,7 @@ export const EditBusinessModal = ({
       const selectedProvince = provinces.find(p => p.name === editedBusiness.province);
       if (selectedProvince && selectedProvince.level2s) {
         setDistricts(selectedProvince.level2s);
-        
+
         // Only reset district and ward if this isn't part of initialization
         if (addressInitialized && !selectedProvince.level2s.some(d => d.name === editedBusiness.district)) {
           setEditedBusiness(prev => ({
@@ -125,7 +111,7 @@ export const EditBusinessModal = ({
       const selectedDistrict = districts.find(d => d.name === editedBusiness.district);
       if (selectedDistrict && selectedDistrict.level3s) {
         setWards(selectedDistrict.level3s);
-        
+
         // Only reset ward if this isn't part of initialization
         if (addressInitialized && !selectedDistrict.level3s.some(w => w.name === editedBusiness.ward)) {
           setEditedBusiness(prev => ({
@@ -144,14 +130,14 @@ export const EditBusinessModal = ({
     if (editedBusiness && addressInitialized) {
       const { province, district, ward, specificAddress } = editedBusiness;
       const addressParts = [];
-      
+
       if (specificAddress) addressParts.push(specificAddress);
       if (ward) addressParts.push(ward);
       if (district) addressParts.push(district);
       if (province) addressParts.push(province);
-      
+
       const combinedAddress = addressParts.join(', ');
-      
+
       setEditedBusiness(prev => ({
         ...prev,
         address: combinedAddress
@@ -170,28 +156,28 @@ export const EditBusinessModal = ({
 
   const handleSave = async () => {
     if (!editedBusiness) return;
-    
+
     // Validate required fields
     if (!editedBusiness.mst || !editedBusiness.name || !editedBusiness.address) {
       toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
     }
-    
+
     // Validate address components
     if (!editedBusiness.province || !editedBusiness.district || !editedBusiness.ward || !editedBusiness.specificAddress) {
       toast.error("Vui lòng điền đầy đủ thông tin địa chỉ");
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
-      
+
       if (!editedBusiness._id) {
         console.error("Missing _id in editedBusiness:", editedBusiness);
         toast.error("Lỗi: ID doanh nghiệp không xác định");
         return;
       }
-      
+
       // Only pass fields that are accepted by the backend API
       const businessToUpdate = {
         _id: editedBusiness._id,
@@ -199,7 +185,7 @@ export const EditBusinessModal = ({
         name: editedBusiness.name,
         address: editedBusiness.address
       };
-      
+
       await onSave(businessToUpdate);
     } catch (error) {
       console.error("Error in handleSave:", error);
@@ -216,14 +202,14 @@ export const EditBusinessModal = ({
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex justify-between items-center">
         <h2 className="text-white font-medium">Chỉnh sửa thông tin doanh nghiệp</h2>
-        <button 
+        <button
           onClick={onClose}
           className="p-1 rounded-full hover:bg-white hover:bg-opacity-20 transition-all text-white"
         >
           <X size={18} />
         </button>
       </div>
-      
+
       {/* Form Content */}
       <div className="p-6 max-h-[70vh] overflow-y-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -258,7 +244,7 @@ export const EditBusinessModal = ({
         {/* Address Fields */}
         <div className="mt-5 space-y-4">
           <h3 className="text-md font-medium text-gray-700">Địa chỉ <span className="text-red-500">*</span></h3>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Province */}
             <div>
@@ -281,7 +267,7 @@ export const EditBusinessModal = ({
                 ))}
               </select>
             </div>
-            
+
             {/* District */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -303,7 +289,7 @@ export const EditBusinessModal = ({
                 ))}
               </select>
             </div>
-            
+
             {/* Ward */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -326,7 +312,7 @@ export const EditBusinessModal = ({
               </select>
             </div>
           </div>
-          
+
           {/* Specific Address */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -342,7 +328,7 @@ export const EditBusinessModal = ({
               required
             />
           </div>
-          
+
           {/* Combined Address Preview */}
           {editedBusiness.address && (
             <div className="p-3 bg-gray-50 rounded-md border border-gray-200">
@@ -353,12 +339,12 @@ export const EditBusinessModal = ({
             </div>
           )}
         </div>
-        
+
         {/* Read-only information */}
         {editedBusiness.typeData && editedBusiness.typeData.length > 0 && (
           <div className="mt-6 pt-4 border-t border-gray-200">
             <h3 className="text-sm font-medium text-gray-700 mb-3">Thông tin khác (chỉ đọc)</h3>
-            
+
             <div className="grid grid-cols-1 gap-4">
               <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
                 <p className="text-xs text-gray-500 mb-1">Loại dữ liệu</p>
@@ -370,7 +356,7 @@ export const EditBusinessModal = ({
                   ))}
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
                   <p className="text-xs text-gray-500 mb-1">Tổng công việc</p>
@@ -392,14 +378,14 @@ export const EditBusinessModal = ({
             </div>
           </div>
         )}
-        
+
         <div className="mt-6 pt-4 border-t border-gray-200">
           <p className="text-sm text-gray-500 italic">
             Lưu ý: Các trường khác như loại dữ liệu và thống kê công việc sẽ được cập nhật tự động khi bạn thêm hoặc cập nhật các task.
           </p>
         </div>
       </div>
-      
+
       {/* Footer with buttons */}
       <div className="px-6 py-4 bg-gray-50 flex justify-end space-x-3 border-t">
         <button

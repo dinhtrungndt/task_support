@@ -44,8 +44,16 @@ const AppContent = () => {
 export default function App() {
   return (
     <AuthProvider>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        newestOnTop={true}
+        closeOnClick
+        pauseOnFocusLoss={false}
+        draggable
+        pauseOnHover
+      />
       <AppContent />
-      <ToastContainer position="top-right" autoClose={3000} />
     </AuthProvider>
   );
 }

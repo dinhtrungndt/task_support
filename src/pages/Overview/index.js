@@ -20,7 +20,8 @@ import { fetchServices } from "../../stores/redux/actions/serviceAction";
 import { fetchUsers, fetchUsersExceptId } from "../../stores/redux/actions/userActions";
 import io from "socket.io-client";
 
-const socket = io("http://192.168.2.209:8080");
+// const socket = io("http://192.168.2.209:8080");
+const socket = io(process.env.REACT_APP_API_URL);
 
 export const OverviewPages = () => {
   const dispatch = useDispatch();
@@ -239,22 +240,22 @@ export const OverviewPages = () => {
           <div className="flex flex-wrap gap-2">
             {users.map((user) => (
               user._id === userID ? null :
-              <div
-                key={user._id}
-                className="flex items-center bg-white p-2 rounded-lg shadow-sm"
-              >
-                <div className="relative">
-                  <img
-                    src={user.avatar || `https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${user.name}`}
-                    alt={user.name}
-                    className="w-8 h-8 rounded-full mr-2"
-                  />
-                  {userStatus[user._id] === "Đang hoạt động" && (
-                    <div className="absolute bottom-0 right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
-                  )}
+                <div
+                  key={user._id}
+                  className="flex items-center bg-white p-2 rounded-lg shadow-sm"
+                >
+                  <div className="relative">
+                    <img
+                      src={user.avatar || `https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${user.name}`}
+                      alt={user.name}
+                      className="w-8 h-8 rounded-full mr-2"
+                    />
+                    {userStatus[user._id] === "Đang hoạt động" && (
+                      <div className="absolute bottom-0 right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
+                    )}
+                  </div>
+                  <span className="text-xs font-medium text-gray-700">{user.name}</span>
                 </div>
-                <span className="text-xs font-medium text-gray-700">{user.name}</span>
-              </div>
             ))}
           </div>
         </div>

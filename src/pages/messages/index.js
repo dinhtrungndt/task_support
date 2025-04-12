@@ -10,7 +10,8 @@ import axios from "axios";
 import { LoaderIcon } from 'lucide-react';
 import axiosClient from '../../api/axiosClient';
 
-const socket = io("http://192.168.2.209:8080");
+// const socket = io("http://192.168.2.209:8080");
+const socket = io(process.env.REACT_APP_API_URL);
 
 export const MessagesPage = () => {
   const dispatch = useDispatch();
@@ -22,8 +23,8 @@ export const MessagesPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const messagesEndRef = useRef(null);
 
-  const {messageses} = useSelector((state) => state.messages);
-  const {users} = useSelector((state) => state.users);
+  const { messageses } = useSelector((state) => state.messages);
+  const { users } = useSelector((state) => state.users);
   const auth = useContext(AuthContext);
 
   const idSender = auth.user.id;
@@ -91,16 +92,21 @@ export const MessagesPage = () => {
   const handleUploadImage = async (e) => {
     setLoadingImg(true);
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) {
+      setLoadingImg(false);
+      return;
+    }
 
     const formData = new FormData();
     formData.append("image", file);
 
     try {
-      const res = await axiosClient.post("http://192.168.2.209:8080/message/upload-image", formData);
+      const res = await axiosClient.post("/message/upload-image", formData);
+      console.log("Upload response:", res.data);
       setImage(res.data.imageUrl);
     } catch (error) {
-      console.error("Lỗi khi tải ảnh:", error);
+      console.error("Lỗi chi tiết khi tải ảnh:", error.response ? error.response.data : error.message);
+      alert("Không thể tải ảnh lên, vui lòng thử lại");
     }
     setLoadingImg(false);
     e.target.value = "";
@@ -182,9 +188,8 @@ export const MessagesPage = () => {
           {users.map((user) => (
             <div
               key={user._id}
-              className={`p-3 border-b border-gray-100 hover:bg-indigo-50 cursor-pointer transition duration-150 flex items-start ${
-                selectedUser && user._id === selectedUser._id ? "bg-indigo-50" : ""
-              }`}
+              className={`p-3 border-b border-gray-100 hover:bg-indigo-50 cursor-pointer transition duration-150 flex items-start ${selectedUser && user._id === selectedUser._id ? "bg-indigo-50" : ""
+                }`}
               onClick={() => selectUser(user)}
             >
               <div className="relative">
@@ -275,11 +280,10 @@ export const MessagesPage = () => {
                       />
                     )}
                     <div
-                      className={`max-w-xs md:max-w-md lg:max-w-lg ${
-                        msg.idSender === idSender
+                      className={`max-w-xs md:max-w-md lg:max-w-lg ${msg.idSender === idSender
                           ? 'bg-indigo-600 text-white rounded-tl-xl rounded-tr-xl rounded-bl-xl'
                           : 'bg-white text-gray-800 rounded-tl-xl rounded-tr-xl rounded-br-xl shadow-md'
-                      } px-4 py-3 text-sm`}
+                        } px-4 py-3 text-sm`}
                     >
                       {msg.content && <p className={`leading-relaxed ${msg.idSender === idSender ? 'text-indigo-50' : 'text-gray-700'}`}>{msg.content}</p>}
                       {msg.image && <img src={msg.image} alt="Shared" className="rounded-lg mt-2 max-w-full" />}
@@ -310,7 +314,7 @@ export const MessagesPage = () => {
               <div className="bg-white p-2 border-t border-gray-200">
                 <div className="flex justify-center">
                   {loadingImg ? (
-                    <LoaderIcon style={{ fontSize: 24 }} spin />
+                    <LoaderIcon style={{ fontSize: 24 }} spin="true" />
                   ) : (
                     image && (
                       <div className="relative inline-block">

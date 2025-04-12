@@ -224,7 +224,7 @@ export const HeaderPages = () => {
         {/* User avatar */}
         <div className="relative group" onClick={() => navigate("/profile")}>
         <img
-          src={currentUser?.avatar || "https://via.placeholder.com/150"}
+          src={currentUser?.avatar || `https://ui-avatars.com/api/?background=4f46e5&color=ffffff&bold=true&name=${currentUser?.name}`}
             alt="User avatar"
             className="w-10 h-10 rounded-full cursor-pointer ring-2 ring-indigo-100 group-hover:ring-indigo-300 transition-all duration-200 shadow-sm"
           />

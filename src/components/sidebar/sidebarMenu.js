@@ -40,7 +40,7 @@ export default function Sidebar({ children }) {
             expanded ? (
               <img
                 src={
-                  currentUser?.avatar || "https://via.placeholder.com/150"
+                  currentUser?.avatar || `https://ui-avatars.com/api/?background=4f46e5&color=ffffff&bold=true&name=${currentUser?.name}`
                 }
                 alt=""
                 className="w-8 h-8 rounded-md"
@@ -49,7 +49,7 @@ export default function Sidebar({ children }) {
               <div onClick={() => setDropdownOpen(!dropdownOpen)} className="w-8 h-8 rounded-md bg-gray-200 flex items-center justify-center cursor-pointer">
                 <img
                   src={
-                    currentUser?.avatar || "https://via.placeholder.com/150"
+                    currentUser?.avatar || `https://ui-avatars.com/api/?background=4f46e5&color=ffffff&bold=true&name=${currentUser?.name}`
                   }
                   alt=""
                   className="w-8 h-8 rounded-md"
