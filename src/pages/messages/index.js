@@ -8,8 +8,9 @@ import moment from "moment";
 import "moment/locale/vi";
 import axios from "axios";
 import { LoaderIcon } from 'lucide-react';
+import axiosClient from '../../api/axiosClient';
 
-const socket = io("http://192.168.1.18:8080/");
+const socket = io("http://192.168.2.209:8080");
 
 export const MessagesPage = () => {
   const dispatch = useDispatch();
@@ -57,8 +58,7 @@ export const MessagesPage = () => {
 
   useEffect(() => {
     if (selectedUser) {
-      axios
-        .get(`http://192.168.1.18:8080/message/get-message/list/${idSender}/${selectedUser._id}`)
+      axiosClient.get(`/message/get-message/list/${idSender}/${selectedUser._id}`)
         .then((res) => setMessages(res.data))
         .catch((err) => console.error(err));
 
@@ -97,7 +97,7 @@ export const MessagesPage = () => {
     formData.append("image", file);
 
     try {
-      const res = await axios.post("http://192.168.1.18:8080/message/upload-image", formData);
+      const res = await axiosClient.post("http://192.168.2.209:8080/message/upload-image", formData);
       setImage(res.data.imageUrl);
     } catch (error) {
       console.error("Lỗi khi tải ảnh:", error);

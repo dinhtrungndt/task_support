@@ -6,11 +6,29 @@ import { SecuritySetting } from './security/security';
 import { NotificationsSetting } from './notifications/notifications';
 import { ProfileSetting } from './Profile/Profile';
 import addressData from '../../assets/json/timezones.json';
+import axiosClient from '../../api/axiosClient';
+import { Cog, Save, UserCircle, Bell, ShieldCheck, Palette, Loader } from 'lucide-react';
 
 export const SettingPages = () => {
   const auth = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('profile');
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
+  const [isSaving, setIsSaving] = useState(false);
+  const [timeZone, setTimeZone] = useState([]);
+  const [originalSettings, setOriginalSettings] = useState({});
+  const [hasChanges, setHasChanges] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [profileSettings, setProfileSettings] = useState({
+    name: auth?.user?.name || '',
+    email: auth?.user?.email || '',
+    phone: '',
+    jobTitle: '',
+    department: '',
+    timeZone: 'GMT+7',
+    avatar: null
+  });
+
   const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: true,
     pushNotifications: true,
@@ -18,31 +36,99 @@ export const SettingPages = () => {
     teamUpdates: true,
     projectChanges: true
   });
+
   const [securitySettings, setSecuritySettings] = useState({
     twoFactorAuth: false,
-    sessionTimeout: "30"
-  });
-  const [timeZone, setTimeZone] = useState([]);
-  const [profileSettings, setProfileSettings] = useState({
-    name: auth?.user?.name,
-    email: auth?.user?.email,
-    phone: "+84 123 456 789",
-    role: "Project Manager",
-    department: "Product Development",
-    timeZone: "GMT+7"
+    sessionTimeout: '30',
+    lastPasswordChange: null
   });
 
   useEffect(() => {
+    const fetchUserSettings = async () => {
+      if (!auth?.user?.id) return;
+
+      setIsLoading(true);
+      try {
+        const response = await axiosClient.get('/profile');
+
+        if (response.data && response.data.status === 200 && response.data.user) {
+          const userData = response.data.user;
+
+          const newProfileSettings = {
+            name: userData.name || '',
+            email: userData.email || '',
+            phone: userData.phone || '',
+            jobTitle: userData.jobTitle || '',
+            department: userData.department || '',
+            timeZone: userData.timeZone || 'GMT+7',
+            avatar: userData.avatar || null
+          };
+
+          setProfileSettings(newProfileSettings);
+
+          if (userData.notifications) {
+            setNotificationSettings({
+              emailNotifications: userData.notifications.emailNotifications ?? true,
+              pushNotifications: userData.notifications.pushNotifications ?? true,
+              taskReminders: userData.notifications.taskReminders ?? true,
+              teamUpdates: userData.notifications.teamUpdates ?? true,
+              projectChanges: userData.notifications.projectChanges ?? true
+            });
+          }
+
+          if (userData.security) {
+            setSecuritySettings({
+              twoFactorAuth: userData.security.twoFactorAuth ?? false,
+              sessionTimeout: userData.security.sessionTimeout || '30',
+              lastPasswordChange: userData.updatedAt || null
+            });
+          }
+
+          setOriginalSettings({
+            profile: newProfileSettings,
+            notifications: { ...notificationSettings },
+            security: { ...securitySettings }
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching user settings:', error);
+        toast.error('Không thể tải thông tin cài đặt. Vui lòng thử lại sau.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserSettings();
     setTimeZone(addressData);
-  }, []);
+  }, [auth?.user?.id]);
 
   useEffect(() => {
     if (darkMode) {
       document.body.classList.add('dark-mode');
+      localStorage.setItem('darkMode', 'true');
     } else {
       document.body.classList.remove('dark-mode');
+      localStorage.setItem('darkMode', 'false');
     }
   }, [darkMode]);
+
+  useEffect(() => {
+    if (Object.keys(originalSettings).length === 0) return;
+
+    const profileChanged = Object.keys(profileSettings).some(key =>
+      originalSettings.profile?.[key] !== profileSettings[key]
+    );
+
+    const notificationChanged = Object.keys(notificationSettings).some(key =>
+      originalSettings.notifications?.[key] !== notificationSettings[key]
+    );
+
+    const securityChanged = Object.keys(securitySettings).some(key =>
+      originalSettings.security?.[key] !== securitySettings[key]
+    );
+
+    setHasChanges(profileChanged || notificationChanged || securityChanged);
+  }, [profileSettings, notificationSettings, securitySettings, originalSettings]);
 
   const handleNotificationChange = (setting) => {
     setNotificationSettings({
@@ -65,6 +151,48 @@ export const SettingPages = () => {
     });
   };
 
+  const saveAllChanges = async () => {
+    if (!hasChanges) return;
+
+    setIsSaving(true);
+    try {
+      const profileResponse = await axiosClient.put('/profile', profileSettings);
+
+      const notificationResponse = await axiosClient.put('/profile', {
+        notifications: notificationSettings
+      });
+
+      const securityResponse = await axiosClient.put('/profile', {
+        security: securitySettings
+      });
+
+      setOriginalSettings({
+        profile: { ...profileSettings },
+        notifications: { ...notificationSettings },
+        security: { ...securitySettings }
+      });
+
+      setHasChanges(false);
+      toast.success('Tất cả thay đổi đã được lưu thành công!');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast.error('Không thể lưu thay đổi. Vui lòng thử lại sau.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className={`flex h-screen items-center justify-center ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800'}`}>
+        <div className="flex flex-col items-center">
+          <Loader className="w-10 h-10 animate-spin text-blue-500 mb-4" />
+          <p className="text-lg font-medium">Đang tải thông tin cài đặt...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`flex h-screen ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800'} transition-colors duration-300`}>
       {/* Main Content */}
@@ -72,17 +200,26 @@ export const SettingPages = () => {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
             <h1 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-4 md:mb-0 flex items-center`}>
-              <svg className="w-8 h-8 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              Settings
+              <Cog className="w-8 h-8 mr-3 text-blue-500" />
+              Cài đặt
             </h1>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-sm font-medium flex items-center transform transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Save Changes
+            <button
+              onClick={saveAllChanges}
+              disabled={!hasChanges || isSaving}
+              className={`bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-sm font-medium flex items-center transform transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl
+                ${(!hasChanges || isSaving) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isSaving ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Đang lưu...
+                </>
+              ) : (
+                <>
+                  <Save className="w-5 h-5 mr-2" />
+                  Lưu thay đổi
+                </>
+              )}
             </button>
           </div>
 
@@ -98,13 +235,10 @@ export const SettingPages = () => {
                   onClick={() => setActiveTab('profile')}
                 >
                   <div className="flex items-center">
-                    <svg className={`w-5 h-5 mr-3 ${activeTab === 'profile' ? 'text-blue-500' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
+                    <UserCircle className={`w-5 h-5 mr-3 ${activeTab === 'profile' ? 'text-blue-500' : darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
                     <span className={`text-sm font-medium ${activeTab === 'profile'
                       ? 'text-blue-600'
-                      : darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Profile Settings</span>
+                      : darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Thông tin người dùng</span>
                   </div>
                 </li>
                 <li
@@ -114,13 +248,10 @@ export const SettingPages = () => {
                   onClick={() => setActiveTab('notifications')}
                 >
                   <div className="flex items-center">
-                    <svg className={`w-5 h-5 mr-3 ${activeTab === 'notifications' ? 'text-blue-500' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                    </svg>
+                    <Bell className={`w-5 h-5 mr-3 ${activeTab === 'notifications' ? 'text-blue-500' : darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
                     <span className={`text-sm font-medium ${activeTab === 'notifications'
                       ? 'text-blue-600'
-                      : darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Notifications</span>
+                      : darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Thông báo</span>
                   </div>
                 </li>
                 <li
@@ -130,13 +261,10 @@ export const SettingPages = () => {
                   onClick={() => setActiveTab('security')}
                 >
                   <div className="flex items-center">
-                    <svg className={`w-5 h-5 mr-3 ${activeTab === 'security' ? 'text-blue-500' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
+                    <ShieldCheck className={`w-5 h-5 mr-3 ${activeTab === 'security' ? 'text-blue-500' : darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
                     <span className={`text-sm font-medium ${activeTab === 'security'
                       ? 'text-blue-600'
-                      : darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Security</span>
+                      : darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Bảo mật</span>
                   </div>
                 </li>
                 <li
@@ -146,13 +274,10 @@ export const SettingPages = () => {
                   onClick={() => setActiveTab('appearance')}
                 >
                   <div className="flex items-center">
-                    <svg className={`w-5 h-5 mr-3 ${activeTab === 'appearance' ? 'text-blue-500' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
-                    </svg>
+                    <Palette className={`w-5 h-5 mr-3 ${activeTab === 'appearance' ? 'text-blue-500' : darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
                     <span className={`text-sm font-medium ${activeTab === 'appearance'
                       ? 'text-blue-600'
-                      : darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Appearance</span>
+                      : darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Giao diện</span>
                   </div>
                 </li>
               </ul>
@@ -163,11 +288,11 @@ export const SettingPages = () => {
               <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-xl shadow-lg overflow-hidden border transition-all duration-300`}>
                 {/* Profile Settings */}
                 {activeTab === 'profile' && (
-                <ProfileSetting
-                  darkMode={darkMode}
-                  profileSettings={profileSettings}
-                  handleProfileChange={handleProfileChange}
-                  timeZone={timeZone}
+                  <ProfileSetting
+                    darkMode={darkMode}
+                    profileSettings={profileSettings}
+                    handleProfileChange={handleProfileChange}
+                    timeZone={timeZone}
                   />
                 )}
 
@@ -203,4 +328,4 @@ export const SettingPages = () => {
       </div>
     </div>
   );
-};
+}

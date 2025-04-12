@@ -21,7 +21,7 @@ import { fetchUsers, fetchUsersExceptId } from "../../stores/redux/actions/userA
 import { AuthContext } from "../../contexts/start/AuthContext";
 import io from "socket.io-client";
 
-const socket = io("http://192.168.1.18:8080/");
+const socket = io("http://192.168.2.209:8080");
 
 export const OverviewPages = () => {
   const dispatch = useDispatch();
