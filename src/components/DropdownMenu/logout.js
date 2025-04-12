@@ -20,12 +20,12 @@ export const DropdownMenuLogout = () => {
         socket.emit("user_logout", auth.user.id);
         socket.disconnect();
       }
-      auth.LogOut();
+      auth.logoutUser();
     });
 
     socket.on("connect_error", (error) => {
       console.error("Socket.IO connection error during logout:", error);
-      auth.LogOut();
+      auth.logoutUser();
     });
   };
 
