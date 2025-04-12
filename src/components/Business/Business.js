@@ -42,8 +42,6 @@ export const BusinessList = ({
     }
   };
 
-  console.log('filteredBusinesses', filteredBusinesses);
-
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
       <div className="overflow-x-auto">

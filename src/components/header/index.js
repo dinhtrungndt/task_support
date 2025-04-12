@@ -21,8 +21,6 @@ export const HeaderPages = () => {
   const [greeting, setGreeting] = useState("");
   const { currentUser } = useSelector((state) => state.users);
 
-  console.log("currentUser", currentUser.avatar);
-
   useEffect(() => {
     const getTimeBasedGreeting = () => {
       const hours = new Date().getHours();

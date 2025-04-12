@@ -9,8 +9,8 @@ export const fetchMessageSR = (idSender, idReceiver) => async (dispatch) => {
             `message/get-message/list/${idSender}/${idReceiver}`
         );
 
-        console.log("ID Sender:", idSender);
-        console.log("ID Receiver:", idReceiver);
+        // console.log("ID Sender:", idSender);
+        // console.log("ID Receiver:", idReceiver);
 
         dispatch({
             type: FETCH_MESSAGES_SR,
