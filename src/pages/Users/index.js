@@ -7,6 +7,7 @@ import io from 'socket.io-client';
 import moment from 'moment';
 import 'moment/locale/vi';
 import { AuthContext } from '../../contexts/start/AuthContext';
+import UserDetailModal from '../../components/modals/UserDetailModal';
 
 // Khởi tạo socket
 const socket = io(process.env.REACT_APP_API_URL, {
@@ -22,7 +23,9 @@ export const UserPages = () => {
   const { users, loading } = useSelector((state) => state.users);
   const { businesses } = useSelector((state) => state.business);
   const [userStatus, setUserStatus] = useState({});
-    const auth = useContext(AuthContext);
+  const auth = useContext(AuthContext);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   // Hàm format trạng thái người dùng giống Messenger
   const getStatusText = (userId) => {
@@ -42,7 +45,7 @@ export const UserPages = () => {
   };
 
   useEffect(() => {
-      dispatch(fetchUsersExceptId(auth.user.id));
+    dispatch(fetchUsersExceptId(auth.user.id));
     dispatch(fetchBusinesses());
 
     // Lắng nghe trạng thái người dùng
@@ -61,11 +64,24 @@ export const UserPages = () => {
     return () => {
       socket.off('update_user_status');
     };
-  }, [dispatch, users]);
+  }, [dispatch, users, auth.user.id]);
 
   // Xử lý nhấn "Nhắn tin"
   const handleMessageClick = (user) => {
     navigate('/message', { state: { selectedUser: user } });
+  };
+
+  // Xử lý nhấn "Chi tiết"
+  const handleDetailClick = (user) => {
+    setSelectedUser(user);
+    setShowDetailModal(true);
+  };
+
+  // Đóng modal
+  const handleCloseModal = () => {
+    setShowDetailModal(false);
+    // Đợi animation kết thúc trước khi xóa dữ liệu
+    setTimeout(() => setSelectedUser(null), 300);
   };
 
   return (
@@ -125,7 +141,10 @@ export const UserPages = () => {
                           </svg>
                           Nhắn tin
                         </button>
-                        <button className="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors duration-200 flex items-center">
+                        <button
+                          className="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors duration-200 flex items-center"
+                          onClick={() => handleDetailClick(member)}
+                        >
                           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
@@ -266,6 +285,17 @@ export const UserPages = () => {
           </div>
         </div>
       </div>
+
+      {/* User Detail Modal */}
+      {showDetailModal && selectedUser && (
+        <UserDetailModal
+          user={selectedUser}
+          onClose={handleCloseModal}
+          userStatus={userStatus}
+        />
+      )}
     </div>
   );
 };
+
+export default UserPages;
