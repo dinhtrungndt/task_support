@@ -12,6 +12,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import Modal from "../../components/modals";
 import EditTaskModal from "../../components/modals/EditTask";
 import MoreDetailsModal from "../../components/modals/MoreTask";
@@ -26,6 +27,7 @@ import * as XLSX from "xlsx";
 
 export const TaskPages = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { tasks, loading, error } = useSelector((state) => state.tasks);
 
   const [openModalCreateTask, setOpenModalCreateTask] = useState(false);
@@ -44,6 +46,22 @@ export const TaskPages = () => {
   useEffect(() => {
     dispatch(fetchTasks());
   }, [dispatch]);
+
+  useEffect(() => {
+    // Check if we should open details from search navigation
+    if (location.state?.showDetails && location.state?.selectedItemType === 'task') {
+      const taskId = location.state.selectedItemId;
+      const taskToShow = tasks.find(task => task._id === taskId);
+
+      if (taskToShow) {
+        setSelectedTask(taskToShow);
+        setMoreModalOpen(true);
+      }
+
+      // Clear the location state to prevent reopening on page refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location, tasks]);
 
   useEffect(() => {
     filterTasks();

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import { HeaderPages } from "../../components/header";
 import {
   Search,
@@ -25,6 +26,7 @@ import ServiceList from "../../components/Service/ServiceList";
 
 export const ServicePages = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { services, loading, error } = useSelector((state) => state.services);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,6 +44,22 @@ export const ServicePages = () => {
   useEffect(() => {
     dispatch(fetchServices());
   }, [dispatch]);
+
+  // Check if we should open details from search navigation
+  useEffect(() => {
+    if (location.state?.showDetails && location.state?.selectedItemType === 'service') {
+      const serviceId = location.state.selectedItemId;
+      const serviceToShow = services.find(service => service._id === serviceId);
+
+      if (serviceToShow) {
+        setSelectedService(serviceToShow);
+        setMoreModalOpen(true);
+      }
+
+      // Clear the location state to prevent reopening on page refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location, services]);
 
   // Handle scroll top button visibility
   useEffect(() => {
@@ -82,7 +100,7 @@ export const ServicePages = () => {
             ))
       )
     );
-  }, [services, searchTerm, services]);
+  }, [services, searchTerm]);
 
   // Handle search input change
   const handleSearchChange = (e) => {

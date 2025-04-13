@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import { HeaderPages } from "../../components/header";
 import {
   Search,
@@ -26,6 +27,7 @@ import BusinessList from "../../components/Business/Business";
 
 export const BusinessPages = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { businesses, loading, error } = useSelector((state) => state.business);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,6 +44,22 @@ export const BusinessPages = () => {
   useEffect(() => {
     dispatch(fetchBusinesses());
   }, [dispatch]);
+
+  useEffect(() => {
+    // Check if we should open details from search navigation
+    if (location.state?.showDetails && location.state?.selectedItemType === 'business') {
+      const businessId = location.state.selectedItemId;
+      const businessToShow = businesses.find(business => business._id === businessId);
+
+      if (businessToShow) {
+        setSelectedBusiness(businessToShow);
+        setMoreModalOpen(true);
+      }
+
+      // Clear the location state to prevent reopening on page refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location, businesses]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -222,7 +240,7 @@ export const BusinessPages = () => {
       "Tổng BH": business.totalServices || 0,
       "BH còn": business.activeServices || 0,
       "BH hết hạn": business.inactionServices || 0,
-      "Loại BH": business.serviceTypes[0] || 0,
+      "Loại BH": business.serviceTypes ? business.serviceTypes.join(", ") : "",
       "Ngày cập nhật": business.lastModified
         ? new Date(business.lastModified).toLocaleDateString()
         : "",

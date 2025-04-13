@@ -5,21 +5,21 @@ import { useSearch } from '../../contexts/search/SearchContext';
 import { useNavigate } from 'react-router-dom';
 
 const InlineSearch = () => {
-  const { 
-    searchTerm, 
-    setSearchTerm, 
-    searchResults, 
+  const {
+    searchTerm,
+    setSearchTerm,
+    searchResults,
     isSearching,
-    handleSelectResult 
+    handleSelectResult
   } = useSearch();
-  
+
   const navigate = useNavigate();
   const searchRef = useRef(null);
   const inputRef = useRef(null);
-  
+
   const [isResultsVisible, setIsResultsVisible] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
-  
+
   // Handle clicking outside of search
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -27,25 +27,25 @@ const InlineSearch = () => {
         setIsResultsVisible(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-  
+
   // Show results when typing or when input is focused
   useEffect(() => {
     if (searchTerm.trim()) {
       setIsResultsVisible(true);
     }
   }, [searchTerm, searchResults]);
-  
+
   // Handle key navigation in search results
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setFocusedIndex(prev => 
+      setFocusedIndex(prev =>
         prev < searchResults.length - 1 ? prev + 1 : prev
       );
     } else if (e.key === 'ArrowUp') {
@@ -60,7 +60,7 @@ const InlineSearch = () => {
       setIsResultsVisible(false);
     }
   };
-  
+
   // Get icon based on result type
   const getResultIcon = (type) => {
     switch (type) {
@@ -74,13 +74,13 @@ const InlineSearch = () => {
         return <ArrowRight size={16} className="text-gray-600" />;
     }
   };
-  
+
   return (
     <div ref={searchRef} className="relative">
       {/* Search input */}
       <div className="relative">
         <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-        
+
         <input
           ref={inputRef}
           type="text"
@@ -93,9 +93,9 @@ const InlineSearch = () => {
             setIsResultsVisible(true);
           }}
         />
-        
+
         {searchTerm && (
-          <button 
+          <button
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
             onClick={() => setSearchTerm('')}
           >
@@ -103,7 +103,7 @@ const InlineSearch = () => {
           </button>
         )}
       </div>
-      
+
       {/* Search results dropdown */}
       {isResultsVisible && (
         <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-80 overflow-y-auto">
@@ -115,7 +115,7 @@ const InlineSearch = () => {
           ) : searchResults.length > 0 && searchTerm.trim() ? (
             <ul className="divide-y divide-gray-100">
               {searchResults.map((result, index) => (
-                <li 
+                <li
                   key={`${result.type}-${result.id}`}
                   className={`px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${
                     index === focusedIndex ? 'bg-indigo-50' : ''
@@ -134,8 +134,8 @@ const InlineSearch = () => {
                     </div>
                     <div className="self-center ml-2">
                       <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 capitalize">
-                        {result.type === 'business' ? 'Doanh nghiệp' : 
-                         result.type === 'task' ? 'Công việc' : 
+                        {result.type === 'business' ? 'Doanh nghiệp' :
+                         result.type === 'task' ? 'Công việc' :
                          result.type === 'service' ? 'Dịch vụ' : result.type}
                       </span>
                     </div>
@@ -156,7 +156,7 @@ const InlineSearch = () => {
                   { label: 'Tìm công việc', icon: <FileText size={14} className="text-blue-600" /> },
                   { label: 'Tìm bảo hành', icon: <Package size={14} className="text-purple-600" /> },
                 ].map((item, index) => (
-                  <div 
+                  <div
                     key={index}
                     className="flex items-center p-2 border border-gray-200 rounded-md text-sm text-gray-700 hover:bg-gray-50 cursor-pointer"
                     onClick={() => setSearchTerm(item.label.split(' ')[1])}
