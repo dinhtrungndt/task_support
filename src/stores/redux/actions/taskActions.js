@@ -50,7 +50,6 @@ export const addTask = (taskData, userId) => async (dispatch) => {
 
     let response;
 
-    console.log("taskToAdd:", taskToAdd.companyId);
     try {
       response = await axiosClient.post("/tasks", [taskToAdd]);
     } catch (error) {

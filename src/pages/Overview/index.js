@@ -29,7 +29,7 @@ const socket = io(process.env.REACT_APP_API_URL, {
 });
 
 socket.on("connect", () => {
-  console.log("Socket.IO connected successfully");
+  // console.log("Socket.IO connected successfully");
 });
 
 socket.on("connect_error", (error) => {
@@ -37,7 +37,7 @@ socket.on("connect_error", (error) => {
 });
 
 socket.on("disconnect", (reason) => {
-  console.log("Socket.IO disconnected:", reason);
+  // console.log("Socket.IO disconnected:", reason);
 });
 
 export const OverviewPages = () => {

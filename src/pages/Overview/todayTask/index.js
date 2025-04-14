@@ -35,7 +35,7 @@ export const TodayTasks = () => {
       .slice(0, 5);
 
     setTodayTasks(latestTasks);
-  }, [dispatch]);
+  }, [dispatch,tasks]);
 
   const getStatusClassName = (status) => {
     switch (status) {
@@ -107,7 +107,7 @@ export const TodayTasks = () => {
 
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium truncate">
-                        {task.companyName || "Không có tên"}
+                        {task.companyId.name || "Không có tên"}
                       </p>
                       <p className="text-xs text-gray-500 truncate">
                         {task.connectionType || ""}
@@ -213,7 +213,7 @@ export const TodayTasks = () => {
                             <FileText size={12} />
                           </div>
                           <span className="text-xs font-medium text-gray-900 truncate max-w-[120px]">
-                            {task.companyName || "N/A"}
+                            {task.companyId.name || "N/A"}
                           </span>
                         </div>
                       </td>

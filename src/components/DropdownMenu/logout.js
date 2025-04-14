@@ -15,7 +15,7 @@ export const DropdownMenuLogout = () => {
     });
 
     socket.on("connect", () => {
-      console.log("Socket.IO connected for logout");
+      // console.log("Socket.IO connected for logout");
       if (auth.user && auth.user.id) {
         socket.emit("user_logout", auth.user.id);
         socket.disconnect();

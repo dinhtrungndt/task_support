@@ -31,10 +31,8 @@ const taskReducer = (state = initialState, action) => {
 
       case ADD_TASK:
         const newTask = action.payload;
-        console.log("newTask Onnnnnnnn:", newTask);
         if (!newTask.companyId || typeof newTask.companyId !== 'object') {
           const company = state.businesses.find(b => b._id === newTask.companyId);
-          console.log("company:", company);
           if (company) {
             newTask.companyId = {
               _id: company._id,
@@ -44,7 +42,6 @@ const taskReducer = (state = initialState, action) => {
             };
           }
         }
-        console.log("newTask:", newTask);
         return {
           ...state,
           tasks: [...state.tasks, newTask]
