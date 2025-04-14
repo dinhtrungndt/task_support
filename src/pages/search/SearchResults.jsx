@@ -11,70 +11,70 @@ const SearchResultsPage = () => {
   const navigate = useNavigate();
   const searchQuery = new URLSearchParams(location.search).get('q') || '';
   const [activeTab, setActiveTab] = useState('All');
-  
+
   // Get data from Redux store
   const { tasks } = useSelector(state => state.tasks);
   const { businesses } = useSelector(state => state.business);
   const { services } = useSelector(state => state.services);
-  
+
   // Search results
   const [taskResults, setTaskResults] = useState([]);
   const [businessResults, setBusinessResults] = useState([]);
   const [serviceResults, setServiceResults] = useState([]);
   const [isSearching, setIsSearching] = useState(true);
-  
+
   // Perform search when query changes
   useEffect(() => {
     if (!searchQuery.trim()) {
       navigate('/');
       return;
     }
-    
+
     setIsSearching(true);
-    
+
     // Search function
     const performSearch = () => {
       const searchTermLower = searchQuery.toLowerCase();
-      
+
       // Search in tasks
-      const filteredTasks = tasks.filter(task => 
-        (task.companyName && task.companyName.toLowerCase().includes(searchTermLower)) ||
-        (task.mst && task.mst.toLowerCase().includes(searchTermLower)) ||
-        (task.address && task.address.toLowerCase().includes(searchTermLower)) ||
+      const filteredTasks = tasks.filter(task =>
+        (task.companyId.name && task.companyId.name.toLowerCase().includes(searchTermLower)) ||
+        (task.companyId.mst && task.companyId.mst.toLowerCase().includes(searchTermLower)) ||
+        (task.companyId.address && task.companyId.address.toLowerCase().includes(searchTermLower)) ||
         (task.connectionType && task.connectionType.toLowerCase().includes(searchTermLower)) ||
         (task.installer && task.installer.toLowerCase().includes(searchTermLower)) ||
         (task.codeData && task.codeData.toLowerCase().includes(searchTermLower)) ||
         (task.typeData && task.typeData.toLowerCase().includes(searchTermLower)) ||
         (task.status && task.status.toLowerCase().includes(searchTermLower))
       );
-      
+
       // Search in businesses
-      const filteredBusinesses = businesses.filter(business => 
+      const filteredBusinesses = businesses.filter(business =>
         (business.name && business.name.toLowerCase().includes(searchTermLower)) ||
         (business.mst && business.mst.toLowerCase().includes(searchTermLower)) ||
         (business.address && business.address.toLowerCase().includes(searchTermLower))
       );
-      
+
       // Search in services
-      const filteredServices = services.filter(service => 
+      const filteredServices = services.filter(service =>
         (service.name && service.name.toLowerCase().includes(searchTermLower)) ||
         (service.type && service.type.toLowerCase().includes(searchTermLower)) ||
         (service.description && service.description.toLowerCase().includes(searchTermLower)) ||
         (service.companyId?.name && service.companyId.name.toLowerCase().includes(searchTermLower))
       );
-      
+
       setTaskResults(filteredTasks);
       setBusinessResults(filteredBusinesses);
       setServiceResults(filteredServices);
       setIsSearching(false);
     };
-    
+
     performSearch();
   }, [searchQuery, tasks, businesses, services, navigate]);
-  
+
   // Calculate total results
   const totalResults = taskResults.length + businessResults.length + serviceResults.length;
-  
+
   // Tabs data
   const tabsData = [
     { id: 'all', label: 'Tất cả', count: totalResults },
@@ -82,7 +82,7 @@ const SearchResultsPage = () => {
     { id: 'businesses', label: 'Doanh nghiệp', count: businessResults.length },
     { id: 'services', label: 'Dịch vụ', count: serviceResults.length },
   ];
-  
+
   // Handle navigation
   const handleItemClick = (type, id) => {
     switch(type) {
@@ -99,7 +99,7 @@ const SearchResultsPage = () => {
         break;
     }
   };
-  
+
   // Get status class for tasks
   const getStatusClassName = (status) => {
     switch (status) {
@@ -113,11 +113,11 @@ const SearchResultsPage = () => {
         return "bg-gray-100 text-gray-700";
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderPages title="Kết quả tìm kiếm" />
-      
+
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         {/* Search header */}
         <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
@@ -132,7 +132,7 @@ const SearchResultsPage = () => {
                 onChange={(e) => navigate(`/search?q=${encodeURIComponent(e.target.value)}`)}
               />
               {searchQuery && (
-                <button 
+                <button
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   onClick={() => navigate('/search?q=')}
                 >
@@ -142,7 +142,7 @@ const SearchResultsPage = () => {
             </div>
           </div>
         </div>
-        
+
         {isSearching ? (
           <div className="bg-white p-8 rounded-lg shadow-sm flex flex-col items-center justify-center">
             <div className="w-12 h-12 border-b-2 border-indigo-600 rounded-full animate-spin mb-4"></div>
@@ -162,7 +162,7 @@ const SearchResultsPage = () => {
                   ))}
                 </TabsList>
               </div>
-              
+
               {/* Search results */}
               <TabsContent value="all" className="space-y-4 mt-4">
                 {/* Tasks section */}
@@ -175,7 +175,7 @@ const SearchResultsPage = () => {
                         <span className="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-600">{taskResults.length}</span>
                       </div>
                       {taskResults.length > 5 && (
-                        <button 
+                        <button
                           className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center transition-colors"
                           onClick={() => setActiveTab('tasks')}
                         >
@@ -183,18 +183,18 @@ const SearchResultsPage = () => {
                         </button>
                       )}
                     </div>
-                    
+
                     <div className="divide-y divide-gray-100">
                       {(activeTab === 'all' ? taskResults.slice(0, 5) : taskResults).map(task => (
-                        <div 
-                          key={task._id} 
+                        <div
+                          key={task._id}
                           className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
                           onClick={() => handleItemClick('task', task._id)}
                         >
                           <div className="flex justify-between items-start">
                             <div>
-                              <h4 className="font-medium text-gray-800">{task.companyName || 'Không có tên'}</h4>
-                              <p className="text-sm text-gray-500 mt-1">MST: {task.mst || 'N/A'}</p>
+                              <h4 className="font-medium text-gray-800">{task.companyId.name || 'Không có tên'}</h4>
+                              <p className="text-sm text-gray-500 mt-1">MST: {task.companyId.mst || 'N/A'}</p>
                               <div className="flex items-center mt-2 text-xs text-gray-500">
                                 <span>Loại kết nối: {task.connectionType || 'N/A'}</span>
                                 <span className="mx-2">•</span>
@@ -210,7 +210,7 @@ const SearchResultsPage = () => {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Businesses section */}
                 {businessResults.length > 0 && (
                   <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -221,7 +221,7 @@ const SearchResultsPage = () => {
                         <span className="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-600">{businessResults.length}</span>
                       </div>
                       {businessResults.length > 5 && (
-                        <button 
+                        <button
                           className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center transition-colors"
                           onClick={() => setActiveTab('businesses')}
                         >
@@ -229,11 +229,11 @@ const SearchResultsPage = () => {
                         </button>
                       )}
                     </div>
-                    
+
                     <div className="divide-y divide-gray-100">
                       {(activeTab === 'all' ? businessResults.slice(0, 5) : businessResults).map(business => (
-                        <div 
-                          key={business._id} 
+                        <div
+                          key={business._id}
                           className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
                           onClick={() => handleItemClick('business', business._id)}
                         >
@@ -254,7 +254,7 @@ const SearchResultsPage = () => {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Services section */}
                 {serviceResults.length > 0 && (
                   <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -265,7 +265,7 @@ const SearchResultsPage = () => {
                         <span className="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-600">{serviceResults.length}</span>
                       </div>
                       {serviceResults.length > 5 && (
-                        <button 
+                        <button
                           className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center transition-colors"
                           onClick={() => setActiveTab('services')}
                         >
@@ -273,11 +273,11 @@ const SearchResultsPage = () => {
                         </button>
                       )}
                     </div>
-                    
+
                     <div className="divide-y divide-gray-100">
                       {(activeTab === 'all' ? serviceResults.slice(0, 5) : serviceResults).map(service => (
-                        <div 
-                          key={service._id} 
+                        <div
+                          key={service._id}
                           className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
                           onClick={() => handleItemClick('service', service._id)}
                         >
@@ -308,7 +308,7 @@ const SearchResultsPage = () => {
                   </div>
                 )}
               </TabsContent>
-              
+
               {/* Tasks tab */}
               <TabsContent value="tasks" className="space-y-4 mt-4">
                 {taskResults.length > 0 ? (
@@ -323,18 +323,18 @@ const SearchResultsPage = () => {
                         <Filter size={16} className="text-gray-500" />
                       </button>
                     </div>
-                    
+
                     <div className="divide-y divide-gray-100">
                       {taskResults.map(task => (
-                        <div 
-                          key={task._id} 
+                        <div
+                          key={task._id}
                           className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
                           onClick={() => handleItemClick('task', task._id)}
                         >
                           <div className="flex justify-between items-start">
                             <div>
-                              <h4 className="font-medium text-gray-800">{task.companyName || 'Không có tên'}</h4>
-                              <p className="text-sm text-gray-500 mt-1">MST: {task.mst || 'N/A'}</p>
+                              <h4 className="font-medium text-gray-800">{task.companyId.name || 'Không có tên'}</h4>
+                              <p className="text-sm text-gray-500 mt-1">MST: {task.companyId.mst || 'N/A'}</p>
                               <div className="flex items-center mt-2 text-xs text-gray-500">
                                 <span>Loại kết nối: {task.connectionType || 'N/A'}</span>
                                 <span className="mx-2">•</span>
@@ -354,13 +354,13 @@ const SearchResultsPage = () => {
                     <AlertTriangle size={48} className="text-amber-400 mb-4" />
                     <h3 className="text-lg font-medium text-gray-700 mb-2">Không tìm thấy công việc nào</h3>
                     <p className="text-gray-500 text-center max-w-md">
-                      Không tìm thấy công việc nào phù hợp với từ khóa "{searchQuery}". 
+                      Không tìm thấy công việc nào phù hợp với từ khóa "{searchQuery}".
                       Vui lòng thử từ khóa khác hoặc kiểm tra lại chính tả.
                     </p>
                   </div>
                 )}
               </TabsContent>
-              
+
               {/* Businesses tab */}
               <TabsContent value="businesses" className="space-y-4 mt-4">
                 {businessResults.length > 0 ? (
@@ -375,11 +375,11 @@ const SearchResultsPage = () => {
                         <Filter size={16} className="text-gray-500" />
                       </button>
                     </div>
-                    
+
                     <div className="divide-y divide-gray-100">
                       {businessResults.map(business => (
-                        <div 
-                          key={business._id} 
+                        <div
+                          key={business._id}
                           className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
                           onClick={() => handleItemClick('business', business._id)}
                         >
@@ -404,13 +404,13 @@ const SearchResultsPage = () => {
                     <AlertTriangle size={48} className="text-amber-400 mb-4" />
                     <h3 className="text-lg font-medium text-gray-700 mb-2">Không tìm thấy doanh nghiệp nào</h3>
                     <p className="text-gray-500 text-center max-w-md">
-                      Không tìm thấy doanh nghiệp nào phù hợp với từ khóa "{searchQuery}". 
+                      Không tìm thấy doanh nghiệp nào phù hợp với từ khóa "{searchQuery}".
                       Vui lòng thử từ khóa khác hoặc kiểm tra lại chính tả.
                     </p>
                   </div>
                 )}
               </TabsContent>
-              
+
               {/* Services tab */}
               <TabsContent value="services" className="space-y-4 mt-4">
                 {serviceResults.length > 0 ? (
@@ -425,11 +425,11 @@ const SearchResultsPage = () => {
                         <Filter size={16} className="text-gray-500" />
                       </button>
                     </div>
-                    
+
                     <div className="divide-y divide-gray-100">
                       {serviceResults.map(service => (
-                        <div 
-                          key={service._id} 
+                        <div
+                          key={service._id}
                           className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
                           onClick={() => handleItemClick('service', service._id)}
                         >
@@ -463,7 +463,7 @@ const SearchResultsPage = () => {
                     <AlertTriangle size={48} className="text-amber-400 mb-4" />
                     <h3 className="text-lg font-medium text-gray-700 mb-2">Không tìm thấy dịch vụ nào</h3>
                     <p className="text-gray-500 text-center max-w-md">
-                      Không tìm thấy dịch vụ nào phù hợp với từ khóa "{searchQuery}". 
+                      Không tìm thấy dịch vụ nào phù hợp với từ khóa "{searchQuery}".
                       Vui lòng thử từ khóa khác hoặc kiểm tra lại chính tả.
                     </p>
                   </div>
@@ -476,7 +476,7 @@ const SearchResultsPage = () => {
             <AlertTriangle size={48} className="text-amber-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-700 mb-2">Không tìm thấy kết quả</h3>
             <p className="text-gray-500 text-center max-w-md">
-              Không tìm thấy kết quả nào phù hợp với từ khóa "{searchQuery}". 
+              Không tìm thấy kết quả nào phù hợp với từ khóa "{searchQuery}".
               Vui lòng thử từ khóa khác hoặc kiểm tra lại chính tả.
             </p>
           </div>

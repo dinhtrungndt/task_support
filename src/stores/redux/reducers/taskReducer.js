@@ -1,10 +1,10 @@
-import { 
-  FETCH_TASKS, 
-  FETCH_TASKS_ERROR, 
-  ADD_TASK, 
-  UPDATE_TASK, 
-  DELETE_TASK, 
-  DELETE_TASKS 
+import {
+  FETCH_TASKS,
+  FETCH_TASKS_ERROR,
+  ADD_TASK,
+  UPDATE_TASK,
+  DELETE_TASK,
+  DELETE_TASKS
 } from "../actions/types";
 
 const initialState = {
@@ -16,25 +16,40 @@ const initialState = {
 const taskReducer = (state = initialState, action) => {
   switch (action.type) {
     case FETCH_TASKS:
-      return { 
-        ...state, 
-        tasks: action.payload, 
-        loading: false 
+      return {
+        ...state,
+        tasks: action.payload,
+        loading: false
       };
-      
+
     case FETCH_TASKS_ERROR:
-      return { 
-        ...state, 
-        error: action.payload, 
-        loading: false 
+      return {
+        ...state,
+        error: action.payload,
+        loading: false
       };
-      
-    case ADD_TASK:
-      return { 
-        ...state, 
-        tasks: [...state.tasks, action.payload] 
-      };
-      
+
+      case ADD_TASK:
+        const newTask = action.payload;
+        console.log("newTask Onnnnnnnn:", newTask);
+        if (!newTask.companyId || typeof newTask.companyId !== 'object') {
+          const company = state.businesses.find(b => b._id === newTask.companyId);
+          console.log("company:", company);
+          if (company) {
+            newTask.companyId = {
+              _id: company._id,
+              mst: company.mst,
+              name: company.name,
+              address: company.address
+            };
+          }
+        }
+        console.log("newTask:", newTask);
+        return {
+          ...state,
+          tasks: [...state.tasks, newTask]
+        };
+
     case UPDATE_TASK:
       return {
         ...state,
@@ -42,19 +57,19 @@ const taskReducer = (state = initialState, action) => {
           task._id === action.payload._id ? { ...task, ...action.payload } : task
         ),
       };
-      
+
     case DELETE_TASK:
       return {
         ...state,
         tasks: state.tasks.filter(task => task._id !== action.payload),
       };
-      
+
     case DELETE_TASKS:
       return {
         ...state,
         tasks: state.tasks.filter(task => !action.payload.includes(task._id)),
       };
-      
+
     default:
       return state;
   }

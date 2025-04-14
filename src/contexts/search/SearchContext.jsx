@@ -30,9 +30,9 @@ export const SearchProvider = ({ children }) => {
 
       const taskResults = tasks
         .filter(task =>
-          (task.companyName && task.companyName.toLowerCase().includes(searchTermLower)) ||
-          (task.mst && task.mst.toLowerCase().includes(searchTermLower)) ||
-          (task.address && task.address.toLowerCase().includes(searchTermLower)) ||
+          (task.companyId.name && task.companyId.name.toLowerCase().includes(searchTermLower)) ||
+          (task.companyId.mst && task.companyId.mst.toLowerCase().includes(searchTermLower)) ||
+          (task.companyId.address && task.companyId.address.toLowerCase().includes(searchTermLower)) ||
           (task.connectionType && task.connectionType.toLowerCase().includes(searchTermLower)) ||
           (task.installer && task.installer.toLowerCase().includes(searchTermLower)) ||
           (task.codeData && task.codeData.toLowerCase().includes(searchTermLower)) ||
@@ -43,8 +43,8 @@ export const SearchProvider = ({ children }) => {
         .map(task => ({
           id: task._id,
           type: 'task',
-          title: task.companyName || 'Không có tên',
-          subtitle: `MST: ${task.mst || 'N/A'} - ${task.status || 'Pending'}`,
+          title: task.companyId.name || 'Không có tên',
+          subtitle: `MST: ${task.companyId.mst || 'N/A'} - ${task.status || 'Pending'}`,
           route: '/task',
           data: task
         }));

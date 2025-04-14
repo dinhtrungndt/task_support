@@ -41,7 +41,7 @@ export const Tasks = ({
   };
 
   // Format date for display
- const formatDate = (dateString) => {
+  const formatDate = (dateString) => {
     const currentTime = moment();
     const postTime = moment(dateString);
     const diffInSeconds = currentTime.diff(postTime, 'seconds');
@@ -125,9 +125,9 @@ export const Tasks = ({
                       onChange={() => handleCheckboxChange(task._id)}
                     />
                   </td>
-                  <td className="p-3 border-b font-medium text-gray-900">{task.mst || 'N/A'}</td>
-                  <td className="p-3 border-b">{task.companyName || 'N/A'}</td>
-                  <td className="p-3 border-b text-gray-500">{task.address || 'N/A'}</td>
+                  <td className="p-3 border-b font-medium text-gray-900">{task.companyId && typeof task.companyId === 'object' ? task.companyId.mst : 'N/A'}</td>
+                  <td className="p-3 border-b">{task.companyId && typeof task.companyId === 'object'? task.companyId.name: 'N/A'}</td>
+                  <td className="p-3 border-b text-gray-500">{task.companyId && typeof task.companyId === 'object'? task.companyId.address: 'N/A'}</td>
                   <td className="p-3 border-b">{task.connectionType || 'N/A'}</td>
                   <td className="p-3 border-b">{task.installer || 'N/A'}</td>
                   <td className="p-3 border-b">{task.codeData || 'N/A'}</td>
@@ -151,7 +151,7 @@ export const Tasks = ({
                   </td>
                   <td className="p-3 border-b text-right relative">
                     <div>
-                      <button 
+                      <button
                         className="p-1 rounded-full hover:bg-gray-100 transition-colors"
                         onClick={() => toggleDropdown(index)}
                       >

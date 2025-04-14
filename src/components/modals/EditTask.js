@@ -29,9 +29,9 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
       // Initialize form with task data
       setFormData({
         _id: task._id || '',
-        mst: task.mst || '',
-        companyName: task.companyName || '',
-        address: task.address || '',
+        mst: task.companyId.mst || '',
+        companyName: task.companyId.name || '',
+        address: task.companyId.address || '',
         connectionType: task.connectionType || '',
         installer: task.installer || '',
         codeData: task.codeData || '',

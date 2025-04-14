@@ -8,10 +8,10 @@ export const ActiveFilter = ({ TaskData, setFilteredTasks, searchTerm }) => {
     useEffect(() => {
       filterTasks();
     }, [searchTerm, activeFilter]);
-  
+
     const filterTasks = () => {
       let results = TaskData;
-  
+
       // Lọc theo trạng thái nếu không phải 'all'
       if (activeFilter !== 'all') {
         const statusMap = {
@@ -21,14 +21,14 @@ export const ActiveFilter = ({ TaskData, setFilteredTasks, searchTerm }) => {
         };
         results = results.filter(task => task.status === statusMap[activeFilter]);
       }
-  
+
       // Lọc theo từ khóa tìm kiếm
       if (searchTerm.trim() !== '') {
         const term = searchTerm.toLowerCase().trim();
         results = results.filter(task =>
-          task.mst.toLowerCase().includes(term) ||
-          task.name.toLowerCase().includes(term) ||
-          task.address.toLowerCase().includes(term) ||
+          task.companyId.mst.toLowerCase().includes(term) ||
+          task.companyId.name.toLowerCase().includes(term) ||
+          task.companyId.address.toLowerCase().includes(term) ||
           task.connectionType.toLowerCase().includes(term) ||
           task.PInstaller.toLowerCase().includes(term) ||
           task.codeData.toLowerCase().includes(term) ||
@@ -36,10 +36,10 @@ export const ActiveFilter = ({ TaskData, setFilteredTasks, searchTerm }) => {
           (task.userId.name && task.userId.name.toLowerCase().includes(term))
         );
       }
-  
+
       setFilteredTasks(results);
     };
-  
+
     const handleFilterClick = (filter) => {
       setActiveFilter(filter);
     };

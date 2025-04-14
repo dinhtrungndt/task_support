@@ -108,9 +108,9 @@ export const TaskPages = () => {
         if (!task) return false;
 
         return (
-          (task.companyName || "").toLowerCase().includes(searchTermLower) ||
-          (task.mst || "").toLowerCase().includes(searchTermLower) ||
-          (task.address || "").toLowerCase().includes(searchTermLower) ||
+          (task.companyId.name || "").toLowerCase().includes(searchTermLower) ||
+          (task.companyId.mst || "").toLowerCase().includes(searchTermLower) ||
+          (task.companyId.address || "").toLowerCase().includes(searchTermLower) ||
           (task.connectionType || "").toLowerCase().includes(searchTermLower) ||
           (task.installer || "").toLowerCase().includes(searchTermLower) ||
           (task.codeData || "").toLowerCase().includes(searchTermLower) ||
@@ -237,9 +237,9 @@ export const TaskPages = () => {
     // Prepare data for Excel
     const exportData = dataToExport.map((task) => {
       return {
-        MST: task.mst || "",
-        "Tên công ty": task.companyName || "",
-        "Địa chỉ": task.address || "",
+        MST: task.companyId.mst || "",
+        "Tên công ty": task.companyId.name || "",
+        "Địa chỉ": task.companyId.address || "",
         "Loại kết nối": task.connectionType || "",
         "Người lắp đặt": task.installer || "",
         "Mã dữ liệu": task.codeData || "",

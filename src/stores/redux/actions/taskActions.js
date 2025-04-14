@@ -34,11 +34,8 @@ export const addTask = (taskData, userId) => async (dispatch) => {
       );
     }
 
-    // Make sure installer and codeData have values since they're required
+    // Prepare data for submission
     const taskToAdd = {
-      mst: taskData.mst || "",
-      companyName: taskData.name || taskData.companyName || "",
-      address: taskData.address || "",
       connectionType: taskData.connectionType || "",
       installer: taskData.PInstaller || taskData.installer || "N/A",
       codeData: taskData.codeData || "N/A",
@@ -52,6 +49,8 @@ export const addTask = (taskData, userId) => async (dispatch) => {
     };
 
     let response;
+
+    console.log("taskToAdd:", taskToAdd.companyId);
     try {
       response = await axiosClient.post("/tasks", [taskToAdd]);
     } catch (error) {
@@ -62,12 +61,21 @@ export const addTask = (taskData, userId) => async (dispatch) => {
       }
     }
 
+    // Sau khi thêm task, cần fetch chi tiết task đã được populate đầy đủ
+    let createdTask = Array.isArray(response.data) ? response.data[0] : response.data;
+
+    // Lấy chi tiết của task mới tạo để có thông tin đầy đủ
+    if (createdTask._id) {
+      const detailResponse = await axiosClient.get(`/tasks/${createdTask._id}`);
+      createdTask = detailResponse.data;
+    }
+
     dispatch({
       type: ADD_TASK,
-      payload: Array.isArray(response.data) ? response.data[0] : response.data,
+      payload: createdTask,
     });
 
-    return Array.isArray(response.data) ? response.data[0] : response.data;
+    return createdTask;
   } catch (error) {
     console.error("Add task error details:", error.response?.data || error);
     dispatch({
@@ -86,9 +94,6 @@ export const updateTask = (taskData) => async (dispatch) => {
     }
 
     const taskToUpdate = {
-      mst: taskData.mst || "",
-      companyName: taskData.name || taskData.companyName || "",
-      address: taskData.address || "",
       connectionType: taskData.connectionType || "",
       installer: taskData.PInstaller || taskData.installer || "N/A",
       codeData: taskData.codeData || "N/A",
@@ -100,7 +105,6 @@ export const updateTask = (taskData) => async (dispatch) => {
       userAdd: taskData.userAdd,
     };
 
-    // Use the updated endpoint
     const response = await axiosClient.put(
       `/tasks/${taskData._id}`,
       taskToUpdate
