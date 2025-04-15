@@ -173,7 +173,6 @@ export const EditBusinessModal = ({
       setIsSubmitting(true);
 
       if (!editedBusiness._id) {
-        console.error("Missing _id in editedBusiness:", editedBusiness);
         toast.error("Lỗi: ID doanh nghiệp không xác định");
         return;
       }
@@ -188,7 +187,6 @@ export const EditBusinessModal = ({
 
       await onSave(businessToUpdate);
     } catch (error) {
-      console.error("Error in handleSave:", error);
       toast.error("Lỗi khi cập nhật: " + (error.message || "Đã xảy ra lỗi"));
     } finally {
       setIsSubmitting(false);

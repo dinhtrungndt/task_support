@@ -76,7 +76,7 @@ export const addTask = (taskData, userId) => async (dispatch) => {
 
     return createdTask;
   } catch (error) {
-    console.error("Add task error details:", error.response?.data || error);
+    // console.error("Add task error details:", error.response?.data || error);
     dispatch({
       type: FETCH_TASKS_ERROR,
       payload: error.message,

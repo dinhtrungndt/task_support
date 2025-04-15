@@ -11,7 +11,7 @@ export const updateLastActivity = () => {
     const now = Date.now();
     secureStorage.setItem(ACTIVITY_TIMESTAMP_KEY, now);
   } catch (error) {
-    console.error("Error updating last activity timestamp");
+    // console.error("Error updating last activity timestamp");
   }
 };
 
@@ -33,7 +33,7 @@ export const isSessionExpired = () => {
 
     return timeSinceLastActivity > INACTIVITY_TIMEOUT;
   } catch (error) {
-    console.error("Error checking session expiry");
+    // console.error("Error checking session expiry");
     // Nếu có lỗi, coi như phiên đã hết hạn để an toàn
     return true;
   }

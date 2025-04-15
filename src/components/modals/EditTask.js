@@ -85,7 +85,6 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
 
       toast.success('Cập nhật công việc thành công');
     } catch (error) {
-      console.error('Error updating task:', error);
       toast.error('Lỗi khi cập nhật công việc: ' + (error.message || 'Đã xảy ra lỗi'));
     } finally {
       setIsSubmitting(false);

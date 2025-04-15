@@ -28,7 +28,7 @@ export const logSecurityEvent = async (eventType, details) => {
       ipAddress: 'client-side' // IP thực được ghi nhận ở server
     });
   } catch (error) {
-    console.error('Failed to log security event:', error);
+    // console.error('Failed to log security event:', error);
   }
 };
 

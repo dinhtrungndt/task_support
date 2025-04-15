@@ -52,7 +52,7 @@ export const addService = (service) => async (dispatch) => {
 
     return response.data;
   } catch (error) {
-    console.error("Error in addService action:", error.response?.data || error);
+    // console.error("Error in addService action:", error.response?.data || error);
     dispatch({
       type: FETCH_SERVICES_ERROR,
       payload: error.response?.data?.message || error.message,
@@ -65,7 +65,7 @@ export const addService = (service) => async (dispatch) => {
 export const updateService = (service) => async (dispatch) => {
   try {
     if (!service._id) {
-      console.error("Service object is missing _id:", service);
+      // console.error("Service object is missing _id:", service);
       throw new Error("Service ID is missing or undefined");
     }
 
@@ -78,7 +78,7 @@ export const updateService = (service) => async (dispatch) => {
 
     return response.data;
   } catch (error) {
-    console.error("Error updating service:", error);
+    // console.error("Error updating service:", error);
     dispatch({
       type: FETCH_SERVICES_ERROR,
       payload: error.response?.data?.message || error.message,
@@ -99,7 +99,7 @@ export const deleteService = (serviceId) => async (dispatch) => {
 
     return response.data;
   } catch (error) {
-    console.error("Error deleting service:", error);
+    // console.error("Error deleting service:", error);
     dispatch({
       type: FETCH_SERVICES_ERROR,
       payload: error.response?.data?.message || error.message,
@@ -122,7 +122,7 @@ export const deleteServices = (serviceIds) => async (dispatch) => {
 
     return response.data;
   } catch (error) {
-    console.error("Error bulk deleting services:", error);
+    // console.error("Error bulk deleting services:", error);
     dispatch({
       type: FETCH_SERVICES_ERROR,
       payload: error.response?.data?.message || error.message,

@@ -3,7 +3,7 @@ import axiosClient from '../api/axiosClient';
 
 const CSRFToken = () => {
   const [csrfToken, setCsrfToken] = useState('');
-  
+
   useEffect(() => {
     // Lấy CSRF token từ server (tùy thuộc vào cấu hình backend của bạn)
     const fetchCSRFToken = async () => {
@@ -11,7 +11,7 @@ const CSRFToken = () => {
         const response = await axiosClient.get('/csrf-token');
         const token = response.data.csrfToken;
         setCsrfToken(token);
-        
+
         // Đặt token vào meta tag để sử dụng trong interceptor
         const metaTag = document.querySelector('meta[name="csrf-token"]');
         if (metaTag) {
@@ -24,13 +24,13 @@ const CSRFToken = () => {
           document.head.appendChild(newMetaTag);
         }
       } catch (error) {
-        console.error('Failed to fetch CSRF token:', error);
+        // console.error('Failed to fetch CSRF token:', error);
       }
     };
-    
+
     fetchCSRFToken();
   }, []);
-  
+
   return (
     <input type="hidden" name="_csrf" value={csrfToken} />
   );

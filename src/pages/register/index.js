@@ -146,8 +146,6 @@ const Register = () => {
         }
       }
     } catch (error) {
-      console.error("Lỗi đăng ký:", error);
-
       // Xử lý lỗi theo loại
       if (error.response) {
         // Lỗi từ server

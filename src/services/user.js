@@ -49,7 +49,6 @@ export const login = async ({ email, password }) => {
     return null;
   } catch (error) {
     // Không in chi tiết lỗi để tránh rò rỉ thông tin nhạy cảm
-    console.error("Login error");
     return null;
   }
 };
@@ -59,7 +58,7 @@ export const refreshToken = async () => {
   try {
     const refreshToken = secureStorage.getItem("rtk");
     if (!refreshToken) {
-      console.warn("Không có refresh token");
+      // console.warn("Không có refresh token");
       return null;
     }
 
@@ -78,11 +77,11 @@ export const refreshToken = async () => {
       return data.accessToken;
     }
 
-    console.warn("Server không trả về accessToken mới");
+    // console.warn("Server không trả về accessToken mới");
     return null;
   } catch (error) {
     // Không log chi tiết lỗi để tránh rò rỉ thông tin nhạy cảm
-    console.error("Refresh token error");
+    // console.error("Refresh token error");
 
     // Chỉ xóa token khi có lỗi nghiêm trọng
     if (error.response && error.response.status === 403) {

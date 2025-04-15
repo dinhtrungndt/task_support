@@ -68,7 +68,6 @@ export const ProfileSetting = ({ darkMode, profileSettings, handleProfileChange,
         toast.success('Cập nhật ảnh đại diện thành công');
       }
     } catch (error) {
-      console.error('Upload error:', error);
       toast.error('Không thể tải lên ảnh đại diện. Vui lòng thử lại sau.');
     } finally {
       setIsUploading(false);
@@ -97,7 +96,6 @@ export const ProfileSetting = ({ darkMode, profileSettings, handleProfileChange,
         setHasChanges(false);
       }
     } catch (error) {
-      console.error('Update profile error:', error);
       toast.error('Không thể cập nhật thông tin. Vui lòng thử lại sau.');
     } finally {
       setIsSaving(false);

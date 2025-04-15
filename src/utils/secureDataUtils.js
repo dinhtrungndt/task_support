@@ -26,7 +26,7 @@ class SecureStorage {
       // Lưu dữ liệu đã mã hóa vào localStorage
       localStorage.setItem(key, encrypted);
     } catch (error) {
-      console.error("Error encrypting and storing data:", key);
+      // console.error("Error encrypting and storing data:", key);
     }
   }
 
@@ -57,7 +57,7 @@ class SecureStorage {
       // Chuyển đổi chuỗi JSON thành object
       return JSON.parse(decrypted);
     } catch (error) {
-      console.error("Error decrypting data:", key);
+      // console.error("Error decrypting data:", key);
       return null;
     }
   }

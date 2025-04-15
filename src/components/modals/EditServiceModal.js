@@ -9,10 +9,10 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
   const auth = useContext(AuthContext);
   const { user } = auth;
   const isMounted = useRef(true);
-  
+
   // Get all users from the Redux store
   const { users } = useSelector(state => state.users);
-  
+
   const [formData, setFormData] = useState({
     _id: '',
     name: '',
@@ -29,13 +29,13 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
   const [currentFeature, setCurrentFeature] = useState('');
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // User selection state
   const [userSearch, setUserSearch] = useState('');
   const [filteredUsers, setFilteredUsers] = useState(users || []);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  
+
   // Business selection state
   const [selectedBusiness, setSelectedBusiness] = useState(null);
 
@@ -54,15 +54,15 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
         userCreated: service.userCreated?._id || service.userCreated || '',
         companyId: service.companyId?._id || service.companyId || ''
       });
-      
+
       // Find the user object from the users array
-      const userObj = users.find(u => 
+      const userObj = users.find(u =>
         u.id === (service.userCreated?.id || service.userCreated)
       );
       if (userObj) {
         setSelectedUser(userObj);
       }
-      
+
       // Set selected business if available
       if (service.companyId) {
         setSelectedBusiness(
@@ -70,12 +70,12 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
         );
       }
     }
-    
+
     return () => {
       isMounted.current = false;
     };
   }, [service, users]);
-  
+
   // Filter users based on search term
   useEffect(() => {
     if (userSearch.trim() === '') {
@@ -97,7 +97,7 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear validation error when field is edited
     if (errors[name]) {
       setErrors(prev => ({
@@ -106,7 +106,7 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
       }));
     }
   };
-  
+
   // Handle user selection
   const handleUserSelect = (selectedUser) => {
     setSelectedUser(selectedUser);
@@ -117,7 +117,7 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
     setUserSearch('');
     setShowUserDropdown(false);
   };
-  
+
   // Handle business selection
   const handleBusinessSelect = (business) => {
     setSelectedBusiness(business);
@@ -126,7 +126,7 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
       companyId: business._id
     }));
   };
-  
+
   // Handle clear business selection
   const handleClearBusinessSelection = () => {
     setSelectedBusiness(null);
@@ -158,27 +158,27 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
   // Validate form fields
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = 'Tên dịch vụ không được để trống';
     }
-    
+
     if (!formData.type) {
       newErrors.type = 'Vui lòng chọn loại dịch vụ';
     }
-    
+
     if (formData.price === '' || isNaN(formData.price) || Number(formData.price) < 0) {
       newErrors.price = 'Giá dịch vụ phải là số dương';
     }
-    
+
     if (formData.duration === '' || isNaN(formData.duration) || Number(formData.duration) < 1) {
       newErrors.duration = 'Thời hạn phải là số nguyên dương';
     }
-    
+
     if (!formData.companyId) {
       newErrors.companyId = 'Vui lòng chọn doanh nghiệp';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -186,24 +186,23 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
   // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
-      
+
       // Format data for submission
       const serviceToSubmit = {
         ...formData,
         price: Number(formData.price),
         duration: Number(formData.duration)
       };
-      
+
       await onSave(serviceToSubmit);
     } catch (error) {
-      console.error('Error updating service:', error);
       toast.error("Lỗi khi cập nhật dịch vụ: " + (error.message || "Đã xảy ra lỗi"));
     } finally {
       setIsSubmitting(false);
@@ -225,7 +224,7 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
         />
         {errors.companyId && <p className="mt-1 text-xs text-red-500">{errors.companyId}</p>}
       </div>
-      
+
       {/* Tên dịch vụ */}
       <div>
         <label htmlFor="name" className="block text-xs font-medium text-gray-700 mb-1">
@@ -366,7 +365,7 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
             <Plus size={14} />
           </button>
         </div>
-        
+
         {/* Feature list */}
         {formData.features.length > 0 && (
           <div className="mt-1 space-y-1 max-h-20 overflow-y-auto">

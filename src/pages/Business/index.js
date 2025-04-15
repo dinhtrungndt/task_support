@@ -113,10 +113,10 @@ export const BusinessPages = () => {
   const handleSaveBusiness = async (updatedBusiness) => {
     try {
       if (!updatedBusiness._id) {
-        console.error(
-          "Business missing ID in handleSaveBusiness:",
-          updatedBusiness
-        );
+        // console.error(
+        //   "Business missing ID in handleSaveBusiness:",
+        //   updatedBusiness
+        // );
         toast.error("Lỗi: Không thể cập nhật doanh nghiệp không có ID");
         return;
       }
@@ -132,7 +132,7 @@ export const BusinessPages = () => {
       setEditModalOpen(false);
       toast.success("Cập nhật doanh nghiệp thành công");
     } catch (error) {
-      console.error("Error in handleSaveBusiness:", error);
+      // console.error("Error in handleSaveBusiness:", error);
       toast.error(
         "Lỗi khi cập nhật doanh nghiệp: " + (error.message || "Đã xảy ra lỗi")
       );

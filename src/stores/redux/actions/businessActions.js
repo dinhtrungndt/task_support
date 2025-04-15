@@ -52,7 +52,7 @@ export const addBusiness = (business) => async (dispatch) => {
 export const updateBusiness = (business) => async (dispatch) => {
   try {
     if (!business._id) {
-      console.error("Business object is missing _id:", business);
+      // console.error("Business object is missing _id:", business);
       throw new Error("Business ID is missing or undefined");
     }
 
@@ -83,7 +83,7 @@ export const updateBusiness = (business) => async (dispatch) => {
       _id: business._id,
     };
   } catch (error) {
-    console.error("Error updating business:", error);
+    // console.error("Error updating business:", error);
     dispatch({
       type: FETCH_BUSINESSES_ERROR,
       payload: error.message || "Failed to update business",

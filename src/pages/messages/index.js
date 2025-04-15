@@ -99,7 +99,6 @@ export const MessagesPage = () => {
       });
       setImage(res.data.imageUrl);
     } catch (error) {
-      console.error('Lỗi tải ảnh:', error);
       alert('Không thể tải ảnh lên, vui lòng thử lại');
     }
     setLoadingImg(false);

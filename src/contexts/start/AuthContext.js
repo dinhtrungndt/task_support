@@ -33,7 +33,7 @@ const safelyDecodeToken = (token) => {
 
     return JSON.parse(jsonPayload);
   } catch (error) {
-    console.error("Token decode error");
+    // console.error("Token decode error");
     return null;
   }
 };
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
     if (user) {
       const token = secureStorage.getItem("tz");
       if (!token) {
-        console.error("No token found. Please log in.");
+        // console.error("No token found. Please log in.");
         return;
       }
 
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }) => {
                     }
                   }
                 } catch (refreshError) {
-                  console.warn("Token refresh failed during initialization");
+                  // console.warn("Token refresh failed during initialization");
                 }
               }
             }
@@ -105,7 +105,7 @@ export const AuthProvider = ({ children }) => {
 
             resetActivityTimestamp();
           } catch (tokenError) {
-            console.error("Token validation error");
+            // console.error("Token validation error");
             setUser(storedUser);
             dispatch(setCurrentUser(storedUser));
 
@@ -113,7 +113,7 @@ export const AuthProvider = ({ children }) => {
           }
         }
       } catch (error) {
-        console.error("Auth initialization error");
+        // console.error("Auth initialization error");
         handleLogout();
       } finally {
         setLoading(false);
@@ -146,7 +146,7 @@ export const AuthProvider = ({ children }) => {
           // console.error("Authentication failed. Please log in again.");
           handleLogout();
         } else {
-          console.error("Socket.IO connection error:", error);
+          // console.error("Socket.IO connection error:", error);
         }
       });
 

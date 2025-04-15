@@ -123,10 +123,6 @@ export const ServicePages = () => {
   const handleSaveService = async (updatedService) => {
     try {
       if (!updatedService._id) {
-        console.error(
-          "Service missing ID in handleSaveService:",
-          updatedService
-        );
         toast.error("Lỗi: Không thể cập nhật dịch vụ không có ID");
         return;
       }
@@ -142,7 +138,6 @@ export const ServicePages = () => {
       setEditModalOpen(false);
       toast.success("Cập nhật dịch vụ thành công");
     } catch (error) {
-      console.error("Error in handleSaveService:", error);
       toast.error(
         "Lỗi khi cập nhật dịch vụ: " + (error.message || "Đã xảy ra lỗi")
       );

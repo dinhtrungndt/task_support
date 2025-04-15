@@ -56,7 +56,6 @@ const Login = () => {
         toast.error("Email hoặc mật khẩu không đúng!");
       }
     } catch (error) {
-      console.error("Login error:", error);
 
       // Xử lý các loại lỗi cụ thể
       if (error.response) {

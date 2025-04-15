@@ -38,7 +38,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
         userCreated: user.id
       }));
     }
-    
+
     return () => {
       isMounted.current = false;
     };
@@ -51,7 +51,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear validation error when field is edited
     if (errors[name]) {
       setErrors(prev => ({
@@ -69,7 +69,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
       companyId: business._id
     }));
   };
-  
+
   // Handle clearing business selection
   const handleClearBusinessSelection = () => {
     setSelectedBusiness(null);
@@ -101,27 +101,27 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
   // Validate form fields
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!service.name.trim()) {
       newErrors.name = 'Tên dịch vụ không được để trống';
     }
-    
+
     if (!service.type) {
       newErrors.type = 'Vui lòng chọn loại dịch vụ';
     }
-    
+
     if (service.price === '' || isNaN(service.price) || Number(service.price) < 0) {
       newErrors.price = 'Giá dịch vụ phải là số dương';
     }
-    
+
     if (service.duration === '' || isNaN(service.duration) || Number(service.duration) < 1) {
       newErrors.duration = 'Thời hạn phải là số nguyên dương';
     }
-    
+
     if (!service.companyId) {
       newErrors.companyId = 'Vui lòng chọn doanh nghiệp';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -131,30 +131,30 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
     if (!validateForm()) {
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
-      
+
       // Format data for submission
       const serviceToSubmit = {
         ...service,
         price: parseFloat(service.price), // Ensure it's a valid number
         duration: parseInt(service.duration, 10), // Ensure it's a valid integer
       };
-      
+
       const createdService = await dispatch(addService(serviceToSubmit));
-      
+
       if (onServiceCreated) {
         onServiceCreated(createdService);
       }
-      
+
       toast.success("Tạo dịch vụ thành công");
-      
+
       // Force reset submitting state and close modal
       setIsSubmitting(false);
       window.setTimeout(() => closeModal(), 500);
     } catch (error) {
-      console.error('Error creating service:', error);
+      // console.error('Error creating service:', error);
       toast.error("Lỗi khi tạo dịch vụ: " + (error.message || "Đã xảy ra lỗi"));
       setIsSubmitting(false);
     }
@@ -190,7 +190,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
               </>
             )}
           </h2>
-          <button 
+          <button
             onClick={() => {
               if (!isSubmitting) {
                 closeModal();
@@ -202,7 +202,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
             <X size={18} />
           </button>
         </div>
-        
+
         {/* Step Indicator */}
         <div className="bg-blue-50 px-4 py-2">
           <div className="flex items-center">
@@ -215,7 +215,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
             </div>
           </div>
         </div>
-        
+
         {/* Form Body - Made Scrollable */}
         <div className="p-4 overflow-y-auto flex-grow">
           {step === 1 ? (
@@ -226,7 +226,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
                 onBusinessSelect={handleBusinessSelect}
                 onClearSelection={handleClearBusinessSelection}
               />
-              
+
               {/* Current user info */}
               <div className="mt-3 p-2 bg-gray-50 border border-gray-200 rounded-md">
                 <div className="flex items-center text-sm text-gray-600">
@@ -258,7 +258,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
                   </span>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -278,7 +278,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
                   </div>
                   {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
                 </div>
-                
+
                 <div>
                   <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
                     Loại dịch vụ <span className="text-red-500">*</span>
@@ -300,7 +300,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
                   </div>
                   {errors.type && <p className="mt-1 text-xs text-red-500">{errors.type}</p>}
                 </div>
-                
+
                 <div>
                   <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
                     Trạng thái
@@ -319,7 +319,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
                     </select>
                   </div>
                 </div>
-                
+
                 <div>
                   <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
                     Giá dịch vụ (VNĐ) <span className="text-red-500">*</span>
@@ -339,7 +339,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
                   </div>
                   {errors.price && <p className="mt-1 text-xs text-red-500">{errors.price}</p>}
                 </div>
-                
+
                 <div>
                   <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-1">
                     Thời hạn (tháng) <span className="text-red-500">*</span>
@@ -360,7 +360,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
                   {errors.duration && <p className="mt-1 text-xs text-red-500">{errors.duration}</p>}
                 </div>
               </div>
-              
+
               <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                   Mô tả
@@ -375,7 +375,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
                   rows={2}
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Tính năng
@@ -402,7 +402,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
                     <Plus size={14} />
                   </button>
                 </div>
-                
+
                 {/* Feature list */}
                 {service.features.length > 0 && (
                   <div className="mt-2 space-y-1 max-h-24 overflow-y-auto">
@@ -424,7 +424,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
             </div>
           )}
         </div>
-        
+
         {/* Footer with buttons - Always at bottom */}
         <div className="px-4 py-3 bg-gray-50 flex justify-between border-t mt-auto">
           {step === 1 ? (

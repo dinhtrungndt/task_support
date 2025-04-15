@@ -18,8 +18,8 @@ export const CreateTask = ({ closeModal }) => {
         mst: "",
         address: "",
         connectionType: "",
-        installer: "", 
-        codeData: "", 
+        installer: "",
+        codeData: "",
         typeData: "Data",
         installDate: new Date().toISOString().split('T')[0],
         status: "Pending",
@@ -66,22 +66,22 @@ export const CreateTask = ({ closeModal }) => {
             toast.error("Vui lòng chọn doanh nghiệp");
             return;
         }
-        
+
         if (!formData.connectionType) {
             toast.error("Vui lòng chọn loại kết nối");
             return;
         }
-        
+
         if (!formData.status) {
             toast.error("Vui lòng chọn trạng thái");
             return;
         }
-        
+
         if (formData.status === "Rejected" && !formData.notes) {
             toast.error("Vui lòng nhập lý do từ chối");
             return;
         }
-        
+
         // Check if user is logged in
         if (!user || !user.id) {
             toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
@@ -90,26 +90,25 @@ export const CreateTask = ({ closeModal }) => {
 
         try {
             setIsSubmitting(true);
-            
+
             // Make sure we have values for required fields
             const dataToSubmit = {
                 ...formData,
                 installer: formData.installer || "N/A",
                 codeData: formData.codeData || "N/A"
             };
-            
+
             // Pass the user ID directly to the action
             await dispatch(addTask(dataToSubmit, user.id));
-            
+
             toast.success("Tạo công việc thành công!");
-            
+
             // Force reset submitting state and close modal
             setIsSubmitting(false);
             window.setTimeout(() => closeModal(), 500);
-            
+
             return true; // Ensure the function returns something
         } catch (error) {
-            console.error("Error creating task:", error);
             toast.error("Lỗi khi tạo công việc: " + (error.message || "Vui lòng thử lại"));
             setIsSubmitting(false);
             return false;
@@ -146,7 +145,7 @@ export const CreateTask = ({ closeModal }) => {
                             </>
                         )}
                     </h2>
-                    <button 
+                    <button
                         onClick={() => {
                             if (!isSubmitting) {
                                 closeModal();
@@ -158,7 +157,7 @@ export const CreateTask = ({ closeModal }) => {
                         <X size={20} />
                     </button>
                 </div>
-                
+
                 {/* Step Indicator */}
                 <div className="bg-blue-50 px-6 py-2">
                     <div className="flex items-center">
@@ -171,7 +170,7 @@ export const CreateTask = ({ closeModal }) => {
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Form Body */}
                 <div className="p-6">
                     {step === 1 ? (
@@ -182,7 +181,7 @@ export const CreateTask = ({ closeModal }) => {
                                 onBusinessSelect={handleBusinessSelect}
                                 onClearSelection={handleClearBusinessSelection}
                             />
-                            
+
                             {/* Current user info */}
                             <div className="mt-4 p-2 bg-gray-50 border border-gray-200 rounded-md">
                                 <div className="flex items-center text-sm text-gray-600">
@@ -208,7 +207,7 @@ export const CreateTask = ({ closeModal }) => {
                                     </span>
                                 </div>
                             </div>
-                            
+
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Loại kết nối <span className="text-red-500">*</span></label>
@@ -227,7 +226,7 @@ export const CreateTask = ({ closeModal }) => {
                                         </select>
                                     </div>
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Người lắp đặt</label>
                                     <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
@@ -242,7 +241,7 @@ export const CreateTask = ({ closeModal }) => {
                                         />
                                     </div>
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Mã dữ liệu</label>
                                     <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
@@ -257,7 +256,7 @@ export const CreateTask = ({ closeModal }) => {
                                         />
                                     </div>
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Loại dữ liệu</label>
                                     <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
@@ -273,7 +272,7 @@ export const CreateTask = ({ closeModal }) => {
                                         </select>
                                     </div>
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Ngày lắp đặt</label>
                                     <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
@@ -287,7 +286,7 @@ export const CreateTask = ({ closeModal }) => {
                                         />
                                     </div>
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái <span className="text-red-500">*</span></label>
                                     <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
@@ -305,7 +304,7 @@ export const CreateTask = ({ closeModal }) => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             {formData.status === "Rejected" && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Lý do từ chối <span className="text-red-500">*</span></label>
@@ -322,7 +321,7 @@ export const CreateTask = ({ closeModal }) => {
                         </div>
                     )}
                 </div>
-                
+
                 {/* Footer with buttons */}
                 <div className="px-6 py-4 bg-gray-50 flex justify-between border-t">
                     {step === 1 ? (

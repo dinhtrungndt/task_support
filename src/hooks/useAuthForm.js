@@ -10,19 +10,19 @@ export const useAuthForm = (initialState, validateFn) => {
   // Xử lý thay đổi input
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Lọc dữ liệu đầu vào để ngăn XSS
-    const sanitizedValue = name === 'password' || name === 'confirmPassword' 
+    const sanitizedValue = name === 'password' || name === 'confirmPassword'
       ? value // Không cần làm sạch mật khẩu
       : sanitizeInput(value);
-    
+
     setForm({ ...form, [name]: sanitizedValue });
-    
+
     // Đánh dấu trường đã được chạm vào
     if (!touched[name]) {
       setTouched({ ...touched, [name]: true });
     }
-    
+
     // Xóa lỗi khi người dùng bắt đầu nhập lại
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
@@ -33,7 +33,7 @@ export const useAuthForm = (initialState, validateFn) => {
   const handleBlur = (e) => {
     const { name } = e.target;
     setTouched({ ...touched, [name]: true });
-    
+
     // Validate khi blur
     if (validateFn) {
       const fieldErrors = validateFn({ [name]: form[name] });
@@ -54,28 +54,28 @@ export const useAuthForm = (initialState, validateFn) => {
   // Xử lý submit
   const handleSubmit = async (submitFn) => {
     setIsSubmitting(true);
-    
+
     // Đánh dấu tất cả các trường là đã chạm vào
     const allTouched = Object.keys(form).reduce((acc, key) => {
       acc[key] = true;
       return acc;
     }, {});
     setTouched(allTouched);
-    
+
     // Validate trước khi submit
     const isValid = validateForm();
-    
+
     if (isValid) {
       try {
         await submitFn(form);
       } catch (error) {
-        console.error('Form submission error:', error);
+        // console.error('Form submission error:', error);
       }
     }
-    
+
     setIsSubmitting(false);
   };
-  
+
   // Kiểm tra xem trường có lỗi và đã được chạm vào hay không
   const hasError = (fieldName) => {
     return touched[fieldName] && errors[fieldName];

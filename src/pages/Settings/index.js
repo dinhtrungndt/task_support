@@ -91,7 +91,6 @@ export const SettingPages = () => {
           });
         }
       } catch (error) {
-        console.error('Error fetching user settings:', error);
         toast.error('Không thể tải thông tin cài đặt. Vui lòng thử lại sau.');
       } finally {
         setIsLoading(false);
@@ -175,7 +174,6 @@ export const SettingPages = () => {
       setHasChanges(false);
       toast.success('Tất cả thay đổi đã được lưu thành công!');
     } catch (error) {
-      console.error('Error saving settings:', error);
       toast.error('Không thể lưu thay đổi. Vui lòng thử lại sau.');
     } finally {
       setIsSaving(false);

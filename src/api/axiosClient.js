@@ -53,7 +53,7 @@ axiosClient.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.message && error.message.includes("Network Error")) {
-      console.error("Có thể đang gặp lỗi CORS:", error);
+      // console.error("Có thể đang gặp lỗi CORS:", error);
       return Promise.reject(error);
     }
 
@@ -135,7 +135,7 @@ axiosClient.interceptors.response.use(
         processQueue(refreshError);
 
         // Không in chi tiết lỗi để tránh rò rỉ thông tin
-        console.error("Failed to refresh token");
+        // console.error("Failed to refresh token");
 
         // Kiểm tra xem đã ở trang login chưa để tránh chuyển hướng lặp lại
         if (window.location.pathname !== "/login") {
