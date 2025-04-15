@@ -10,13 +10,6 @@ import axiosClient from '../../api/axiosClient';
 import { LoaderIcon } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
-const socket = io(process.env.REACT_APP_API_URL, {
-  transports: ['websocket', 'polling'],
-  reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000,
-});
-
 export const MessagesPage = () => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -27,14 +20,11 @@ export const MessagesPage = () => {
   const [userStatus, setUserStatus] = useState({});
   const [selectedUser, setSelectedUser] = useState(null);
   const messagesEndRef = useRef(null);
-
-  const { messageses } = useSelector((state) => state.messages);
+  const { user: currentUser, socket } = useContext(AuthContext);
   const { users } = useSelector((state) => state.users);
-  const auth = useContext(AuthContext);
 
-  const idSender = auth.user.id;
+  const idSender = currentUser.id;
 
-  // Nhận selectedUser từ location.state
   useEffect(() => {
     if (location.state?.selectedUser) {
       setSelectedUser(location.state.selectedUser);
@@ -42,41 +32,36 @@ export const MessagesPage = () => {
   }, [location.state]);
 
   useEffect(() => {
-    if (idSender) {
-      socket.emit('user_online', idSender);
-    }
+    if (currentUser && socket) {
+      socket.emit("user_online", currentUser.id);
 
-    return () => {
-      socket.off('user_online');
-    };
-  }, [idSender]);
-
-  useEffect(() => {
-    socket.on('update_user_status', (onlineUsers) => {
-      const statusObj = {};
-      users.forEach((user) => {
-        statusObj[user._id] = onlineUsers.includes(user._id) ? 'Đang hoạt động' : 'Không hoạt động';
+      socket.on("update_user_status", (onlineUsers) => {
+        const statusObj = {};
+        users.forEach((user) => {
+          statusObj[user._id] = onlineUsers.includes(user._id) ? "Đang hoạt động" : "Không hoạt động";
+        });
+        setUserStatus(statusObj);
       });
-      setUserStatus(statusObj);
-    });
 
-    return () => {
-      socket.off('update_user_status');
-    };
-  }, [users]);
+      return () => {
+        socket.off("user_online");
+        socket.off("update_user_status");
+      };
+    }
+  }, [currentUser, socket, users]);
 
   useEffect(() => {
-    dispatch(fetchUsersExceptId(auth.user.id));
-  }, [dispatch, auth.user.id]);
+    dispatch(fetchUsersExceptId(currentUser.id));
+  }, [dispatch, currentUser.id]);
 
   useEffect(() => {
     if (selectedUser) {
       axiosClient
-        .get(`/message/get-message/list/${idSender}/${selectedUser._id}`)
+        .get(`/message/get-message/list/${currentUser.id}/${selectedUser._id}`)
         .then((res) => setMessages(res.data))
         .catch((err) => console.error(err));
     }
-  }, [selectedUser, idSender]);
+  }, [selectedUser, currentUser]);
 
   useEffect(() => {
     socket.on('new_message', (newMessage) => {
@@ -147,10 +132,10 @@ export const MessagesPage = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="w-10 h-10 rounded-full bg-indigo-400 flex items-center justify-center text-xl font-bold">
-                {auth.user.name.charAt(0)}
+                {currentUser.name.charAt(0)}
               </div>
               <div>
-                <h2 className="font-semibold">{auth.user.name}</h2>
+                <h2 className="font-semibold">{currentUser.name}</h2>
                 <div className="flex items-center text-xs">
                   <div className="w-2 h-2 bg-green-400 rounded-full mr-1"></div>
                   Đang hoạt động
@@ -312,7 +297,7 @@ export const MessagesPage = () => {
                     </div>
                     {msg.idSender === idSender && (
                       <img
-                        src={`https://ui-avatars.com/api/?background=4f46e5&color=ffffff&bold=true&name=${auth.user.name}`}
+                        src={`https://ui-avatars.com/api/?background=4f46e5&color=ffffff&bold=true&name=${currentUser.name}`}
                         alt="You"
                         className="w-8 h-8 rounded-full ml-2 self-end mb-1"
                       />

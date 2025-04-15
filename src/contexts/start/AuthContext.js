@@ -7,10 +7,10 @@ import {
 } from "../../utils/sessionUtils";
 import { setCurrentUser } from "../../stores/redux/actions/userActions";
 import { useDispatch } from "react-redux";
+import io from "socket.io-client";
 
 export const AuthContext = createContext();
 
-// Hàm an toàn để giải mã JWT token
 const safelyDecodeToken = (token) => {
   try {
     if (!token) return null;
@@ -43,6 +43,31 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tokenExpiryTime, setTokenExpiryTime] = useState(null);
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      const token = secureStorage.getItem("tz");
+      if (!token) {
+        console.error("No token found. Please log in.");
+        return;
+      }
+
+      const newSocket = io(process.env.REACT_APP_API_URL, {
+        transports: ["websocket", "polling"],
+        auth: {
+          token: token,
+        },
+      });
+
+      setSocket(newSocket);
+
+      return () => {
+        newSocket.disconnect();
+        setSocket(null);
+      };
+    }
+  }, [user]);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -58,7 +83,6 @@ export const AuthProvider = ({ children }) => {
               const expiryTime = new Date(decodedToken.exp * 1000);
               setTokenExpiryTime(expiryTime);
 
-              // Kiểm tra nếu token sắp hết hạn (còn dưới 5 phút) hoặc đã hết hạn
               const timeUntilExpiry =
                 expiryTime.getTime() - new Date().getTime();
               if (timeUntilExpiry < 300000) {
@@ -90,7 +114,6 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.error("Auth initialization error");
-        // Chỉ đăng xuất nếu có lỗi nghiêm trọng
         handleLogout();
       } finally {
         setLoading(false);
@@ -100,50 +123,62 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  // Thiết lập timer để refresh token trước khi hết hạn
   useEffect(() => {
-    if (tokenExpiryTime && user) {
-      const timeUntilExpiry = tokenExpiryTime.getTime() - new Date().getTime();
+    if (user) {
+      const token = secureStorage.getItem("tz");
 
-      // Refresh token khi còn 5 phút trước khi hết hạn
-      const refreshTime = Math.max(timeUntilExpiry - 5 * 60 * 1000, 0);
+      const newSocket = io(process.env.REACT_APP_API_URL, {
+        transports: ["websocket", "polling"],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        auth: {
+          token: token,
+        },
+      });
 
-      // Tránh refresh quá sớm hoặc quá muộn
-      const refreshTimer = setTimeout(async () => {
-        try {
-          const newToken = await refreshToken();
-          if (newToken) {
-            const decodedToken = safelyDecodeToken(newToken);
-            if (decodedToken && decodedToken.exp) {
-              setTokenExpiryTime(new Date(decodedToken.exp * 1000));
-            }
-          }
-        } catch (error) {
-          // Ẩn chi tiết lỗi để tránh rò rỉ thông tin
-          console.error("Token refresh error");
+      newSocket.on("connect", () => {
+        // console.log("Socket.IO connected successfully");
+      });
+
+      newSocket.on("connect_error", (error) => {
+        if (error.message === "Authentication error: Token required") {
+          // console.error("Authentication failed. Please log in again.");
+          handleLogout();
+        } else {
+          console.error("Socket.IO connection error:", error);
         }
-      }, refreshTime);
+      });
 
-      return () => clearTimeout(refreshTimer);
+      newSocket.on("disconnect", (reason) => {
+        // console.log("Socket.IO disconnected:", reason);
+      });
+
+      setSocket(newSocket);
+
+      return () => {
+        newSocket.disconnect();
+        setSocket(null);
+      };
     }
-  }, [tokenExpiryTime, user]);
+  }, [user]);
 
-  // Hàm đăng xuất
   const handleLogout = () => {
-    // Đảm bảo xóa dữ liệu theo dõi hoạt động
     clearActivityData();
-    // Gọi hàm logout từ service
     logout();
     setUser(null);
     setTokenExpiryTime(null);
+
+    if (socket) {
+      socket.disconnect()
+      setSocket(null);
+    }
   };
 
-  // Hàm đăng nhập
   const loginUser = (userData) => {
     setUser(userData);
     dispatch(setCurrentUser(userData));
 
-    // Get token from secureStorage
     const token = secureStorage.getItem("tz");
     if (token) {
       const decodedToken = safelyDecodeToken(token);
@@ -152,24 +187,7 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    // Đặt lại timestamp hoạt động khi đăng nhập
     resetActivityTimestamp();
-  };
-
-  // Kiểm tra xem người dùng có quyền admin hay không
-  const isAdmin = () => {
-    return user && user.role === "admin";
-  };
-
-  const updateUserInfo = (updatedUserData) => {
-    setUser(updatedUserData);
-
-    dispatch(setCurrentUser(updatedUserData));
-
-    const storedUser = secureStorage.getItem("ts");
-    if (storedUser) {
-      secureStorage.setItem("ts", { ...storedUser, ...updatedUserData });
-    }
   };
 
   const contextValue = {
@@ -177,9 +195,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     loginUser,
     logoutUser: handleLogout,
-    isAdmin,
-    refreshSession: refreshToken,
-    updateUserInfo
+    socket,
   };
 
   return (

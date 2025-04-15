@@ -27,9 +27,15 @@ export const setCurrentUser = (user) => ({
 export const fetchUsersExceptId = (userId) => async (dispatch) => {
   try {
     const response = await axiosClient.get(`/users/get-users-except-id/${userId}`);
+
+    const decryptedUsers = response.data.map((user) => ({
+      ...user,
+      name: user.name,
+    }));
+
     dispatch({
       type: FETCH_USERS_EXCEPT_ID,
-      payload: response.data,
+      payload: decryptedUsers,
     });
   } catch (error) {
     dispatch({

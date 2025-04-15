@@ -9,23 +9,15 @@ import 'moment/locale/vi';
 import { AuthContext } from '../../contexts/start/AuthContext';
 import UserDetailModal from '../../components/modals/UserDetailModal';
 
-// Khởi tạo socket
-const socket = io(process.env.REACT_APP_API_URL, {
-  transports: ['websocket', 'polling'],
-  reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000,
-});
-
 export const UserPages = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { users, loading } = useSelector((state) => state.users);
   const { businesses } = useSelector((state) => state.business);
   const [userStatus, setUserStatus] = useState({});
-  const auth = useContext(AuthContext);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const { user: currentUser, socket } = useContext(AuthContext);
 
   // Hàm format trạng thái người dùng giống Messenger
   const getStatusText = (userId) => {
@@ -45,26 +37,27 @@ export const UserPages = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchUsersExceptId(auth.user.id));
-    dispatch(fetchBusinesses());
-
-    // Lắng nghe trạng thái người dùng
-    socket.on('update_user_status', (onlineUsers) => {
-      const statusObj = {};
-      users.forEach((user) => {
-        const isOnline = onlineUsers.includes(user._id);
-        statusObj[user._id] = {
-          isOnline,
-          lastActive: isOnline ? Date.now() : (statusObj[user._id]?.lastActive || Date.now()),
-        };
+    if (currentUser && socket) {
+      socket.on("update_user_status", (onlineUsers) => {
+        const statusObj = {};
+        users.forEach((user) => {
+          statusObj[user._id] = onlineUsers.includes(user._id) ? "Đang hoạt động" : "Không hoạt động";
+        });
+        setUserStatus(statusObj);
       });
-      setUserStatus(statusObj);
-    });
 
-    return () => {
-      socket.off('update_user_status');
-    };
-  }, [dispatch, users, auth.user.id]);
+      return () => {
+        socket.off("update_user_status");
+      };
+    }
+  }, [currentUser, socket, users]);
+
+  useEffect(() => {
+    if (currentUser?.id) {
+      dispatch(fetchUsersExceptId(currentUser.id));
+    }
+    dispatch(fetchBusinesses());
+  }, [dispatch, currentUser]);
 
   // Xử lý nhấn "Nhắn tin"
   const handleMessageClick = (user) => {
