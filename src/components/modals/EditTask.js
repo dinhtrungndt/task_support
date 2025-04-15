@@ -94,11 +94,11 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
   // Format creator name
   const getCreatorName = () => {
     if (taskCreator) {
-      return taskCreator.name || taskCreator.email || 'Người dùng';
+      return taskCreator?.name || taskCreator?.email || 'Người dùng';
     }
 
-    if (typeof task.userAdd === 'object') {
-      return task.userAdd.name || task.userAdd.email || 'Người dùng';
+    if (typeof task?.userAdd === 'object') {
+      return task?.userAdd?.name || task?.userAdd?.email || 'Người dùng';
     }
 
     return 'Người dùng';
