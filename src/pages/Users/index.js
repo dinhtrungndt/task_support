@@ -3,11 +3,25 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchUsers, fetchUsersExceptId } from '../../stores/redux/actions/userActions';
 import { fetchBusinesses } from '../../stores/redux/actions/businessActions';
 import { useNavigate } from 'react-router-dom';
-import io from 'socket.io-client';
 import moment from 'moment';
 import 'moment/locale/vi';
 import { AuthContext } from '../../contexts/start/AuthContext';
 import UserDetailModal from '../../components/modals/UserDetailModal';
+import { HeaderPages } from '../../components/header';
+import {
+  Users,
+  MessageSquare,
+  User,
+  Plus,
+  Briefcase,
+  Bell,
+  Search,
+  Eye,
+  Edit,
+  CheckCircle,
+  Clock,
+  AlertTriangle
+} from 'lucide-react';
 
 export const UserPages = () => {
   const dispatch = useDispatch();
@@ -17,24 +31,29 @@ export const UserPages = () => {
   const [userStatus, setUserStatus] = useState({});
   const [selectedUser, setSelectedUser] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const { user: currentUser, socket } = useContext(AuthContext);
 
   // Hàm format trạng thái người dùng giống Messenger
   const getStatusText = (userId) => {
     const status = userStatus[userId];
     if (!status) return 'Không hoạt động';
-    const { isOnline, lastActive } = status;
 
-    if (isOnline) return 'Đang hoạt động';
-    if (!lastActive) return 'Không hoạt động';
-
-    const diffMinutes = moment().diff(moment(lastActive), 'minutes');
-    if (diffMinutes < 1) return 'Vừa mới hoạt động';
-    if (diffMinutes < 60) return `Hoạt động ${diffMinutes} phút trước`;
-    const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `Hoạt động ${diffHours} giờ trước`;
-    return `Hoạt động ${moment(lastActive).fromNow()}`;
+    if (status === "Đang hoạt động") return 'Đang hoạt động';
+    return 'Không hoạt động';
   };
+
+  // Filter users based on search term
+  useEffect(() => {
+    if (!users) return;
+
+    const filtered = users.filter(user =>
+      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+    setFilteredUsers(filtered);
+  }, [users, searchTerm]);
 
   useEffect(() => {
     if (currentUser && socket) {
@@ -77,203 +96,335 @@ export const UserPages = () => {
     setTimeout(() => setSelectedUser(null), 300);
   };
 
+  // Get initials from name
+  const getInitials = (name) => {
+    if (!name) return '';
+    const nameParts = name.split(' ');
+    if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
+    return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return moment(dateString).format('DD/MM/YYYY');
+  };
+
   return (
-    <div className="flex bg-gradient-to-br from-indigo-50 to-blue-50">
-      <div className="flex-1 p-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-indigo-900">Thành viên</h1>
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg shadow-md text-sm font-medium flex items-center transition-all duration-200 transform hover:scale-105">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-              </svg>
-              Thêm thành viên
-            </button>
+    <div className="min-h-screen bg-gray-50">
+      <HeaderPages title="Quản lý thành viên" />
+
+      <div className="container mx-auto px-4 py-6">
+        {/* Search and Add Member */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="relative max-w-md w-full">
+            <input
+              type="text"
+              placeholder="Tìm kiếm thành viên theo tên, email..."
+              className="w-full bg-white border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 overflow-auto max-h-[calc(100vh-200px)]">
-            {users.map((member) => (
-              <div
-                key={member._id}
-                className="bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md transform hover:-translate-y-1 border border-gray-100"
-              >
-                <div className="p-6">
+
+          <button className="flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg shadow-sm text-sm font-medium transition-colors gap-1.5">
+            <Plus size={18} />
+            <span>Thêm thành viên</span>
+          </button>
+        </div>
+
+        {/* Member Cards */}
+        <div className="mb-10">
+          <div className="flex items-center mb-4">
+            <Users size={20} className="text-indigo-600 mr-2" />
+            <h2 className="text-lg font-semibold text-gray-800">Danh sách thành viên</h2>
+            <div className="ml-auto text-sm text-gray-500">
+              Hiển thị {filteredUsers.length} thành viên
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="bg-white rounded-lg shadow-sm p-6 animate-pulse">
                   <div className="flex items-start">
-                    <div className="relative">
-                      <img
-                        src={
-                          member.avatar ||
-                          `https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${encodeURIComponent(
-                            member.name
-                          )}&size=32`
-                        }
-                        alt={member.name}
-                        className="w-16 h-16 rounded-full mr-4 ring-2 ring-opacity-10 ring-indigo-600"
-                      />
-                      <div
-                        className={`absolute bottom-0 right-4 w-4 h-4 rounded-full border-2 border-white ${
-                          userStatus[member._id]?.isOnline ? 'bg-emerald-500' : 'bg-gray-400'
-                        }`}
-                      ></div>
-                    </div>
+                    <div className="w-16 h-16 bg-gray-200 rounded-full mr-4"></div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-800">{member.name}</h3>
-                      <p className="text-sm text-indigo-600 font-medium mb-1">{member.email}</p>
-                      <p className="text-xs text-gray-500">{getStatusText(member._id)}</p>
-                      <div className="flex mt-3 space-x-4">
-                        <button
-                          onClick={() => handleMessageClick(member)}
-                          className="text-indigo-600 hover:text-indigo-800 text-sm font-medium transition-colors duration-200 flex items-center"
-                        >
-                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                            ></path>
-                          </svg>
-                          Nhắn tin
-                        </button>
-                        <button
-                          className="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors duration-200 flex items-center"
-                          onClick={() => handleDetailClick(member)}
-                        >
-                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            ></path>
-                          </svg>
-                          Chi tiết
-                        </button>
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-3"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/4 mb-3"></div>
+                      <div className="flex space-x-4 mt-4">
+                        <div className="h-6 bg-gray-200 rounded w-20"></div>
+                        <div className="h-6 bg-gray-200 rounded w-20"></div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Active Projects */}
-          <h2 className="text-2xl font-bold text-indigo-900 mb-5 flex items-center">
-            <svg className="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-              ></path>
-            </svg>
-            Hoạt động của dự án
-          </h2>
-
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8 border border-gray-100">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    MST
-                  </th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tên doanh nghiệp
-                  </th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tình trạng
-                  </th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ngày cập nhập
-                  </th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {businesses.map((project) => (
-                  <tr key={project._id} className="hover:bg-gray-50 transition-colors duration-150">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-indigo-900">{project.mst}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-indigo-900">{project.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
+              ))}
+            </div>
+          ) : filteredUsers.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredUsers.map((member) => (
+                <div
+                  key={member._id}
+                  className="bg-white rounded-lg shadow-sm overflow-hidden transition-all hover:shadow-md border border-gray-200"
+                >
+                  <div className="p-6">
+                    <div className="flex items-start">
+                      <div className="relative">
+                        {member.avatar ? (
+                          <img
+                            src={member.avatar}
+                            alt={member.name}
+                            className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-gray-100"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 rounded-full mr-4 bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl font-semibold border-2 border-indigo-50">
+                            {getInitials(member.name)}
+                          </div>
+                        )}
                         <div
-                          className={`h-2.5 rounded-full ${
-                            project.totalTasks >= 10 ? 'bg-emerald-500' : project.totalTasks >= 9 ? 'bg-blue-600' : 'bg-amber-500'
+                          className={`absolute bottom-0 right-4 w-4 h-4 rounded-full border-2 border-white ${
+                            userStatus[member._id] === "Đang hoạt động" ? 'bg-green-500' : 'bg-gray-300'
                           }`}
-                          style={{ width: `${project.totalTasks}%` }}
                         ></div>
                       </div>
-                      <span className="text-xs text-gray-500">{project.totalTasks}% complete</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{new Date(project.updatedAt).toLocaleDateString()}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <a href="#" className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded-md transition-colors duration-150">
-                          View
-                        </a>
-                        <a href="#" className="text-gray-600 hover:text-gray-900 bg-gray-100 px-3 py-1 rounded-md transition-colors duration-150">
-                          Edit
-                        </a>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-800">{member.name}</h3>
+                        <p className="text-sm text-indigo-600 font-medium mb-1">{member.email || 'Email không có sẵn'}</p>
+                        <div className="flex items-center text-xs text-gray-500">
+                          <div className={`w-2 h-2 ${userStatus[member._id] === "Đang hoạt động" ? 'bg-green-500' : 'bg-gray-300'} rounded-full mr-1.5`}></div>
+                          {getStatusText(member._id)}
+                        </div>
+                        <div className="flex mt-4 gap-2">
+                          <button
+                            onClick={() => handleMessageClick(member)}
+                            className="flex items-center justify-center text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                          >
+                            <MessageSquare size={14} className="mr-1.5" />
+                            Nhắn tin
+                          </button>
+                          <button
+                            className="flex items-center justify-center text-gray-600 hover:text-gray-800 hover:bg-gray-50 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                            onClick={() => handleDetailClick(member)}
+                          >
+                            <User size={14} className="mr-1.5" />
+                            Chi tiết
+                          </button>
+                        </div>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow-sm p-10 text-center border border-gray-200">
+              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users size={24} className="text-indigo-600" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-800 mb-2">Không tìm thấy thành viên</h3>
+              <p className="text-gray-500 text-sm mb-4">Không có thành viên nào phù hợp với từ khóa "{searchTerm}"</p>
+              <button
+                onClick={() => setSearchTerm('')}
+                className="inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm font-medium hover:bg-indigo-100"
+              >
+                Xóa tìm kiếm
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Project Activity */}
+        <div className="mb-10">
+          <div className="flex items-center mb-4">
+            <Briefcase size={20} className="text-indigo-600 mr-2" />
+            <h2 className="text-lg font-semibold text-gray-800">Hoạt động của dự án</h2>
           </div>
 
-          {/* Team Activity Feed */}
-          <h2 className="text-2xl font-bold text-indigo-900 mb-5 flex items-center">
-            <svg className="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-              ></path>
-            </svg>
-            Hoạt động gần đây
-          </h2>
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      MST
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tên doanh nghiệp
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tiến độ
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Trạng thái
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ngày cập nhật
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Thao tác
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {businesses.slice(0, 5).map((project) => (
+                    <tr key={project._id} className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="text-sm font-medium text-gray-900 font-mono">{project.mst}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{project.name}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full ${
+                              project.completedTasks >= 10 ? 'bg-green-500' : project.completedTasks >= 5 ? 'bg-indigo-500' : 'bg-amber-500'
+                            }`}
+                            style={{ width: `${Math.min((project.completedTasks / project.totalTasks) * 100 || 0, 100)}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-xs text-gray-500 mt-1 inline-block">
+                          {Math.min(Math.round((project.completedTasks / project.totalTasks) * 100) || 0, 100)}% hoàn thành
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          project.completedTasks === project.totalTasks
+                            ? 'bg-green-100 text-green-800 border border-green-200'
+                            : project.completedTasks > 0
+                              ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                              : 'bg-gray-100 text-gray-800 border border-gray-200'
+                        }`}>
+                          {project.completedTasks === project.totalTasks
+                            ? <CheckCircle size={12} className="mr-1" />
+                            : project.completedTasks > 0
+                              ? <Clock size={12} className="mr-1" />
+                              : <AlertTriangle size={12} className="mr-1" />
+                          }
+                          {project.completedTasks === project.totalTasks
+                            ? 'Hoàn thành'
+                            : project.completedTasks > 0
+                              ? 'Đang thực hiện'
+                              : 'Chưa bắt đầu'
+                          }
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">{formatDate(project.updatedAt)}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <button className="inline-flex items-center justify-center text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1 rounded-md transition-colors">
+                            <Eye size={14} className="mr-1" />
+                            <span>Xem</span>
+                          </button>
+                          <button className="inline-flex items-center justify-center text-gray-600 hover:text-gray-800 hover:bg-gray-50 px-3 py-1 rounded-md transition-colors">
+                            <Edit size={14} className="mr-1" />
+                            <span>Sửa</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-            <div className="p-6 space-y-6">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <img
-                    src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=MM"
-                    alt="Mark Magnum"
-                    className="w-10 h-10 rounded-full ring-2 ring-indigo-100"
-                  />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm text-gray-700">
-                    <span className="font-semibold text-indigo-800">Mark Magnum</span> completed the task
-                    <span className="font-medium text-gray-900"> "Create wireframes for mobile app"</span>
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1 flex items-center">
-                    <svg className="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    2 hours ago
-                  </p>
+            {businesses.length > 5 && (
+              <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
+                <button className="text-sm font-medium text-indigo-600 hover:text-indigo-800 flex items-center">
+                  Xem tất cả dự án
+                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Recent Activities */}
+        <div className="mb-6">
+          <div className="flex items-center mb-4">
+            <Bell size={20} className="text-indigo-600 mr-2" />
+            <h2 className="text-lg font-semibold text-gray-800">Hoạt động gần đây</h2>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
+            <div className="divide-y divide-gray-100">
+              <div className="p-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-medium">
+                      MM
+                    </div>
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <p className="text-sm text-gray-700">
+                      <span className="font-semibold text-gray-900">Mark Magnum</span> hoàn thành công việc
+                      <span className="font-medium text-indigo-600"> "Tạo wireframes cho ứng dụng di động"</span>
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 flex items-center">
+                      <Clock size={12} className="mr-1 text-gray-400" />
+                      2 giờ trước
+                    </p>
+                  </div>
                 </div>
               </div>
-              {/* Các hoạt động khác giữ nguyên */}
+
+              <div className="p-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-medium">
+                      JD
+                    </div>
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <p className="text-sm text-gray-700">
+                      <span className="font-semibold text-gray-900">John Doe</span> đã bắt đầu dự án
+                      <span className="font-medium text-indigo-600"> "Hệ thống quản lý ABC Corp"</span>
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 flex items-center">
+                      <Clock size={12} className="mr-1 text-gray-400" />
+                      Hôm qua
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-medium">
+                      SA
+                    </div>
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <p className="text-sm text-gray-700">
+                      <span className="font-semibold text-gray-900">Sarah Adams</span> đã thêm tính năng mới vào
+                      <span className="font-medium text-indigo-600"> "Hệ thống phân tích dữ liệu"</span>
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 flex items-center">
+                      <Clock size={12} className="mr-1 text-gray-400" />
+                      3 ngày trước
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="bg-gray-50 px-6 py-4 border-t border-gray-100">
-              <a href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 flex items-center transition-colors duration-150">
-                View all activity
-                <svg className="w-4 h-4 ml-1 Maw" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+            <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
+              <button className="text-sm font-medium text-indigo-600 hover:text-indigo-800 flex items-center">
+                Xem tất cả hoạt động
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                 </svg>
-              </a>
+              </button>
             </div>
           </div>
         </div>

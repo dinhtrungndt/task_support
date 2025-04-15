@@ -7,8 +7,28 @@ import io from 'socket.io-client';
 import moment from 'moment';
 import 'moment/locale/vi';
 import axiosClient from '../../api/axiosClient';
-import { LoaderIcon } from 'lucide-react';
+import {
+  Loader,
+  Search,
+  Video,
+  Phone,
+  MoreVertical,
+  Paperclip,
+  Smile,
+  Mic,
+  Send,
+  Image as ImageIcon,
+  CheckCheck,
+  MessageSquare,
+  Filter,
+  User,
+  Plus,
+  Bell,
+  Calendar,
+  X
+} from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { HeaderPages } from '../../components/header';
 
 export const MessagesPage = () => {
   const dispatch = useDispatch();
@@ -19,18 +39,23 @@ export const MessagesPage = () => {
   const [loadingImg, setLoadingImg] = useState(false);
   const [userStatus, setUserStatus] = useState({});
   const [selectedUser, setSelectedUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const messagesEndRef = useRef(null);
+  const messageInputRef = useRef(null);
   const { user: currentUser, socket } = useContext(AuthContext);
   const { users } = useSelector((state) => state.users);
 
   const idSender = currentUser.id;
 
+  // Set selected user from navigation
   useEffect(() => {
     if (location.state?.selectedUser) {
       setSelectedUser(location.state.selectedUser);
     }
   }, [location.state]);
 
+  // Handle online status
   useEffect(() => {
     if (currentUser && socket) {
       socket.emit("user_online", currentUser.id);
@@ -50,19 +75,36 @@ export const MessagesPage = () => {
     }
   }, [currentUser, socket, users]);
 
+  // Fetch users
   useEffect(() => {
     dispatch(fetchUsersExceptId(currentUser.id));
   }, [dispatch, currentUser.id]);
 
+  // Filter users based on search term
+  useEffect(() => {
+    const filtered = users.filter(user =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+    setFilteredUsers(filtered);
+  }, [users, searchTerm]);
+
+  // Fetch messages for selected user
   useEffect(() => {
     if (selectedUser) {
       axiosClient
         .get(`/message/get-message/list/${currentUser.id}/${selectedUser._id}`)
         .then((res) => setMessages(res.data))
         .catch((err) => console.error(err));
+
+      // Focus on message input when user is selected
+      if (messageInputRef.current) {
+        messageInputRef.current.focus();
+      }
     }
   }, [selectedUser, currentUser]);
 
+  // Listen for new messages
   useEffect(() => {
     socket.on('new_message', (newMessage) => {
       if (
@@ -76,10 +118,12 @@ export const MessagesPage = () => {
     return () => socket.off('new_message');
   }, [selectedUser, idSender]);
 
+  // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Handle image upload
   const handleUploadImage = async (e) => {
     setLoadingImg(true);
     const file = e.target.files[0];
@@ -105,6 +149,7 @@ export const MessagesPage = () => {
     e.target.value = '';
   };
 
+  // Send message
   const sendMessage = () => {
     if ((message.trim() || image) && selectedUser) {
       const newMessage = {
@@ -117,286 +162,374 @@ export const MessagesPage = () => {
       socket.emit('new_message', newMessage);
       setMessage('');
       setImage(null);
+
+      // Focus on input after sending
+      if (messageInputRef.current) {
+        messageInputRef.current.focus();
+      }
     }
   };
 
+  // Select user to chat with
   const selectUser = (user) => {
     setSelectedUser(user);
   };
 
+  // Format dates for grouping messages
+  const formatMessageDate = (dateString) => {
+    const messageDate = moment(dateString);
+    const today = moment().startOf('day');
+    const yesterday = moment().subtract(1, 'days').startOf('day');
+
+    if (messageDate.isSame(today, 'day')) {
+      return 'Hôm nay';
+    } else if (messageDate.isSame(yesterday, 'day')) {
+      return 'Hôm qua';
+    } else {
+      return messageDate.format('DD/MM/YYYY');
+    }
+  };
+
+  // Group messages by date
+  const groupedMessages = () => {
+    const groups = {};
+
+    messages.forEach(msg => {
+      const date = formatMessageDate(msg.time);
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(msg);
+    });
+
+    return groups;
+  };
+
+  // Get first letters of name for avatar
+  const getInitials = (name) => {
+    if (!name) return '';
+    const nameParts = name.split(' ');
+    if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
+    return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+  };
+
   return (
-    <div className="flex h-screen bg-gray-100">
-      <div className="w-1/4 bg-white shadow-lg">
-        <div className="p-4 bg-indigo-600 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 rounded-full bg-indigo-400 flex items-center justify-center text-xl font-bold">
-                {currentUser.name.charAt(0)}
-              </div>
-              <div>
-                <h2 className="font-semibold">{currentUser.name}</h2>
-                <div className="flex items-center text-xs">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mr-1"></div>
-                  Đang hoạt động
-                </div>
-              </div>
+    <div className="flex flex-col h-screen bg-gray-100">
+      <HeaderPages title="Tin nhắn" />
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar - Contact List */}
+        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+          {/* Search Bar */}
+          <div className="p-4 border-b border-gray-200">
+            <div className="relative">
+              <input
+                type="text"
+                className="w-full px-4 py-2 pl-10 text-sm bg-gray-100 border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                placeholder="Tìm kiếm liên hệ..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-500" />
+              {searchTerm && (
+                <button
+                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                  onClick={() => setSearchTerm('')}
+                >
+                  <X size={16} />
+                </button>
+              )}
             </div>
-            <button className="text-white hover:text-indigo-200">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                ></path>
-              </svg>
+          </div>
+
+          {/* Filter Tabs */}
+          <div className="flex border-b border-gray-200 px-2">
+            <button className="flex-1 py-3 px-2 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600">
+              Tất cả
+            </button>
+            <button className="flex-1 py-3 px-2 text-sm font-medium text-gray-500 hover:text-gray-700">
+              Chưa đọc
+            </button>
+            <button className="flex-1 py-3 px-2 text-sm font-medium text-gray-500 hover:text-gray-700">
+              Nhóm
             </button>
           </div>
-        </div>
-        <div className="p-4 border-b border-gray-200">
-          <div className="relative">
-            <input
-              type="text"
-              className="w-full px-4 py-2 pl-10 text-sm bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Tìm kiếm liên hệ..."
-            />
-            <svg className="absolute left-3 top-2.5 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-          </div>
-        </div>
-        <div className="overflow-y-auto" style={{ height: 'calc(100vh - 156px)' }}>
-          {users.map((user) => (
-            <div
-              key={user._id}
-              className={`p-3 border-b border-gray-100 hover:bg-indigo-50 cursor-pointer transition duration-150 flex items-start ${
-                selectedUser?._id === user._id ? 'bg-indigo-50' : ''
-              }`}
-              onClick={() => selectUser(user)}
-            >
-              <div className="relative">
-                <img
-                  src={user.avatar || `https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${user.name}`}
-                  alt={user.name}
-                  className="w-12 h-12 rounded-full mr-3 border-2 border-indigo-100"
-                />
-                {userStatus[user._id] === 'Đang hoạt động' && (
-                  <div className="absolute bottom-0 right-3 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-medium text-gray-900 truncate">{user.name}</h3>
-                  <span className="text-xs text-gray-500">{userStatus[user._id]}</span>
-                </div>
-                <p className="text-xs text-gray-500 truncate mt-1">{user.email}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="flex-1 flex flex-col">
-        {selectedUser ? (
-          <>
-            <div className="bg-white border-b border-gray-200 p-4 flex justify-between items-center shadow-sm">
-              <div className="flex items-center">
-                <div className="relative">
-                  <img
-                    src={selectedUser.avatar || `https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${selectedUser.name}`}
-                    alt={selectedUser.name}
-                    className="w-12 h-12 rounded-full mr-3 border-2 border-indigo-100"
-                  />
-                  {userStatus[selectedUser._id] === 'Đang hoạt động' && (
-                    <div className="absolute bottom-0 right-3 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-800">{selectedUser.name}</h3>
-                  <div className="flex items-center">
-                    <span className="text-xs text-gray-500">{userStatus[selectedUser._id] || 'Không hoạt động'}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex space-x-2">
-                <button className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition">
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    ></path>
-                  </svg>
-                </button>
-                <button className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition">
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                    ></path>
-                  </svg>
-                </button>
-                <button className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition">
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                    ></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div
-              className="flex-1 overflow-y-auto p-4 bg-gray-50"
-              style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/cubes.png")' }}
-            >
-              <div className="max-w-3xl mx-auto space-y-6">
-                <div className="flex justify-center">
-                  <div className="bg-white text-xs text-gray-500 px-3 py-1 rounded-full shadow-sm">
-                    Today, {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-                  </div>
-                </div>
-                {messages.map((msg, index) => (
-                  <div key={index} className={`flex ${msg.idSender === idSender ? 'justify-end' : 'justify-start'}`}>
-                    {msg.idSender !== idSender && (
+
+          {/* Contacts */}
+          <div className="overflow-y-auto flex-1">
+            {filteredUsers.length > 0 ? (
+              filteredUsers.map((user) => (
+                <div
+                  key={user._id}
+                  className={`p-3 hover:bg-gray-50 cursor-pointer transition duration-150 flex items-center ${
+                    selectedUser?._id === user._id ? 'bg-indigo-50 border-l-4 border-indigo-500' : 'border-l-4 border-transparent'
+                  }`}
+                  onClick={() => selectUser(user)}
+                >
+                  <div className="relative">
+                    {user.avatar ? (
                       <img
-                        src={
-                          selectedUser.avatar ||
-                          `https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${selectedUser.name}`
-                        }
-                        alt="Contact"
-                        className="w-8 h-8 rounded-full mr-2 self-end mb-1"
+                        src={user.avatar}
+                        alt={user.name}
+                        className="w-12 h-12 rounded-full object-cover border border-gray-200"
                       />
-                    )}
-                    <div
-                      className={`max-w-xs md:max-w-md lg:max-w-lg ${
-                        msg.idSender === idSender
-                          ? 'bg-indigo-600 text-white rounded-tl-xl rounded-tr-xl rounded-bl-xl'
-                          : 'bg-white text-gray-800 rounded-tl-xl rounded-tr-xl rounded-br-xl shadow-md'
-                      } px-4 py-3 text-sm`}
-                    >
-                      {msg.content && (
-                        <p className={`leading-relaxed ${msg.idSender === idSender ? 'text-indigo-50' : 'text-gray-700'}`}>
-                          {msg.content}
-                        </p>
-                      )}
-                      {msg.image && <img src={msg.image} alt="Shared" className="rounded-lg mt-2 max-w-full" />}
-                      <div className={`text-xs mt-1 flex justify-end ${msg.idSender === idSender ? 'text-indigo-200' : 'text-gray-400'}`}>
-                        {moment(msg.time).fromNow()}
-                        {msg.idSender === idSender && (
-                          <svg className="w-4 h-4 ml-1 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                          </svg>
-                        )}
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-medium text-lg border border-gray-200">
+                        {getInitials(user.name)}
                       </div>
+                    )}
+                    {userStatus[user._id] === 'Đang hoạt động' && (
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    )}
+                  </div>
+                  <div className="ml-3 flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-sm font-medium text-gray-900 truncate">{user.name}</h3>
+                      <span className="text-xs text-gray-500">12:30</span>
                     </div>
-                    {msg.idSender === idSender && (
-                      <img
-                        src={`https://ui-avatars.com/api/?background=4f46e5&color=ffffff&bold=true&name=${currentUser.name}`}
-                        alt="You"
-                        className="w-8 h-8 rounded-full ml-2 self-end mb-1"
-                      />
-                    )}
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-gray-500 truncate mt-1 max-w-[160px]">
+                        {user.email || ""}
+                      </p>
+                      {userStatus[user._id] === 'Đang hoạt động' ? (
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                      ) : (
+                        <span className="w-2 h-2 bg-gray-300 rounded-full"></span>
+                      )}
+                    </div>
                   </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-            </div>
-            {(loadingImg || image) && (
-              <div className="bg-white p-2 border-t border-gray-200">
-                <div className="flex justify-center">
-                  {loadingImg ? (
-                    <LoaderIcon style={{ fontSize: 24 }} spin="true" />
-                  ) : (
-                    image && (
-                      <div className="relative inline-block">
-                        <img src={image} alt="Preview" className="h-20 rounded-lg" />
-                        <button
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
-                          onClick={() => setImage(null)}
-                        >
-                          ✖
-                        </button>
-                      </div>
-                    )
-                  )}
                 </div>
+              ))
+            ) : (
+              <div className="p-4 text-center text-gray-500">
+                <User className="mx-auto h-10 w-10 text-gray-400 mb-2" />
+                <p>Không tìm thấy liên hệ nào</p>
               </div>
             )}
-            <div className="bg-white border-t border-gray-200 p-4">
-              <div className="flex items-center max-w-4xl mx-auto bg-gray-100 rounded-xl shadow-sm p-1">
-                <label className="p-2 ml-1 text-gray-500 hover:text-indigo-500 transition cursor-pointer">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                    ></path>
-                  </svg>
-                  <input type="file" className="hidden" onChange={handleUploadImage} accept="image/*" />
-                </label>
-                <button className="p-2 text-gray-500 hover:text-indigo-500 transition">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                </button>
-                <input
-                  type="text"
-                  placeholder="Nhập tin nhắn của bạn..."
-                  className="flex-1 px-4 py-2 text-sm bg-transparent border-none focus:outline-none focus:ring-0"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                />
-                <button className="p-2 text-gray-500 hover:text-indigo-500 transition">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-                    ></path>
-                  </svg>
-                </button>
-                <button
-                  className="ml-1 p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-                  onClick={sendMessage}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center bg-gray-50">
-            <div className="text-center p-8 max-w-md">
-              <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                  ></path>
-                </svg>
-              </div>
-              <h3 className="text-xl font-medium text-gray-800 mb-2">Tin nhắn của bạn</h3>
-              <p className="text-gray-500 mb-6">Chọn một liên hệ để bắt đầu trò chuyện</p>
-            </div>
           </div>
-        )}
+        </div>
+
+        {/* Main Chat Area */}
+        <div className="flex-1 flex flex-col bg-slate-50">
+          {selectedUser ? (
+            <>
+              {/* Chat Header */}
+              <div className="bg-white border-b border-gray-200 p-3 flex justify-between items-center shadow-sm">
+                <div className="flex items-center">
+                  <div className="relative">
+                    {selectedUser.avatar ? (
+                      <img
+                        src={selectedUser.avatar}
+                        alt={selectedUser.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-medium text-lg">
+                        {getInitials(selectedUser.name)}
+                      </div>
+                    )}
+                    {userStatus[selectedUser._id] === 'Đang hoạt động' && (
+                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
+                    )}
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-gray-800">{selectedUser.name}</h3>
+                    <div className="flex items-center">
+                      <span className="text-xs text-gray-500">{userStatus[selectedUser._id] || 'Không hoạt động'}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex space-x-1">
+                  <button className="p-2 rounded-full hover:bg-gray-100 transition">
+                    <Video size={18} className="text-gray-600" />
+                  </button>
+                  <button className="p-2 rounded-full hover:bg-gray-100 transition">
+                    <Phone size={18} className="text-gray-600" />
+                  </button>
+                  <button className="p-2 rounded-full hover:bg-gray-100 transition">
+                    <MoreVertical size={18} className="text-gray-600" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto p-4 bg-slate-50" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/subtle-white-feathers.png")' }}>
+                <div className="max-w-3xl mx-auto space-y-6">
+                  {Object.entries(groupedMessages()).map(([date, msgs]) => (
+                    <div key={date}>
+                      <div className="flex justify-center mb-4">
+                        <div className="bg-white text-xs text-gray-500 px-3 py-1 rounded-full shadow-sm">
+                          {date}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        {msgs.map((msg, msgIndex) => {
+                          const isSender = msg.idSender === idSender;
+                          const prevMsg = msgIndex > 0 ? msgs[msgIndex - 1] : null;
+                          const showAvatar = !prevMsg || prevMsg.idSender !== msg.idSender;
+
+                          return (
+                            <div key={msgIndex} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
+                              {!isSender && showAvatar && (
+                                <div className="w-8 h-8 rounded-full mr-2 self-end mb-1 flex-shrink-0">
+                                  {selectedUser.avatar ? (
+                                    <img
+                                      src={selectedUser.avatar}
+                                      alt={selectedUser.name}
+                                      className="w-8 h-8 rounded-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-medium text-xs">
+                                      {getInitials(selectedUser.name)}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {!isSender && !showAvatar && <div className="w-8 mr-2 flex-shrink-0"></div>}
+
+                              <div
+                                className={`max-w-xs md:max-w-md ${
+                                  isSender
+                                    ? 'bg-indigo-600 text-white rounded-tl-xl rounded-tr-xl rounded-bl-xl'
+                                    : 'bg-white text-gray-800 rounded-tl-xl rounded-tr-xl rounded-br-xl shadow-sm'
+                                } px-4 py-2.5 text-sm`}
+                              >
+                                {msg.content && (
+                                  <p className={`leading-relaxed ${isSender ? 'text-white' : 'text-gray-700'}`}>
+                                    {msg.content}
+                                  </p>
+                                )}
+                                {msg.image && (
+                                  <img
+                                    src={msg.image}
+                                    alt="Shared"
+                                    className="rounded-lg mt-2 max-w-full h-auto cursor-pointer hover:opacity-95 transition"
+                                  />
+                                )}
+                                <div className={`text-xs mt-1 flex justify-end ${isSender ? 'text-indigo-200' : 'text-gray-400'}`}>
+                                  {moment(msg.time).format('HH:mm')}
+                                  {isSender && (
+                                    <CheckCheck size={12} className="ml-1" />
+                                  )}
+                                </div>
+                              </div>
+
+                              {isSender && showAvatar && (
+                                <div className="w-8 h-8 rounded-full ml-2 self-end mb-1 flex-shrink-0">
+                                  {currentUser.avatar ? (
+                                    <img
+                                      src={currentUser.avatar}
+                                      alt={currentUser.name}
+                                      className="w-8 h-8 rounded-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium text-xs">
+                                      {getInitials(currentUser.name)}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {isSender && !showAvatar && <div className="w-8 ml-2 flex-shrink-0"></div>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              </div>
+
+              {/* Image Preview */}
+              {(loadingImg || image) && (
+                <div className="bg-white p-2 border-t border-gray-200">
+                  <div className="flex justify-start px-4">
+                    {loadingImg ? (
+                      <div className="flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-2">
+                        <Loader size={18} className="text-indigo-600 animate-spin" />
+                        <span className="text-xs text-gray-600">Đang tải ảnh...</span>
+                      </div>
+                    ) : (
+                      image && (
+                        <div className="relative inline-block">
+                          <img src={image} alt="Preview" className="h-24 rounded-lg border border-gray-200" />
+                          <button
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                            onClick={() => setImage(null)}
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Message Input */}
+              <div className="bg-white border-t border-gray-200 p-3">
+                <div className="flex items-end max-w-4xl mx-auto rounded-xl p-1">
+                  <div className="flex items-center gap-1 mr-1">
+                    <button className="p-2 text-gray-500 hover:text-indigo-500 hover:bg-gray-100 rounded-full transition">
+                      <Plus size={20} />
+                    </button>
+                    <label className="p-2 text-gray-500 hover:text-indigo-500 hover:bg-gray-100 rounded-full transition cursor-pointer">
+                      <ImageIcon size={20} />
+                      <input type="file" className="hidden" onChange={handleUploadImage} accept="image/*" />
+                    </label>
+                  </div>
+
+                  <div className="flex-1 flex bg-gray-100 rounded-2xl px-3 py-2">
+                    <input
+                      type="text"
+                      ref={messageInputRef}
+                      placeholder="Nhập tin nhắn của bạn..."
+                      className="flex-1 bg-transparent border-none text-sm focus:outline-none"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                    />
+                    <div className="flex items-center gap-1 ml-2">
+                      <button className="p-1.5 text-gray-500 hover:text-indigo-500 rounded-full transition">
+                        <Smile size={20} />
+                      </button>
+                      <button className="p-1.5 text-gray-500 hover:text-indigo-500 rounded-full transition">
+                        <Mic size={20} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    className="ml-2 p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors flex-shrink-0"
+                    onClick={sendMessage}
+                    disabled={!message.trim() && !image}
+                  >
+                    <Send size={18} />
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center bg-gray-50">
+              <div className="text-center p-8 max-w-md">
+                <div className="w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <MessageSquare size={32} className="text-indigo-600" />
+                </div>
+                <h3 className="text-xl font-medium text-gray-800 mb-3">Tin nhắn của bạn</h3>
+                <p className="text-gray-500 mb-6 text-sm leading-relaxed">
+                  Chọn một liên hệ bên trái để bắt đầu trò chuyện hoặc tạo một cuộc trò chuyện mới bằng cách nhấn vào nút bên dưới.
+                </p>
+                <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors inline-flex items-center">
+                  <Plus size={16} className="mr-1.5" />
+                  <span>Tạo cuộc trò chuyện mới</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
