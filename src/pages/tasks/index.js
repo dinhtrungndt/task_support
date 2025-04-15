@@ -104,18 +104,18 @@ export const TaskPages = () => {
     if (searchTerm.trim() !== "") {
       const searchTermLower = searchTerm.toLowerCase().trim();
       results = results.filter((task) => {
-        // Guard against missing properties
-        if (!task) return false;
+        // Guard against missing task or companyId
+        if (!task || !task.companyId) return false;
 
         return (
-          (task.companyId.name || "").toLowerCase().includes(searchTermLower) ||
           (task.companyId.mst || "").toLowerCase().includes(searchTermLower) ||
           (task.companyId.address || "").toLowerCase().includes(searchTermLower) ||
+          (task.companyId.name || "").toLowerCase().includes(searchTermLower) ||
           (task.connectionType || "").toLowerCase().includes(searchTermLower) ||
           (task.installer || "").toLowerCase().includes(searchTermLower) ||
           (task.codeData || "").toLowerCase().includes(searchTermLower) ||
           (task.typeData || "").toLowerCase().includes(searchTermLower) ||
-          (task.userAdd.name || "").toLowerCase().includes(searchTermLower) ||
+          (task.userAdd?.name || "").toLowerCase().includes(searchTermLower) ||
           (task.notes || "").toLowerCase().includes(searchTermLower) ||
           (task.status || "").toLowerCase().includes(searchTermLower) ||
           (task.installDate
