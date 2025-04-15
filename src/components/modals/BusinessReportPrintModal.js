@@ -1,18 +1,18 @@
 import React, { useState, useRef } from 'react';
-import { Printer, X, Settings, Check, FileText, Info } from 'lucide-react';
+import { Printer, X, Settings, Check, FileText, Info, Building } from 'lucide-react';
 import moment from 'moment';
 
-const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
+const BusinessPrintPreviewModal = ({ isOpen, onClose, businesses }) => {
   const printableRef = useRef(null);
   const [options, setOptions] = useState({
-    showCompanyInfo: true,
-    showConnectionInfo: true,
+    showTasks: true,
+    showServices: true,
+    showTypeData: true,
     showDates: true,
-    showUserInfo: true,
-    showNotes: true,
-    title: 'Báo cáo danh sách công việc',
+    showAddress: true,
+    title: 'Báo cáo danh sách doanh nghiệp',
     subtitle: `Ngày xuất: ${moment().format('DD/MM/YYYY')}`,
-    orientation: 'portrait',
+    orientation: 'landscape',
     showHeader: true,
     showFooter: true,
     pageSize: 'a4'
@@ -33,91 +33,86 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
         body {
           font-family: 'Segoe UI', Arial, sans-serif;
           color: #333;
-          line-height: 1.4;
+          line-height: 1.5;
           margin: 0;
           padding: 0;
         }
         .report-container {
           width: 100%;
-          max-width: 100%;
           margin: 0 auto;
-          page-break-after: always;
         }
         .header {
           text-align: center;
-          margin-bottom: 15px;
-          padding-bottom: 10px;
-          border-bottom: 1px solid #3b82f6;
+          margin-bottom: 20px;
+          padding-bottom: 15px;
+          border-bottom: 2px solid #3b82f6;
         }
         .header h1 {
-          margin: 0 0 5px 0;
+          margin-bottom: 5px;
           color: #1e40af;
-          font-size: 18px;
-          font-weight: 600;
+          font-size: 24px;
         }
         .header p {
-          margin: 3px 0;
+          margin-top: 0;
           color: #6b7280;
-          font-size: 12px;
-        }
-        .divider {
-          height: 1px;
-          background-color: #e5e7eb;
-          margin: 10px 0;
-          width: 100%;
+          font-size: 14px;
         }
         table {
           width: 100%;
           border-collapse: collapse;
-          margin-top: 5px;
-          font-size: 11px;
-          table-layout: fixed;
+          margin-top: 20px;
+          font-size: 12px;
         }
         th {
           background-color: #eff6ff;
           color: #1e40af;
           font-weight: 600;
           text-align: left;
-          padding: 6px;
+          padding: 8px;
           border: 1px solid #dbeafe;
         }
         td {
-          padding: 6px;
+          padding: 8px;
           text-align: left;
           border: 1px solid #e5e7eb;
           vertical-align: top;
-          word-wrap: break-word;
         }
         tr:nth-child(even) {
           background-color: #f9fafb;
         }
-        .status-done, .status-active {
+        .tasks-done {
           color: #059669;
           font-weight: 500;
         }
-        .status-pending {
+        .tasks-pending {
           color: #d97706;
           font-weight: 500;
         }
-        .status-rejected, .status-inactive {
+        .tasks-rejected {
           color: #dc2626;
           font-weight: 500;
         }
+        .services-active {
+          color: #059669;
+          font-weight: 500;
+        }
+        .services-inactive {
+          color: #dc2626;
+          font-weight: 500;
+        }
+        .tags-list {
+          font-size: 11px;
+          color: #4b5563;
+        }
         .footer {
-          margin-top: 15px;
+          margin-top: 30px;
           text-align: right;
-          font-size: 10px;
+          font-size: 11px;
           color: #6b7280;
-          padding-top: 5px;
+          padding-top: 10px;
           border-top: 1px solid #e5e7eb;
         }
         @media print {
-          body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-          }
           button { display: none !important; }
           body {
             -webkit-print-color-adjust: exact;
@@ -132,9 +127,6 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
             background-color: #eff6ff !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
-          }
-          * {
-            box-sizing: border-box;
           }
         }
       </style>
@@ -157,32 +149,6 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
         printWindow.close();
       };
     };
-  };
-
-  const getStatusClass = (status) => {
-    switch (status) {
-      case "Done":
-        return "status-done";
-      case "Pending":
-        return "status-pending";
-      case "Rejected":
-        return "status-rejected";
-      default:
-        return "";
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "Done":
-        return "●";
-      case "Pending":
-        return "○";
-      case "Rejected":
-        return "✕";
-      default:
-        return "○";
-    }
   };
 
   const toggleOption = (option) => {
@@ -215,12 +181,12 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
 
   // Tính toán cấu trúc có bao nhiêu cột để quyết định độ rộng bảng
   const calculateColumnCount = () => {
-    let count = 3; // STT, trạng thái và các cột cơ bản
-    if (options.showCompanyInfo) count += 3;
-    if (options.showConnectionInfo) count += 4;
+    let count = 3; // STT, MST, và tên doanh nghiệp là cột cơ bản
+    if (options.showAddress) count += 1;
+    if (options.showTasks) count += 4;
+    if (options.showServices) count += 3;
+    if (options.showTypeData) count += 2;
     if (options.showDates) count += 2;
-    if (options.showUserInfo) count += 1;
-    if (options.showNotes) count += 1;
     return count;
   };
 
@@ -349,21 +315,41 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
                     <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
                       <input
                         type="checkbox"
-                        checked={options.showCompanyInfo}
-                        onChange={() => toggleOption('showCompanyInfo')}
+                        checked={options.showAddress}
+                        onChange={() => toggleOption('showAddress')}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
                       />
-                      Thông tin công ty
+                      Địa chỉ
                     </label>
 
                     <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
                       <input
                         type="checkbox"
-                        checked={options.showConnectionInfo}
-                        onChange={() => toggleOption('showConnectionInfo')}
+                        checked={options.showTasks}
+                        onChange={() => toggleOption('showTasks')}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
                       />
-                      Thông tin kết nối
+                      Thông tin công việc
+                    </label>
+
+                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
+                      <input
+                        type="checkbox"
+                        checked={options.showServices}
+                        onChange={() => toggleOption('showServices')}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+                      />
+                      Thông tin dịch vụ
+                    </label>
+
+                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
+                      <input
+                        type="checkbox"
+                        checked={options.showTypeData}
+                        onChange={() => toggleOption('showTypeData')}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+                      />
+                      Loại dữ liệu và dịch vụ
                     </label>
 
                     <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
@@ -374,26 +360,6 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
                       />
                       Ngày tháng
-                    </label>
-
-                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
-                      <input
-                        type="checkbox"
-                        checked={options.showUserInfo}
-                        onChange={() => toggleOption('showUserInfo')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
-                      />
-                      Thông tin người tạo
-                    </label>
-
-                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
-                      <input
-                        type="checkbox"
-                        checked={options.showNotes}
-                        onChange={() => toggleOption('showNotes')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
-                      />
-                      Ghi chú
                     </label>
 
                     <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
@@ -419,89 +385,108 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
                   <div className="header">
                     <h1 className="text-xl font-bold text-blue-800">{options.title}</h1>
                     <p className="text-sm text-gray-600">{options.subtitle}</p>
-                    {tasks.length > 0 && (
-                      <p className="text-sm mt-2">Tổng số: <span className="font-semibold">{tasks.length}</span> công việc</p>
+                    {businesses.length > 0 && (
+                      <p className="text-sm mt-2">Tổng số: <span className="font-semibold">{businesses.length}</span> doanh nghiệp</p>
                     )}
                   </div>
                 )}
 
-                {tasks.length > 0 ? (
+                {businesses.length > 0 ? (
                   <div className="overflow-auto">
                     <table className="w-full border-collapse text-sm" style={{ minWidth: columnCount > 8 ? '100%' : 'auto' }}>
                       <thead>
                         <tr>
                           <th className="border p-2 text-center" style={{ width: '50px' }}>STT</th>
-                          {options.showCompanyInfo && (
+                          <th className="border p-2" style={{ width: '120px' }}>MST</th>
+                          <th className="border p-2" style={{ width: '180px' }}>Tên doanh nghiệp</th>
+                          {options.showAddress && (
+                            <th className="border p-2" style={{ width: '200px' }}>Địa chỉ</th>
+                          )}
+
+                          {options.showTasks && (
                             <>
-                              <th className="border p-2" style={{ width: '100px' }}>MST</th>
-                              <th className="border p-2" style={{ width: '180px' }}>Tên công ty</th>
-                              <th className="border p-2" style={{ width: '200px' }}>Địa chỉ</th>
+                              <th className="border p-2 text-center" style={{ width: '70px' }}>Tổng CV</th>
+                              <th className="border p-2 text-center" style={{ width: '70px' }}>Hoàn thành</th>
+                              <th className="border p-2 text-center" style={{ width: '70px' }}>Đang làm</th>
+                              <th className="border p-2 text-center" style={{ width: '70px' }}>Từ chối</th>
                             </>
                           )}
-                          {options.showConnectionInfo && (
+
+                          {options.showServices && (
                             <>
-                              <th className="border p-2" style={{ width: '120px' }}>Loại kết nối</th>
-                              <th className="border p-2" style={{ width: '120px' }}>Người lắp đặt</th>
-                              <th className="border p-2" style={{ width: '100px' }}>Mã dữ liệu</th>
-                              <th className="border p-2" style={{ width: '120px' }}>Loại dữ liệu</th>
+                              <th className="border p-2 text-center" style={{ width: '70px' }}>Tổng BH</th>
+                              <th className="border p-2 text-center" style={{ width: '70px' }}>BH còn</th>
+                              <th className="border p-2 text-center" style={{ width: '70px' }}>BH hết</th>
                             </>
                           )}
+
+                          {options.showTypeData && (
+                            <>
+                              <th className="border p-2" style={{ width: '150px' }}>Loại dữ liệu</th>
+                              <th className="border p-2" style={{ width: '150px' }}>Loại dịch vụ</th>
+                            </>
+                          )}
+
                           {options.showDates && (
                             <>
-                              <th className="border p-2" style={{ width: '100px' }}>Ngày lắp</th>
+                              <th className="border p-2" style={{ width: '100px' }}>Ngày tạo</th>
                               <th className="border p-2" style={{ width: '100px' }}>Ngày cập nhật</th>
                             </>
-                          )}
-                          <th className="border p-2" style={{ width: '100px' }}>Trạng thái</th>
-                          {options.showUserInfo && (
-                            <th className="border p-2" style={{ width: '120px' }}>Người tạo</th>
-                          )}
-                          {options.showNotes && (
-                            <th className="border p-2" style={{ width: '150px' }}>Ghi chú</th>
                           )}
                         </tr>
                       </thead>
                       <tbody>
-                        {tasks.map((task, index) => (
-                          <tr key={task._id || index}>
+                        {businesses.map((business, index) => (
+                          <tr key={business._id || index}>
                             <td className="border p-2 text-center">{index + 1}</td>
-                            {options.showCompanyInfo && (
+                            <td className="border p-2 font-medium">{business.mst || 'N/A'}</td>
+                            <td className="border p-2">{business.name || 'N/A'}</td>
+
+                            {options.showAddress && (
+                              <td className="border p-2">{business.address || 'N/A'}</td>
+                            )}
+
+                            {options.showTasks && (
                               <>
-                                <td className="border p-2 font-medium">{task.companyId?.mst || 'N/A'}</td>
-                                <td className="border p-2">{task.companyId?.name || 'N/A'}</td>
-                                <td className="border p-2">{task.companyId?.address || 'N/A'}</td>
+                                <td className="border p-2 text-center font-medium">{business.totalTasks || 0}</td>
+                                <td className="border p-2 text-center tasks-done">{business.completedTasks || 0}</td>
+                                <td className="border p-2 text-center tasks-pending">{business.pendingTasks || 0}</td>
+                                <td className="border p-2 text-center tasks-rejected">{business.rejectedTasks || 0}</td>
                               </>
                             )}
-                            {options.showConnectionInfo && (
+
+                            {options.showServices && (
                               <>
-                                <td className="border p-2">{task.connectionType || 'N/A'}</td>
-                                <td className="border p-2">{task.installer || 'N/A'}</td>
-                                <td className="border p-2 font-mono">{task.codeData || 'N/A'}</td>
-                                <td className="border p-2">{task.typeData || 'N/A'}</td>
+                                <td className="border p-2 text-center font-medium">{business.totalServices || 0}</td>
+                                <td className="border p-2 text-center services-active">{business.activeServices || 0}</td>
+                                <td className="border p-2 text-center services-inactive">{business.inactionServices || 0}</td>
                               </>
                             )}
+
+                            {options.showTypeData && (
+                              <>
+                                <td className="border p-2 tags-list">
+                                  {business.typeData && business.typeData.length > 0
+                                    ? business.typeData.join(', ')
+                                    : 'N/A'}
+                                </td>
+                                <td className="border p-2 tags-list">
+                                  {business.serviceTypes && business.serviceTypes.length > 0
+                                    ? business.serviceTypes.join(', ')
+                                    : 'N/A'}
+                                </td>
+                              </>
+                            )}
+
                             {options.showDates && (
                               <>
                                 <td className="border p-2">
-                                  {task.installDate ? moment(task.installDate).format('DD/MM/YYYY') : 'N/A'}
+                                  {business.createdAt ? moment(business.createdAt).format('DD/MM/YYYY') : 'N/A'}
                                 </td>
                                 <td className="border p-2">
-                                  {task.lastModified ? moment(task.lastModified).format('DD/MM/YYYY') : 'N/A'}
+                                  {business.lastModified ? moment(business.lastModified).format('DD/MM/YYYY') : 'N/A'}
                                 </td>
                               </>
-                            )}
-                            <td className="border p-2">
-                              <span className={getStatusClass(task.status)}>
-                                {getStatusIcon(task.status)} {task.status || 'Pending'}
-                              </span>
-                            </td>
-                            {options.showUserInfo && (
-                              <td className="border p-2">
-                                {task.userAdd?.name || (typeof task.userAdd === 'string' ? task.userAdd : 'N/A')}
-                              </td>
-                            )}
-                            {options.showNotes && (
-                              <td className="border p-2">{task.notes || 'N/A'}</td>
                             )}
                           </tr>
                         ))}
@@ -512,13 +497,13 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
                   <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
                     <Info size={36} className="mx-auto mb-3 text-gray-400" />
                     <p className="font-medium">Không có dữ liệu để hiển thị</p>
-                    <p className="text-sm mt-1">Vui lòng chọn hoặc thêm công việc để xem báo cáo</p>
+                    <p className="text-sm mt-1">Vui lòng chọn hoặc thêm doanh nghiệp để xem báo cáo</p>
                   </div>
                 )}
 
                 {options.showFooter && (
                   <div className="footer">
-                    <p>Báo cáo được tạo từ hệ thống quản lý công việc • {moment().format('HH:mm DD/MM/YYYY')}</p>
+                    <p>Báo cáo được tạo từ hệ thống quản lý • {moment().format('HH:mm DD/MM/YYYY')}</p>
                   </div>
                 )}
               </div>
@@ -530,4 +515,4 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
   );
 };
 
-export default PrintPreviewModal;
+export default BusinessPrintPreviewModal;

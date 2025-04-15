@@ -1,16 +1,16 @@
 import React, { useState, useRef } from 'react';
-import { Printer, X, Settings, Check, FileText, Info } from 'lucide-react';
+import { Printer, X, Settings, Check, FileText, Info, Server } from 'lucide-react';
 import moment from 'moment';
 
-const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
+const ServicePrintPreviewModal = ({ isOpen, onClose, services }) => {
   const printableRef = useRef(null);
   const [options, setOptions] = useState({
     showCompanyInfo: true,
-    showConnectionInfo: true,
+    showServiceDetails: true,
     showDates: true,
     showUserInfo: true,
-    showNotes: true,
-    title: 'Báo cáo danh sách công việc',
+    showFeatures: true,
+    title: 'Báo cáo danh sách dịch vụ',
     subtitle: `Ngày xuất: ${moment().format('DD/MM/YYYY')}`,
     orientation: 'portrait',
     showHeader: true,
@@ -160,29 +160,22 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
   };
 
   const getStatusClass = (status) => {
-    switch (status) {
-      case "Done":
-        return "status-done";
-      case "Pending":
+    if (!status) return "";
+    switch (status.toLowerCase()) {
+      case "active":
+        return "status-active";
+      case "inactive":
+        return "status-inactive";
+      case "pending":
         return "status-pending";
-      case "Rejected":
-        return "status-rejected";
       default:
         return "";
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "Done":
-        return "●";
-      case "Pending":
-        return "○";
-      case "Rejected":
-        return "✕";
-      default:
-        return "○";
-    }
+  const formatCurrency = (amount) => {
+    if (amount === undefined || amount === null) return "N/A";
+    return new Intl.NumberFormat('vi-VN').format(amount) + ' đ';
   };
 
   const toggleOption = (option) => {
@@ -215,12 +208,12 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
 
   // Tính toán cấu trúc có bao nhiêu cột để quyết định độ rộng bảng
   const calculateColumnCount = () => {
-    let count = 3; // STT, trạng thái và các cột cơ bản
-    if (options.showCompanyInfo) count += 3;
-    if (options.showConnectionInfo) count += 4;
+    let count = 2; // STT và tên dịch vụ là cột cơ bản
+    if (options.showCompanyInfo) count += 2;
+    if (options.showServiceDetails) count += 4;
     if (options.showDates) count += 2;
     if (options.showUserInfo) count += 1;
-    if (options.showNotes) count += 1;
+    if (options.showFeatures) count += 1;
     return count;
   };
 
@@ -353,17 +346,17 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
                         onChange={() => toggleOption('showCompanyInfo')}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
                       />
-                      Thông tin công ty
+                      Thông tin doanh nghiệp
                     </label>
 
                     <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
                       <input
                         type="checkbox"
-                        checked={options.showConnectionInfo}
-                        onChange={() => toggleOption('showConnectionInfo')}
+                        checked={options.showServiceDetails}
+                        onChange={() => toggleOption('showServiceDetails')}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
                       />
-                      Thông tin kết nối
+                      Chi tiết dịch vụ
                     </label>
 
                     <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
@@ -389,11 +382,11 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
                     <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
                       <input
                         type="checkbox"
-                        checked={options.showNotes}
-                        onChange={() => toggleOption('showNotes')}
+                        checked={options.showFeatures}
+                        onChange={() => toggleOption('showFeatures')}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
                       />
-                      Ghi chú
+                      Tính năng
                     </label>
 
                     <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
@@ -419,89 +412,91 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
                   <div className="header">
                     <h1 className="text-xl font-bold text-blue-800">{options.title}</h1>
                     <p className="text-sm text-gray-600">{options.subtitle}</p>
-                    {tasks.length > 0 && (
-                      <p className="text-sm mt-2">Tổng số: <span className="font-semibold">{tasks.length}</span> công việc</p>
+                    {services.length > 0 && (
+                      <p className="text-sm mt-2">Tổng số: <span className="font-semibold">{services.length}</span> dịch vụ</p>
                     )}
                   </div>
                 )}
 
-                {tasks.length > 0 ? (
+                {services.length > 0 ? (
                   <div className="overflow-auto">
                     <table className="w-full border-collapse text-sm" style={{ minWidth: columnCount > 8 ? '100%' : 'auto' }}>
                       <thead>
                         <tr>
-                          <th className="border p-2 text-center" style={{ width: '50px' }}>STT</th>
+                          <th className="border p-2 text-center" style={{ width: '40px' }}>STT</th>
+                          <th className="border p-2" style={{ width: '130px' }}>Tên dịch vụ</th>
                           {options.showCompanyInfo && (
                             <>
                               <th className="border p-2" style={{ width: '100px' }}>MST</th>
-                              <th className="border p-2" style={{ width: '180px' }}>Tên công ty</th>
-                              <th className="border p-2" style={{ width: '200px' }}>Địa chỉ</th>
+                              <th className="border p-2" style={{ width: '130px' }}>Doanh nghiệp</th>
                             </>
                           )}
-                          {options.showConnectionInfo && (
+                          {options.showServiceDetails && (
                             <>
-                              <th className="border p-2" style={{ width: '120px' }}>Loại kết nối</th>
-                              <th className="border p-2" style={{ width: '120px' }}>Người lắp đặt</th>
-                              <th className="border p-2" style={{ width: '100px' }}>Mã dữ liệu</th>
-                              <th className="border p-2" style={{ width: '120px' }}>Loại dữ liệu</th>
+                              <th className="border p-2" style={{ width: '90px' }}>Loại dịch vụ</th>
+                              <th className="border p-2" style={{ width: '90px' }}>Giá dịch vụ</th>
+                              <th className="border p-2 text-center" style={{ width: '70px' }}>Thời hạn</th>
+                              <th className="border p-2" style={{ width: '80px' }}>Trạng thái</th>
                             </>
                           )}
                           {options.showDates && (
                             <>
-                              <th className="border p-2" style={{ width: '100px' }}>Ngày lắp</th>
-                              <th className="border p-2" style={{ width: '100px' }}>Ngày cập nhật</th>
+                              <th className="border p-2" style={{ width: '90px' }}>Ngày tạo</th>
+                              <th className="border p-2" style={{ width: '90px' }}>Ngày cập nhật</th>
                             </>
                           )}
-                          <th className="border p-2" style={{ width: '100px' }}>Trạng thái</th>
                           {options.showUserInfo && (
-                            <th className="border p-2" style={{ width: '120px' }}>Người tạo</th>
+                            <th className="border p-2" style={{ width: '110px' }}>Người tạo</th>
                           )}
-                          {options.showNotes && (
-                            <th className="border p-2" style={{ width: '150px' }}>Ghi chú</th>
+                          {options.showFeatures && (
+                            <th className="border p-2" style={{ width: '130px' }}>Tính năng</th>
                           )}
                         </tr>
                       </thead>
                       <tbody>
-                        {tasks.map((task, index) => (
-                          <tr key={task._id || index}>
+                        {services.map((service, index) => (
+                          <tr key={service._id || index}>
                             <td className="border p-2 text-center">{index + 1}</td>
+                            <td className="border p-2 font-medium">{service.name || 'N/A'}</td>
                             {options.showCompanyInfo && (
                               <>
-                                <td className="border p-2 font-medium">{task.companyId?.mst || 'N/A'}</td>
-                                <td className="border p-2">{task.companyId?.name || 'N/A'}</td>
-                                <td className="border p-2">{task.companyId?.address || 'N/A'}</td>
+                                <td className="border p-2">{service.companyId?.mst || 'N/A'}</td>
+                                <td className="border p-2">{service.companyId?.name || 'N/A'}</td>
                               </>
                             )}
-                            {options.showConnectionInfo && (
+                            {options.showServiceDetails && (
                               <>
-                                <td className="border p-2">{task.connectionType || 'N/A'}</td>
-                                <td className="border p-2">{task.installer || 'N/A'}</td>
-                                <td className="border p-2 font-mono">{task.codeData || 'N/A'}</td>
-                                <td className="border p-2">{task.typeData || 'N/A'}</td>
+                                <td className="border p-2">{service.type || 'N/A'}</td>
+                                <td className="border p-2 price">{formatCurrency(service.price)}</td>
+                                <td className="border p-2 text-center">
+                                  {service.duration ? `${service.duration} tháng` : 'N/A'}
+                                </td>
+                                <td className="border p-2">
+                                  <span className={getStatusClass(service.status)}>
+                                    {service.status || 'N/A'}
+                                  </span>
+                                </td>
                               </>
                             )}
                             {options.showDates && (
                               <>
                                 <td className="border p-2">
-                                  {task.installDate ? moment(task.installDate).format('DD/MM/YYYY') : 'N/A'}
+                                  {service.createdAt ? moment(service.createdAt).format('DD/MM/YYYY') : 'N/A'}
                                 </td>
                                 <td className="border p-2">
-                                  {task.lastModified ? moment(task.lastModified).format('DD/MM/YYYY') : 'N/A'}
+                                  {service.lastModified ? moment(service.lastModified).format('DD/MM/YYYY') : 'N/A'}
                                 </td>
                               </>
                             )}
-                            <td className="border p-2">
-                              <span className={getStatusClass(task.status)}>
-                                {getStatusIcon(task.status)} {task.status || 'Pending'}
-                              </span>
-                            </td>
                             {options.showUserInfo && (
                               <td className="border p-2">
-                                {task.userAdd?.name || (typeof task.userAdd === 'string' ? task.userAdd : 'N/A')}
+                                {service.userCreated?.name || (typeof service.userCreated === 'string' ? service.userCreated : 'N/A')}
                               </td>
                             )}
-                            {options.showNotes && (
-                              <td className="border p-2">{task.notes || 'N/A'}</td>
+                            {options.showFeatures && (
+                              <td className="border p-2 features">
+                                {service.features && service.features.length > 0 ? service.features.join(', ') : 'N/A'}
+                              </td>
                             )}
                           </tr>
                         ))}
@@ -512,13 +507,13 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
                   <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
                     <Info size={36} className="mx-auto mb-3 text-gray-400" />
                     <p className="font-medium">Không có dữ liệu để hiển thị</p>
-                    <p className="text-sm mt-1">Vui lòng chọn hoặc thêm công việc để xem báo cáo</p>
+                    <p className="text-sm mt-1">Vui lòng chọn hoặc thêm dịch vụ để xem báo cáo</p>
                   </div>
                 )}
 
                 {options.showFooter && (
                   <div className="footer">
-                    <p>Báo cáo được tạo từ hệ thống quản lý công việc • {moment().format('HH:mm DD/MM/YYYY')}</p>
+                    <p>Báo cáo được tạo từ hệ thống quản lý • {moment().format('HH:mm DD/MM/YYYY')}</p>
                   </div>
                 )}
               </div>
@@ -530,4 +525,4 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
   );
 };
 
-export default PrintPreviewModal;
+export default ServicePrintPreviewModal;

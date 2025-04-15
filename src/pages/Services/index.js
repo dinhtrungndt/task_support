@@ -10,11 +10,13 @@ import {
   Download,
   ChevronUp,
   Building,
+  Printer,
 } from "lucide-react";
 import Modal from "../../components/modals";
 import CreateService from "../../components/modals/CreateService";
 import EditServiceModal from "../../components/modals/EditServiceModal";
 import MoreServiceDetailsModal from "../../components/modals/MoreServiceDetailsModal";
+import ServicePrintPreviewModal from "../../components/modals/ServicePrintPreviewModal";
 import {
   fetchServices,
   deleteServices,
@@ -39,6 +41,7 @@ export const ServicePages = () => {
   const [selectedServiceIds, setSelectedServiceIds] = useState([]);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [printPreviewOpen, setPrintPreviewOpen] = useState(false); // New state for print preview
 
   // Fetch services when component mounts
   useEffect(() => {
@@ -221,6 +224,11 @@ export const ServicePages = () => {
     });
   };
 
+  // Handle print preview
+  const handlePrintPreview = () => {
+    setPrintPreviewOpen(true);
+  };
+
   // Export to Excel
   const handleExportToExcel = () => {
     let dataToExport = filteredServices;
@@ -341,7 +349,19 @@ export const ServicePages = () => {
                 onClick={handleExportToExcel}
               >
                 <Download size={16} className="mr-1.5" />
-                Xuất
+                Xuất Excel
+                {selectedServiceIds.length > 0
+                  ? ` (${selectedServiceIds.length})`
+                  : ""}
+              </button>
+
+              {/* Print Preview Button */}
+              <button
+                className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                onClick={handlePrintPreview}
+              >
+                <Printer size={16} className="mr-1.5" />
+                In báo cáo
                 {selectedServiceIds.length > 0
                   ? ` (${selectedServiceIds.length})`
                   : ""}
@@ -508,6 +528,15 @@ export const ServicePages = () => {
           <MoreServiceDetailsModal service={selectedService} />
         </Modal>
 
+        {/* Print Preview Modal */}
+        <ServicePrintPreviewModal
+          isOpen={printPreviewOpen}
+          onClose={() => setPrintPreviewOpen(false)}
+          services={selectedServiceIds.length > 0
+            ? filteredServices.filter((service) => selectedServiceIds.includes(service._id))
+            : filteredServices}
+        />
+
         {/* Scroll to top button */}
         {showScrollTop && (
           <button
@@ -521,6 +550,6 @@ export const ServicePages = () => {
       </div>
     </div>
   );
-};
+}
 
 export default ServicePages;

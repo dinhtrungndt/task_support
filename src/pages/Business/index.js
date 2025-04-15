@@ -10,6 +10,7 @@ import {
   MoreVertical,
   Download,
   ChevronUp,
+  Printer,
 } from "lucide-react";
 import Modal from "../../components/modals";
 import DropdownMenu from "../../components/DropdownMenu";
@@ -24,6 +25,7 @@ import {
 import * as XLSX from "xlsx";
 import { toast } from "react-toastify";
 import BusinessList from "../../components/Business/Business";
+import BusinessPrintPreviewModal from "../../components/modals/BusinessReportPrintModal";
 
 export const BusinessPages = () => {
   const dispatch = useDispatch();
@@ -40,6 +42,7 @@ export const BusinessPages = () => {
   const [selectedBusinessIds, setSelectedBusinessIds] = useState([]);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [printPreviewOpen, setPrintPreviewOpen] = useState(false); // New state for print preview
 
   useEffect(() => {
     dispatch(fetchBusinesses());
@@ -113,10 +116,6 @@ export const BusinessPages = () => {
   const handleSaveBusiness = async (updatedBusiness) => {
     try {
       if (!updatedBusiness._id) {
-        // console.error(
-        //   "Business missing ID in handleSaveBusiness:",
-        //   updatedBusiness
-        // );
         toast.error("Lỗi: Không thể cập nhật doanh nghiệp không có ID");
         return;
       }
@@ -132,7 +131,6 @@ export const BusinessPages = () => {
       setEditModalOpen(false);
       toast.success("Cập nhật doanh nghiệp thành công");
     } catch (error) {
-      // console.error("Error in handleSaveBusiness:", error);
       toast.error(
         "Lỗi khi cập nhật doanh nghiệp: " + (error.message || "Đã xảy ra lỗi")
       );
@@ -216,6 +214,11 @@ export const BusinessPages = () => {
       top: 0,
       behavior: "smooth",
     });
+  };
+
+  // Handle print preview
+  const handlePrintPreview = () => {
+    setPrintPreviewOpen(true);
   };
 
   // Export to Excel
@@ -340,7 +343,19 @@ export const BusinessPages = () => {
                 onClick={handleExportToExcel}
               >
                 <Download size={16} className="mr-1.5" />
-                Xuất
+                Xuất Excel
+                {selectedBusinessIds.length > 0
+                  ? ` (${selectedBusinessIds.length})`
+                  : ""}
+              </button>
+
+              {/* Print Preview Button */}
+              <button
+                className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                onClick={handlePrintPreview}
+              >
+                <Printer size={16} className="mr-1.5" />
+                In báo cáo
                 {selectedBusinessIds.length > 0
                   ? ` (${selectedBusinessIds.length})`
                   : ""}
@@ -412,6 +427,15 @@ export const BusinessPages = () => {
         >
           <MoreDetailsModalBusiness business={selectedBusiness} />
         </Modal>
+
+        {/* Print Preview Modal */}
+        <BusinessPrintPreviewModal
+          isOpen={printPreviewOpen}
+          onClose={() => setPrintPreviewOpen(false)}
+          businesses={selectedBusinessIds.length > 0
+            ? filteredBusinesses.filter((business) => selectedBusinessIds.includes(business._id))
+            : filteredBusinesses}
+        />
 
         {/* Scroll to top button */}
         {showScrollTop && (
