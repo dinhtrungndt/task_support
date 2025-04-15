@@ -229,52 +229,8 @@ export const OverviewPages = () => {
             </div>
           </div>
         </div>
-
-        {/* Online Members Section */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center">
-              <div className="bg-green-100 p-2 rounded-lg mr-2">
-                <Users size={16} className="text-green-600" />
-              </div>
-              <h3 className="text-sm font-medium text-gray-800">Thành viên đang hoạt động</h3>
-            </div>
-            <button className="text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center">
-              Xem tất cả thành viên
-            </button>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {filteredUsers.map((user) => (
-              <div
-                key={user._id}
-                className="flex items-center bg-white p-3 rounded-lg shadow-sm border border-gray-200 transition-all hover:shadow-md hover:border-blue-200"
-              >
-                <div className="relative">
-                  <img
-                    src={user.avatar || `https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${encodeURIComponent(user.name)}`}
-                    alt={user.name}
-                    className="w-10 h-10 rounded-full mr-3 object-cover"
-                  />
-                  {userStatus[user._id] === "Đang hoạt động" && (
-                    <div className="absolute bottom-0 right-2 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-800">{user.name}</p>
-                  <p className="text-xs text-gray-500">{user.role || "Nhân viên"}</p>
-                </div>
-                <span className={`ml-3 px-2 py-0.5 rounded-full text-xs font-medium ${userStatus[user._id] === "Đang hoạt động" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
-                  {userStatus[user._id] === "Đang hoạt động" ? "Online" : "Offline"}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Tasks Section with Improved Styling */}
         <TodayTasks userStatus={userStatus}/>
-
         {/* Footer */}
         <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex justify-between items-center">
