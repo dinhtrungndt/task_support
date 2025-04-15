@@ -10,6 +10,7 @@ import {
   XCircle,
   Clock,
   ChevronUp,
+  Printer,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
@@ -24,6 +25,7 @@ import {
 } from "../../stores/redux/actions/taskActions";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
+import PrintPreviewModal from "../../components/modals/PrintPreviewModal";
 
 export const TaskPages = () => {
   const dispatch = useDispatch();
@@ -42,6 +44,7 @@ export const TaskPages = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [printPreviewOpen, setPrintPreviewOpen] = useState(false); // New state for print preview
 
   useEffect(() => {
     dispatch(fetchTasks());
@@ -224,6 +227,11 @@ export const TaskPages = () => {
     }
   };
 
+  // Handle print preview
+  const handlePrintPreview = () => {
+    setPrintPreviewOpen(true);
+  };
+
   // Handle export to Excel
   const handleExportToExcel = () => {
     let dataToExport = filteredTasks;
@@ -369,7 +377,16 @@ export const TaskPages = () => {
                 onClick={handleExportToExcel}
               >
                 <Download size={14} className="mr-1" />
-                Xuất{selectedIds.length > 0 ? ` (${selectedIds.length})` : ""}
+                Xuất Excel{selectedIds.length > 0 ? ` (${selectedIds.length})` : ""}
+              </button>
+
+              {/* New Print Preview Button */}
+              <button
+                className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 bg-white text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
+                onClick={handlePrintPreview}
+              >
+                <Printer size={14} className="mr-1" />
+                In báo cáo{selectedIds.length > 0 ? ` (${selectedIds.length})` : ""}
               </button>
             </div>
           </div>
@@ -530,6 +547,15 @@ export const TaskPages = () => {
       >
         <MoreDetailsModal task={selectedTask} />
       </Modal>
+
+      {/* Print Preview Modal */}
+      <PrintPreviewModal
+        isOpen={printPreviewOpen}
+        onClose={() => setPrintPreviewOpen(false)}
+        tasks={selectedIds.length > 0
+          ? filteredTasks.filter((task) => selectedIds.includes(task._id))
+          : filteredTasks}
+      />
 
       {/* Scroll to top button */}
       {showScrollTop && (

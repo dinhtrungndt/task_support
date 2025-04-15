@@ -329,12 +329,12 @@ const MoreDetailsModal = ({ task }) => {
         {/* Task Header */}
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 text-white">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium truncate max-w-[70%]">{task.companyName || 'N/A'}</h2>
+            <h2 className="text-sm font-medium truncate max-w-[70%]">{task.companyId.name || 'N/A'}</h2>
             {getStatusBadge(task.status || 'Pending')}
           </div>
           <p className="text-xs text-blue-100 mt-0.5 flex items-center">
             <MapPin size={12} className="mr-1" />
-            <span className="truncate">{task.address || 'Chưa có địa chỉ'}</span>
+            <span className="truncate">{task.companyId.address || 'Chưa có địa chỉ'}</span>
           </p>
           <div className="flex items-center mt-1.5">
             <div className="bg-blue-400 bg-opacity-30 rounded-md px-2 py-0.5 flex items-center text-xs text-white">
