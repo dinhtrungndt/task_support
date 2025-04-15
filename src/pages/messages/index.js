@@ -41,10 +41,11 @@ export const MessagesPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [hasSetDefaultUser, setHasSetDefaultUser] = useState(false); // Flag to track if we've set a default user
   const messagesEndRef = useRef(null);
   const messageInputRef = useRef(null);
   const { user: currentUser, socket } = useContext(AuthContext);
-  const { users } = useSelector((state) => state.users);
+  const { users, loading: usersLoading } = useSelector((state) => state.users);
 
   const idSender = currentUser.id;
 
@@ -52,6 +53,7 @@ export const MessagesPage = () => {
   useEffect(() => {
     if (location.state?.selectedUser) {
       setSelectedUser(location.state.selectedUser);
+      setHasSetDefaultUser(true); // Mark that we've already set a user
     }
   }, [location.state]);
 
@@ -80,14 +82,19 @@ export const MessagesPage = () => {
     dispatch(fetchUsersExceptId(currentUser.id));
   }, [dispatch, currentUser.id]);
 
-  // Filter users based on search term
+  // Filter users based on search term and set default selected user
   useEffect(() => {
     const filtered = users.filter(user =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()))
     );
     setFilteredUsers(filtered);
-  }, [users, searchTerm]);
+
+    if (filtered.length > 0 && !selectedUser && !hasSetDefaultUser && !usersLoading) {
+      setSelectedUser(filtered[0]);
+      setHasSetDefaultUser(true);
+    }
+  }, [users, searchTerm, selectedUser, hasSetDefaultUser, usersLoading]);
 
   // Fetch messages for selected user
   useEffect(() => {
@@ -212,6 +219,21 @@ export const MessagesPage = () => {
     if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
     return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
   };
+
+  // Show loading state while waiting for users
+  if (usersLoading) {
+    return (
+      <div className="flex flex-col h-screen bg-gray-100">
+        <HeaderPages title="Tin nhắn" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <Loader size={40} className="animate-spin text-indigo-600 mb-4" />
+            <p className="text-gray-600">Đang tải danh sách liên hệ...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -354,93 +376,107 @@ export const MessagesPage = () => {
 
               {/* Messages Area */}
               <div className="flex-1 overflow-y-auto p-4 bg-slate-50" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/subtle-white-feathers.png")' }}>
-                <div className="max-w-3xl mx-auto space-y-6">
-                  {Object.entries(groupedMessages()).map(([date, msgs]) => (
-                    <div key={date}>
-                      <div className="flex justify-center mb-4">
-                        <div className="bg-white text-xs text-gray-500 px-3 py-1 rounded-full shadow-sm">
-                          {date}
+                {Object.keys(groupedMessages()).length > 0 ? (
+                  <div className="max-w-3xl mx-auto space-y-6">
+                    {Object.entries(groupedMessages()).map(([date, msgs]) => (
+                      <div key={date}>
+                        <div className="flex justify-center mb-4">
+                          <div className="bg-white text-xs text-gray-500 px-3 py-1 rounded-full shadow-sm">
+                            {date}
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          {msgs.map((msg, msgIndex) => {
+                            const isSender = msg.idSender === idSender;
+                            const prevMsg = msgIndex > 0 ? msgs[msgIndex - 1] : null;
+                            const showAvatar = !prevMsg || prevMsg.idSender !== msg.idSender;
+
+                            return (
+                              <div key={msgIndex} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
+                                {!isSender && showAvatar && (
+                                  <div className="w-8 h-8 rounded-full mr-2 self-end mb-1 flex-shrink-0">
+                                    {selectedUser.avatar ? (
+                                      <img
+                                        src={selectedUser.avatar}
+                                        alt={selectedUser.name}
+                                        className="w-8 h-8 rounded-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-medium text-xs">
+                                        {getInitials(selectedUser.name)}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {!isSender && !showAvatar && <div className="w-8 mr-2 flex-shrink-0"></div>}
+
+                                <div
+                                  className={`max-w-xs md:max-w-md ${
+                                    isSender
+                                      ? 'bg-indigo-600 text-white rounded-tl-xl rounded-tr-xl rounded-bl-xl'
+                                      : 'bg-white text-gray-800 rounded-tl-xl rounded-tr-xl rounded-br-xl shadow-sm'
+                                  } px-4 py-2.5 text-sm`}
+                                >
+                                  {msg.content && (
+                                    <p className={`leading-relaxed ${isSender ? 'text-white' : 'text-gray-700'}`}>
+                                      {msg.content}
+                                    </p>
+                                  )}
+                                  {msg.image && (
+                                    <img
+                                      src={msg.image}
+                                      alt="Shared"
+                                      className="rounded-lg mt-2 max-w-full h-auto cursor-pointer hover:opacity-95 transition"
+                                    />
+                                  )}
+                                  <div className={`text-xs mt-1 flex justify-end ${isSender ? 'text-indigo-200' : 'text-gray-400'}`}>
+                                    {moment(msg.time).format('HH:mm')}
+                                    {isSender && (
+                                      <CheckCheck size={12} className="ml-1" />
+                                    )}
+                                  </div>
+                                </div>
+
+                                {isSender && showAvatar && (
+                                  <div className="w-8 h-8 rounded-full ml-2 self-end mb-1 flex-shrink-0">
+                                    {currentUser.avatar ? (
+                                      <img
+                                        src={currentUser.avatar}
+                                        alt={currentUser.name}
+                                        className="w-8 h-8 rounded-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium text-xs">
+                                        {getInitials(currentUser.name)}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {isSender && !showAvatar && <div className="w-8 ml-2 flex-shrink-0"></div>}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-
-                      <div className="space-y-3">
-                        {msgs.map((msg, msgIndex) => {
-                          const isSender = msg.idSender === idSender;
-                          const prevMsg = msgIndex > 0 ? msgs[msgIndex - 1] : null;
-                          const showAvatar = !prevMsg || prevMsg.idSender !== msg.idSender;
-
-                          return (
-                            <div key={msgIndex} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
-                              {!isSender && showAvatar && (
-                                <div className="w-8 h-8 rounded-full mr-2 self-end mb-1 flex-shrink-0">
-                                  {selectedUser.avatar ? (
-                                    <img
-                                      src={selectedUser.avatar}
-                                      alt={selectedUser.name}
-                                      className="w-8 h-8 rounded-full object-cover"
-                                    />
-                                  ) : (
-                                    <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-medium text-xs">
-                                      {getInitials(selectedUser.name)}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-
-                              {!isSender && !showAvatar && <div className="w-8 mr-2 flex-shrink-0"></div>}
-
-                              <div
-                                className={`max-w-xs md:max-w-md ${
-                                  isSender
-                                    ? 'bg-indigo-600 text-white rounded-tl-xl rounded-tr-xl rounded-bl-xl'
-                                    : 'bg-white text-gray-800 rounded-tl-xl rounded-tr-xl rounded-br-xl shadow-sm'
-                                } px-4 py-2.5 text-sm`}
-                              >
-                                {msg.content && (
-                                  <p className={`leading-relaxed ${isSender ? 'text-white' : 'text-gray-700'}`}>
-                                    {msg.content}
-                                  </p>
-                                )}
-                                {msg.image && (
-                                  <img
-                                    src={msg.image}
-                                    alt="Shared"
-                                    className="rounded-lg mt-2 max-w-full h-auto cursor-pointer hover:opacity-95 transition"
-                                  />
-                                )}
-                                <div className={`text-xs mt-1 flex justify-end ${isSender ? 'text-indigo-200' : 'text-gray-400'}`}>
-                                  {moment(msg.time).format('HH:mm')}
-                                  {isSender && (
-                                    <CheckCheck size={12} className="ml-1" />
-                                  )}
-                                </div>
-                              </div>
-
-                              {isSender && showAvatar && (
-                                <div className="w-8 h-8 rounded-full ml-2 self-end mb-1 flex-shrink-0">
-                                  {currentUser.avatar ? (
-                                    <img
-                                      src={currentUser.avatar}
-                                      alt={currentUser.name}
-                                      className="w-8 h-8 rounded-full object-cover"
-                                    />
-                                  ) : (
-                                    <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-medium text-xs">
-                                      {getInitials(currentUser.name)}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-
-                              {isSender && !showAvatar && <div className="w-8 ml-2 flex-shrink-0"></div>}
-                            </div>
-                          );
-                        })}
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center p-6">
+                      <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <MessageSquare size={24} className="text-indigo-600" />
                       </div>
+                      <h3 className="text-base font-medium text-gray-800 mb-1">Bắt đầu cuộc trò chuyện</h3>
+                      <p className="text-gray-500 text-sm mb-4">
+                        Chưa có tin nhắn nào với {selectedUser.name}. Hãy gửi lời chào!
+                      </p>
                     </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
+                  </div>
+                )}
               </div>
 
               {/* Image Preview */}
@@ -503,7 +539,11 @@ export const MessagesPage = () => {
                   </div>
 
                   <button
-                    className="ml-2 p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors flex-shrink-0"
+                    className={`ml-2 p-3 rounded-full flex-shrink-0 transition-colors ${
+                      message.trim() || image
+                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
                     onClick={sendMessage}
                     disabled={!message.trim() && !image}
                   >

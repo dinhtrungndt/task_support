@@ -83,26 +83,68 @@ const BusinessPrintPreviewModal = ({ isOpen, onClose, businesses }) => {
         .tasks-done {
           color: #059669;
           font-weight: 500;
+          background-color: #d1fae5;
+          border-radius: 4px;
+          padding: 2px 6px;
+          display: inline-block;
+          text-align: center;
         }
         .tasks-pending {
           color: #d97706;
           font-weight: 500;
+          background-color: #fef3c7;
+          border-radius: 4px;
+          padding: 2px 6px;
+          display: inline-block;
+          text-align: center;
         }
         .tasks-rejected {
           color: #dc2626;
           font-weight: 500;
+          background-color: #fee2e2;
+          border-radius: 4px;
+          padding: 2px 6px;
+          display: inline-block;
+          text-align: center;
         }
         .services-active {
           color: #059669;
           font-weight: 500;
+          background-color: #d1fae5;
+          border-radius: 4px;
+          padding: 2px 6px;
+          display: inline-block;
+          text-align: center;
         }
         .services-inactive {
           color: #dc2626;
           font-weight: 500;
+          background-color: #fee2e2;
+          border-radius: 4px;
+          padding: 2px 6px;
+          display: inline-block;
+          text-align: center;
         }
-        .tags-list {
+        .type-tag {
+          display: inline-block;
+          padding: 1px 6px;
+          background-color: #d1fae5;
+          color: #059669;
+          border-radius: 4px;
           font-size: 11px;
-          color: #4b5563;
+          border: 1px solid #a7f3d0;
+          font-weight: normal;
+        }
+        .service-type-tag {
+          display: inline-block;
+          padding: 1px 6px;
+          background-color: #dbeafe;
+          color: #2563eb;
+          border-radius: 4px;
+          font-size: 11px;
+          border: 1px solid #bfdbfe;
+          font-weight: normal;
+          margin: 1px;
         }
         .footer {
           margin-top: 30px;
@@ -193,26 +235,26 @@ const BusinessPrintPreviewModal = ({ isOpen, onClose, businesses }) => {
   const columnCount = calculateColumnCount();
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 overflow-auto">
-      <div className="bg-white rounded-lg shadow-xl w-11/12 max-w-full max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 overflow-auto animate-fadeIn">
+      <div className="bg-white rounded-xl shadow-2xl w-11/12 max-w-full max-h-[90vh] flex flex-col transition-all duration-300 ease-in-out">
         {/* Header */}
-        <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-800 flex items-center">
-            <FileText size={20} className="mr-2 text-blue-600" />
-            Xem trước khi in
+        <div className="flex justify-between items-center p-4 border-b border-emerald-100 bg-gradient-to-r from-emerald-50 to-white rounded-t-xl">
+          <h2 className="text-lg font-semibold text-emerald-800 flex items-center">
+            <Building size={20} className="mr-2 text-emerald-600" />
+            Xem trước báo cáo doanh nghiệp
           </h2>
           <div className="flex gap-2">
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors flex items-center text-sm font-medium border"
+              className={`p-2 rounded-lg hover:bg-emerald-50 text-gray-700 transition-all duration-200 ease-in-out flex items-center text-sm font-medium border ${showSettings ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'border-gray-200'}`}
               title="Tùy chỉnh"
             >
-              <Settings size={16} className="mr-1 text-gray-600" />
+              <Settings size={16} className={`mr-1 ${showSettings ? 'text-emerald-600' : 'text-gray-600'}`} />
               Tùy chỉnh
             </button>
             <button
               onClick={print}
-              className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center text-sm font-medium"
+              className="p-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all duration-200 ease-in-out flex items-center text-sm font-medium shadow-sm hover:shadow"
               title="In"
             >
               <Printer size={16} className="mr-1" />
@@ -220,7 +262,7 @@ const BusinessPrintPreviewModal = ({ isOpen, onClose, businesses }) => {
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors"
+              className="p-2 rounded-lg hover:bg-red-50 hover:text-red-600 text-gray-500 transition-all duration-200 ease-in-out"
               title="Đóng"
             >
               <X size={18} />
@@ -232,20 +274,20 @@ const BusinessPrintPreviewModal = ({ isOpen, onClose, businesses }) => {
         <div className="flex flex-1 overflow-hidden">
           {/* Settings Panel */}
           {showSettings && (
-            <div className="w-60 border-r p-4 bg-gray-50 overflow-y-auto">
+            <div className="w-72 border-r border-gray-200 p-5 bg-gray-50 overflow-y-auto animate-slideInLeft rounded-bl-xl">
               <h3 className="font-medium mb-4 text-gray-800 flex items-center">
-                <Settings size={16} className="mr-2 text-blue-600" />
+                <Settings size={16} className="mr-2 text-emerald-600" />
                 Tùy chỉnh báo cáo
               </h3>
 
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div className="space-y-2">
                   <label className="text-sm font-medium block text-gray-700">
                     Tiêu đề báo cáo
                   </label>
                   <input
                     type="text"
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
                     value={options.title}
                     onChange={handleTitleChange}
                   />
@@ -257,7 +299,7 @@ const BusinessPrintPreviewModal = ({ isOpen, onClose, businesses }) => {
                   </label>
                   <input
                     type="text"
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
                     value={options.subtitle}
                     onChange={handleSubtitleChange}
                   />
@@ -269,9 +311,9 @@ const BusinessPrintPreviewModal = ({ isOpen, onClose, businesses }) => {
                   </label>
                   <div className="flex gap-2">
                     <button
-                      className={`flex-1 py-2 px-3 text-sm rounded-lg border flex items-center justify-center ${
+                      className={`flex-1 py-2 px-3 text-sm rounded-lg border flex items-center justify-center transition-all duration-200 ${
                         options.orientation === 'portrait'
-                          ? 'bg-blue-100 border-blue-500 text-blue-700'
+                          ? 'bg-emerald-100 border-emerald-500 text-emerald-700 shadow-sm'
                           : 'border-gray-300 hover:bg-gray-100 text-gray-700'
                       }`}
                       onClick={() => setOrientation('portrait')}
@@ -282,9 +324,9 @@ const BusinessPrintPreviewModal = ({ isOpen, onClose, businesses }) => {
                       Dọc
                     </button>
                     <button
-                      className={`flex-1 py-2 px-3 text-sm rounded-lg border flex items-center justify-center ${
+                      className={`flex-1 py-2 px-3 text-sm rounded-lg border flex items-center justify-center transition-all duration-200 ${
                         options.orientation === 'landscape'
-                          ? 'bg-blue-100 border-blue-500 text-blue-700'
+                          ? 'bg-emerald-100 border-emerald-500 text-emerald-700 shadow-sm'
                           : 'border-gray-300 hover:bg-gray-100 text-gray-700'
                       }`}
                       onClick={() => setOrientation('landscape')}
@@ -297,78 +339,113 @@ const BusinessPrintPreviewModal = ({ isOpen, onClose, businesses }) => {
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-gray-200">
+                <div className="pt-3 border-t border-gray-200">
                   <label className="text-sm font-medium block mb-3 text-gray-700">
                     Hiển thị thông tin
                   </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
-                      <input
-                        type="checkbox"
-                        checked={options.showHeader}
-                        onChange={() => toggleOption('showHeader')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
-                      />
+                  <div className="space-y-2.5">
+                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900 group p-1 rounded hover:bg-emerald-50 transition-colors duration-200">
+                      <span className="relative flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={options.showHeader}
+                          onChange={() => toggleOption('showHeader')}
+                          className="sr-only peer"
+                        />
+                        <span className="w-5 h-5 rounded border border-gray-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500 flex items-center justify-center transition-all duration-200">
+                          {options.showHeader && <Check size={12} className="text-white" />}
+                        </span>
+                      </span>
                       Tiêu đề báo cáo
                     </label>
 
-                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
-                      <input
-                        type="checkbox"
-                        checked={options.showAddress}
-                        onChange={() => toggleOption('showAddress')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
-                      />
+                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900 group p-1 rounded hover:bg-emerald-50 transition-colors duration-200">
+                      <span className="relative flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={options.showAddress}
+                          onChange={() => toggleOption('showAddress')}
+                          className="sr-only peer"
+                        />
+                        <span className="w-5 h-5 rounded border border-gray-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500 flex items-center justify-center transition-all duration-200">
+                          {options.showAddress && <Check size={12} className="text-white" />}
+                        </span>
+                      </span>
                       Địa chỉ
                     </label>
 
-                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
-                      <input
-                        type="checkbox"
-                        checked={options.showTasks}
-                        onChange={() => toggleOption('showTasks')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
-                      />
+                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900 group p-1 rounded hover:bg-emerald-50 transition-colors duration-200">
+                      <span className="relative flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={options.showTasks}
+                          onChange={() => toggleOption('showTasks')}
+                          className="sr-only peer"
+                        />
+                        <span className="w-5 h-5 rounded border border-gray-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500 flex items-center justify-center transition-all duration-200">
+                          {options.showTasks && <Check size={12} className="text-white" />}
+                        </span>
+                      </span>
                       Thông tin công việc
                     </label>
 
-                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
-                      <input
-                        type="checkbox"
-                        checked={options.showServices}
-                        onChange={() => toggleOption('showServices')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
-                      />
+                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900 group p-1 rounded hover:bg-emerald-50 transition-colors duration-200">
+                      <span className="relative flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={options.showServices}
+                          onChange={() => toggleOption('showServices')}
+                          className="sr-only peer"
+                        />
+                        <span className="w-5 h-5 rounded border border-gray-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500 flex items-center justify-center transition-all duration-200">
+                          {options.showServices && <Check size={12} className="text-white" />}
+                        </span>
+                      </span>
                       Thông tin dịch vụ
                     </label>
 
-                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
-                      <input
-                        type="checkbox"
-                        checked={options.showTypeData}
-                        onChange={() => toggleOption('showTypeData')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
-                      />
+                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900 group p-1 rounded hover:bg-emerald-50 transition-colors duration-200">
+                      <span className="relative flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={options.showTypeData}
+                          onChange={() => toggleOption('showTypeData')}
+                          className="sr-only peer"
+                        />
+                        <span className="w-5 h-5 rounded border border-gray-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500 flex items-center justify-center transition-all duration-200">
+                          {options.showTypeData && <Check size={12} className="text-white" />}
+                        </span>
+                      </span>
                       Loại dữ liệu và dịch vụ
                     </label>
 
-                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
-                      <input
-                        type="checkbox"
-                        checked={options.showDates}
-                        onChange={() => toggleOption('showDates')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
-                      />
+                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900 group p-1 rounded hover:bg-emerald-50 transition-colors duration-200">
+                      <span className="relative flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={options.showDates}
+                          onChange={() => toggleOption('showDates')}
+                          className="sr-only peer"
+                        />
+                        <span className="w-5 h-5 rounded border border-gray-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500 flex items-center justify-center transition-all duration-200">
+                          {options.showDates && <Check size={12} className="text-white" />}
+                        </span>
+                      </span>
                       Ngày tháng
                     </label>
 
-                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900">
-                      <input
-                        type="checkbox"
-                        checked={options.showFooter}
-                        onChange={() => toggleOption('showFooter')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
-                      />
+                    <label className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-gray-900 group p-1 rounded hover:bg-emerald-50 transition-colors duration-200">
+                      <span className="relative flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={options.showFooter}
+                          onChange={() => toggleOption('showFooter')}
+                          className="sr-only peer"
+                        />
+                        <span className="w-5 h-5 rounded border border-gray-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500 flex items-center justify-center transition-all duration-200">
+                          {options.showFooter && <Check size={12} className="text-white" />}
+                        </span>
+                      </span>
                       Chân trang
                     </label>
                   </div>
@@ -378,12 +455,12 @@ const BusinessPrintPreviewModal = ({ isOpen, onClose, businesses }) => {
           )}
 
           {/* Preview Area */}
-          <div className="flex-1 overflow-y-auto p-4 bg-gray-100">
-            <div className="bg-white p-6 shadow-md mx-auto" ref={printableRef}>
+          <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-gray-50 to-gray-100">
+            <div className="bg-white p-6 rounded-lg shadow-lg mx-auto border border-gray-200 transition-all duration-300" ref={printableRef}>
               <div className="report-container">
                 {options.showHeader && (
                   <div className="header">
-                    <h1 className="text-xl font-bold text-blue-800">{options.title}</h1>
+                    <h1 className="text-xl font-bold text-emerald-800">{options.title}</h1>
                     <p className="text-sm text-gray-600">{options.subtitle}</p>
                     {businesses.length > 0 && (
                       <p className="text-sm mt-2">Tổng số: <span className="font-semibold">{businesses.length}</span> doanh nghiệp</p>
@@ -437,7 +514,7 @@ const BusinessPrintPreviewModal = ({ isOpen, onClose, businesses }) => {
                       </thead>
                       <tbody>
                         {businesses.map((business, index) => (
-                          <tr key={business._id || index}>
+                          <tr key={business._id || index} className="hover:bg-emerald-50 transition-colors duration-150">
                             <td className="border p-2 text-center">{index + 1}</td>
                             <td className="border p-2 font-medium">{business.mst || 'N/A'}</td>
                             <td className="border p-2">{business.name || 'N/A'}</td>
@@ -448,31 +525,57 @@ const BusinessPrintPreviewModal = ({ isOpen, onClose, businesses }) => {
 
                             {options.showTasks && (
                               <>
-                                <td className="border p-2 text-center font-medium">{business.totalTasks || 0}</td>
-                                <td className="border p-2 text-center tasks-done">{business.completedTasks || 0}</td>
-                                <td className="border p-2 text-center tasks-pending">{business.pendingTasks || 0}</td>
-                                <td className="border p-2 text-center tasks-rejected">{business.rejectedTasks || 0}</td>
+                                <td className="border p-2 text-center font-medium bg-gray-50">{business.totalTasks || 0}</td>
+                                <td className="border p-2 text-center">
+                                  <span className="tasks-done">{business.completedTasks || 0}</span>
+                                </td>
+                                <td className="border p-2 text-center">
+                                  <span className="tasks-pending">{business.pendingTasks || 0}</span>
+                                </td>
+                                <td className="border p-2 text-center">
+                                  <span className="tasks-rejected">{business.rejectedTasks || 0}</span>
+                                </td>
                               </>
                             )}
 
                             {options.showServices && (
                               <>
-                                <td className="border p-2 text-center font-medium">{business.totalServices || 0}</td>
-                                <td className="border p-2 text-center services-active">{business.activeServices || 0}</td>
-                                <td className="border p-2 text-center services-inactive">{business.inactionServices || 0}</td>
+                                <td className="border p-2 text-center font-medium bg-gray-50">{business.totalServices || 0}</td>
+                                <td className="border p-2 text-center">
+                                  <span className="services-active">{business.activeServices || 0}</span>
+                                </td>
+                                <td className="border p-2 text-center">
+                                  <span className="services-inactive">{business.inactionServices || 0}</span>
+                                </td>
                               </>
                             )}
 
                             {options.showTypeData && (
                               <>
-                                <td className="border p-2 tags-list">
+                                <td className="border p-2">
                                   {business.typeData && business.typeData.length > 0
-                                    ? business.typeData.join(', ')
+                                    ? (
+                                        <div className="flex flex-wrap gap-1">
+                                          {business.typeData.map((type, idx) => (
+                                            <span key={idx} className="type-tag">
+                                              {type}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      )
                                     : 'N/A'}
                                 </td>
-                                <td className="border p-2 tags-list">
+                                <td className="border p-2">
                                   {business.serviceTypes && business.serviceTypes.length > 0
-                                    ? business.serviceTypes.join(', ')
+                                    ? (
+                                        <div className="flex flex-wrap gap-1">
+                                          {business.serviceTypes.map((type, idx) => (
+                                            <span key={idx} className="service-type-tag">
+                                              {type}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      )
                                     : 'N/A'}
                                 </td>
                               </>
@@ -495,7 +598,7 @@ const BusinessPrintPreviewModal = ({ isOpen, onClose, businesses }) => {
                   </div>
                 ) : (
                   <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
-                    <Info size={36} className="mx-auto mb-3 text-gray-400" />
+                    <Building size={36} className="mx-auto mb-3 text-gray-400" />
                     <p className="font-medium">Không có dữ liệu để hiển thị</p>
                     <p className="text-sm mt-1">Vui lòng chọn hoặc thêm doanh nghiệp để xem báo cáo</p>
                   </div>
