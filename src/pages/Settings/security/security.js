@@ -1,104 +1,184 @@
-import React from 'react'
+import React from 'react';
+import {
+  ShieldCheck,
+  ShieldAlert,
+  Clock,
+  Key,
+  Lock,
+  Smartphone,
+  LogOut,
+  AlertTriangle
+} from 'lucide-react';
+import moment from 'moment';
 
-export const SecuritySetting = ({darkMode, securitySettings, handleSecurityChange}) => {
-    return (
-        <div className="p-6">
-            <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-6 pb-2 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                Security Settings
-            </h2>
+export const SecuritySetting = ({ securitySettings, handleSecurityChange }) => {
+  return (
+    <div className="p-6">
+      <h2 className="text-xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200">
+        Cài đặt bảo mật
+      </h2>
 
-            <div className="space-y-8">
-                <div>
-                    <div className={`flex items-center justify-between mb-4 p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                        <div>
-                            <h3 className={`text-sm font-medium ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-1`}>Two-Factor Authentication</h3>
-                            <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Add an extra layer of security to your account</p>
-                        </div>
-                        <div className="flex items-center">
-                            <button
-                                className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 ${securitySettings.twoFactorAuth ? 'bg-blue-600' : darkMode ? 'bg-gray-600' : 'bg-gray-300'}`}
-                                onClick={() => handleSecurityChange('twoFactorAuth', !securitySettings.twoFactorAuth)}
-                                role="switch"
-                                aria-checked={securitySettings.twoFactorAuth}
-                            >
-                                <span
-                                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition-transform duration-300 ease-in-out ${securitySettings.twoFactorAuth ? 'translate-x-6' : 'translate-x-1'}`}
-                                />
-                            </button>
-                        </div>
-                    </div>
-                    {securitySettings.twoFactorAuth && (
-                        <div className={`${darkMode ? 'bg-blue-900 border-blue-800 text-blue-200' : 'bg-blue-50 border-blue-100 text-blue-800'} p-4 rounded-lg border-l-4 border-blue-500 mt-3 mb-6`}>
-                            <div className="flex">
-                                <div className="flex-shrink-0">
-                                    <svg className="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div className="ml-3">
-                                    <p className={`text-sm font-medium ${darkMode ? 'text-blue-200' : 'text-blue-800'} mb-2`}>Two-factor authentication is enabled</p>
-                                    <p className={`text-xs ${darkMode ? 'text-blue-300' : 'text-blue-700'}`}>Your account is protected with an additional layer of security</p>
-                                    <button className={`mt-2 text-xs font-medium ${darkMode ? 'text-blue-300 hover:text-blue-100' : 'text-blue-600 hover:text-blue-800'}`}>
-                                        Configure settings
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-                <div className={`p-5 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                    <h3 className={`text-sm font-medium ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-2`}>Session Timeout</h3>
-                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-3`}>Automatically log out after a period of inactivity</p>
-
-                    <select
-                        className={`w-full px-4 py-3 rounded-lg ${darkMode
-                            ? 'bg-gray-800 border-gray-600 text-gray-100 focus:border-blue-500'
-                            : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                            } border focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all duration-200 appearance-none bg-no-repeat bg-right`}
-                        style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
-                        value={securitySettings.sessionTimeout}
-                        onChange={(e) => handleSecurityChange('sessionTimeout', e.target.value)}
-                    >
-                        <option value="never">Never</option>
-                        <option value="15">After 15 minutes</option>
-                        <option value="30">After 30 minutes</option>
-                        <option value="60">After 1 hour</option>
-                        <option value="120">After 2 hours</option>
-                    </select>
-                </div>
-                <div className={`p-5 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                    <h3 className={`text-sm font-medium ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-2`}>Password</h3>
-                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-3 flex items-center`}>
-                        <svg className="w-4 h-4 mr-1 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"></path>
-                        </svg>
-                        Last changed 2 months ago
-                    </p>
-
-                    <button className={`${darkMode
-                        ? 'bg-gray-600 hover:bg-gray-500 text-white'
-                        : 'bg-white hover:bg-gray-100 text-gray-800 border border-gray-300'
-                        } px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 shadow-sm flex items-center`}>
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-                        </svg>
-                        Change Password
-                    </button>
-                </div>
-                <div className={`p-5 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                    <h3 className={`text-sm font-medium ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-2`}>Connected Devices</h3>
-                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-3 flex`}>
-                        Manage devices that are currently signed in to your account
-                    </p>
-
-                    <button className={`text-blue-500 hover:text-blue-700 text-sm font-medium flex items-center transition-colors`}>
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                        View all devices
-                    </button>
-                </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* Two-Factor Authentication Card */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+          <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+            <div className="flex items-center">
+              <ShieldCheck className="h-5 w-5 text-indigo-600 mr-2" />
+              <h3 className="text-sm font-medium text-gray-800">Xác thực hai lớp</h3>
             </div>
+            <div className="flex items-center">
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={securitySettings.twoFactorAuth}
+                  onChange={() => handleSecurityChange('twoFactorAuth', !securitySettings.twoFactorAuth)}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+          </div>
+          <div className="p-4">
+            <p className="text-xs text-gray-500 mb-3">
+              Bảo vệ tài khoản của bạn bằng lớp xác thực thứ hai. Khi bật, bạn sẽ được yêu cầu nhập mã từ ứng dụng xác thực của bạn mỗi khi đăng nhập.
+            </p>
+
+            {securitySettings.twoFactorAuth ? (
+              <div className="bg-green-50 border-l-4 border-green-500 p-3 rounded-md">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <ShieldCheck className="h-5 w-5 text-green-500" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-green-700 font-medium">
+                      Xác thực hai lớp đã được bật
+                    </p>
+                    <p className="text-xs text-green-700 mt-1">
+                      Tài khoản của bạn đang được bảo vệ với một lớp bảo mật bổ sung
+                    </p>
+                    <button className="mt-2 text-xs font-medium text-green-700 hover:text-green-900 underline">
+                      Cấu hình thiết bị
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <button className="inline-flex items-center px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                <Smartphone size={16} className="mr-2" />
+                <span>Thiết lập ngay</span>
+              </button>
+            )}
+          </div>
         </div>
-    )
-}
+
+        {/* Session Timeout Card */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+          <div className="p-4 border-b border-gray-100 flex items-center">
+            <Clock className="h-5 w-5 text-indigo-600 mr-2" />
+            <h3 className="text-sm font-medium text-gray-800">Thời gian phiên làm việc</h3>
+          </div>
+          <div className="p-4">
+            <p className="text-xs text-gray-500 mb-3">
+              Tự động đăng xuất sau một khoảng thời gian không hoạt động. Điều này giúp bảo vệ tài khoản của bạn khi bạn quên đăng xuất.
+            </p>
+            <select
+              className="block w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all duration-200 appearance-none"
+              value={securitySettings.sessionTimeout}
+              onChange={(e) => handleSecurityChange('sessionTimeout', e.target.value)}
+            >
+              <option value="never">Không bao giờ</option>
+              <option value="15">Sau 15 phút</option>
+              <option value="30">Sau 30 phút</option>
+              <option value="60">Sau 1 giờ</option>
+              <option value="120">Sau 2 giờ</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Password Section */}
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm mb-6">
+        <div className="p-4 border-b border-gray-100 flex items-center">
+          <Key className="h-5 w-5 text-indigo-600 mr-2" />
+          <h3 className="text-sm font-medium text-gray-800">Mật khẩu và đăng nhập</h3>
+        </div>
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-start">
+              <Lock className="h-5 w-5 text-gray-400 mt-0.5 mr-3" />
+              <div>
+                <p className="text-sm text-gray-800 font-medium">Mật khẩu</p>
+                <p className="text-xs text-gray-500 mt-1 flex items-center">
+                  <Clock size={12} className="mr-1 text-amber-500" />
+                  {securitySettings.lastPasswordChange
+                    ? `Thay đổi lần cuối ${moment(securitySettings.lastPasswordChange).fromNow()}`
+                    : "Chưa cập nhật"}
+                </p>
+              </div>
+            </div>
+            <button className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-lg transition-colors">
+              Đổi mật khẩu
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-start">
+              <LogOut className="h-5 w-5 text-gray-400 mt-0.5 mr-3" />
+              <div>
+                <p className="text-sm text-gray-800 font-medium">Phiên đăng nhập</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Đăng xuất khỏi tất cả các thiết bị khác
+                </p>
+              </div>
+            </div>
+            <button className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-medium rounded-lg transition-colors">
+              Đăng xuất
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Security Log */}
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-gray-100 flex items-center">
+          <ShieldAlert className="h-5 w-5 text-indigo-600 mr-2" />
+          <h3 className="text-sm font-medium text-gray-800">Nhật ký bảo mật</h3>
+        </div>
+        <div className="p-4">
+          <p className="text-xs text-gray-500 mb-3">
+            Theo dõi lịch sử hoạt động đăng nhập và các sự kiện bảo mật quan trọng trên tài khoản của bạn.
+          </p>
+
+          <div className="space-y-3 mb-4">
+            <div className="flex items-start p-2 rounded-md hover:bg-gray-50">
+              <div className="p-1 bg-green-100 rounded-full text-green-600 mr-3">
+                <ShieldCheck size={14} />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-800">Đăng nhập thành công</p>
+                <p className="text-xs text-gray-500">Từ 192.168.1.1 • Hà Nội, Việt Nam • 10:30 AM hôm nay</p>
+              </div>
+            </div>
+
+            <div className="flex items-start p-2 rounded-md hover:bg-gray-50">
+              <div className="p-1 bg-amber-100 rounded-full text-amber-600 mr-3">
+                <AlertTriangle size={14} />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-800">Thay đổi mật khẩu</p>
+                <p className="text-xs text-gray-500">Từ 192.168.1.1 • Hà Nội, Việt Nam • 1 tuần trước</p>
+              </div>
+            </div>
+          </div>
+
+          <button className="w-full px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-lg transition-colors flex items-center justify-center">
+            <ShieldCheck size={14} className="mr-1.5" />
+            <span>Xem toàn bộ nhật ký bảo mật</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SecuritySetting;

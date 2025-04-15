@@ -7,7 +7,18 @@ import { NotificationsSetting } from './notifications/notifications';
 import { ProfileSetting } from './Profile/Profile';
 import addressData from '../../assets/json/timezones.json';
 import axiosClient from '../../api/axiosClient';
-import { Cog, Save, UserCircle, Bell, ShieldCheck, Palette, Loader } from 'lucide-react';
+import {
+  Cog,
+  Save,
+  UserCircle,
+  Bell,
+  ShieldCheck,
+  Palette,
+  Loader,
+  ArrowLeft,
+  Check
+} from 'lucide-react';
+import { HeaderPages } from '../../components/header';
 
 export const SettingPages = () => {
   const auth = useContext(AuthContext);
@@ -18,6 +29,7 @@ export const SettingPages = () => {
   const [originalSettings, setOriginalSettings] = useState({});
   const [hasChanges, setHasChanges] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const [profileSettings, setProfileSettings] = useState({
     name: auth?.user?.name || '',
@@ -155,13 +167,13 @@ export const SettingPages = () => {
 
     setIsSaving(true);
     try {
-      const profileResponse = await axiosClient.put('/profile', profileSettings);
+      await axiosClient.put('/profile', profileSettings);
 
-      const notificationResponse = await axiosClient.put('/profile', {
+      await axiosClient.put('/profile', {
         notifications: notificationSettings
       });
 
-      const securityResponse = await axiosClient.put('/profile', {
+      await axiosClient.put('/profile', {
         security: securitySettings
       });
 
@@ -172,6 +184,8 @@ export const SettingPages = () => {
       });
 
       setHasChanges(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
       toast.success('Tất cả thay đổi đã được lưu thành công!');
     } catch (error) {
       toast.error('Không thể lưu thay đổi. Vui lòng thử lại sau.');
@@ -182,108 +196,122 @@ export const SettingPages = () => {
 
   if (isLoading) {
     return (
-      <div className={`flex h-screen items-center justify-center ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800'}`}>
-        <div className="flex flex-col items-center">
-          <Loader className="w-10 h-10 animate-spin text-blue-500 mb-4" />
-          <p className="text-lg font-medium">Đang tải thông tin cài đặt...</p>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <HeaderPages title="Cài đặt" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <Loader className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
+            <p className="text-lg font-medium text-gray-800">Đang tải thông tin cài đặt...</p>
+          </div>
         </div>
       </div>
     );
   }
 
+  const tabs = [
+    { id: 'profile', label: 'Thông tin người dùng', icon: <UserCircle className="w-5 h-5" /> },
+    { id: 'notifications', label: 'Thông báo', icon: <Bell className="w-5 h-5" /> },
+    { id: 'security', label: 'Bảo mật', icon: <ShieldCheck className="w-5 h-5" /> },
+    { id: 'appearance', label: 'Giao diện', icon: <Palette className="w-5 h-5" /> },
+  ];
+
   return (
-    <div className={`flex h-screen ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800'} transition-colors duration-300`}>
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto p-4 md:p-6">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <HeaderPages title="Cài đặt" />
+
+      <div className="flex-1 py-6 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-            <h1 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-4 md:mb-0 flex items-center`}>
-              <Cog className="w-8 h-8 mr-3 text-blue-500" />
-              Cài đặt
-            </h1>
+          <div className="mb-6 flex flex-col md:flex-row justify-between md:items-center">
+            <div className="flex items-center mb-4 md:mb-0">
+              <Cog className="w-6 h-6 text-indigo-600 mr-2" />
+              <h1 className="text-2xl font-bold text-gray-800">Cài đặt tài khoản</h1>
+            </div>
+
             <button
               onClick={saveAllChanges}
               disabled={!hasChanges || isSaving}
-              className={`bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-sm font-medium flex items-center transform transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl
-                ${(!hasChanges || isSaving) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center transition-all
+                ${(!hasChanges || isSaving)
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg'
+                } ${saveSuccess ? 'bg-green-600 hover:bg-green-700' : ''}`}
             >
               {isSaving ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Đang lưu...
+                  <Loader size={16} className="animate-spin mr-2" />
+                  <span>Đang lưu...</span>
+                </>
+              ) : saveSuccess ? (
+                <>
+                  <Check size={16} className="mr-2" />
+                  <span>Đã lưu thành công</span>
                 </>
               ) : (
                 <>
-                  <Save className="w-5 h-5 mr-2" />
-                  Lưu thay đổi
+                  <Save size={16} className="mr-2" />
+                  <span>Lưu thay đổi</span>
                 </>
               )}
             </button>
           </div>
 
-          {/* Settings Navigation and Content - Responsive Layout */}
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Settings Navigation */}
-            <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-xl shadow-lg overflow-hidden w-full md:w-72 border transition-all duration-300 mb-6 md:mb-0`}>
-              <ul className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
-                <li
-                  className={`px-4 py-4 cursor-pointer transition-all duration-200 ${activeTab === 'profile'
-                    ? `${darkMode ? 'bg-gray-700' : 'bg-blue-50'} border-l-4 border-blue-500`
-                    : `hover:${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}`}
-                  onClick={() => setActiveTab('profile')}
-                >
-                  <div className="flex items-center">
-                    <UserCircle className={`w-5 h-5 mr-3 ${activeTab === 'profile' ? 'text-blue-500' : darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-                    <span className={`text-sm font-medium ${activeTab === 'profile'
-                      ? 'text-blue-600'
-                      : darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Thông tin người dùng</span>
-                  </div>
-                </li>
-                <li
-                  className={`px-4 py-4 cursor-pointer transition-all duration-200 ${activeTab === 'notifications'
-                    ? `${darkMode ? 'bg-gray-700' : 'bg-blue-50'} border-l-4 border-blue-500`
-                    : `hover:${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}`}
-                  onClick={() => setActiveTab('notifications')}
-                >
-                  <div className="flex items-center">
-                    <Bell className={`w-5 h-5 mr-3 ${activeTab === 'notifications' ? 'text-blue-500' : darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-                    <span className={`text-sm font-medium ${activeTab === 'notifications'
-                      ? 'text-blue-600'
-                      : darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Thông báo</span>
-                  </div>
-                </li>
-                <li
-                  className={`px-4 py-4 cursor-pointer transition-all duration-200 ${activeTab === 'security'
-                    ? `${darkMode ? 'bg-gray-700' : 'bg-blue-50'} border-l-4 border-blue-500`
-                    : `hover:${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}`}
-                  onClick={() => setActiveTab('security')}
-                >
-                  <div className="flex items-center">
-                    <ShieldCheck className={`w-5 h-5 mr-3 ${activeTab === 'security' ? 'text-blue-500' : darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-                    <span className={`text-sm font-medium ${activeTab === 'security'
-                      ? 'text-blue-600'
-                      : darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Bảo mật</span>
-                  </div>
-                </li>
-                <li
-                  className={`px-4 py-4 cursor-pointer transition-all duration-200 ${activeTab === 'appearance'
-                    ? `${darkMode ? 'bg-gray-700' : 'bg-blue-50'} border-l-4 border-blue-500`
-                    : `hover:${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}`}
-                  onClick={() => setActiveTab('appearance')}
-                >
-                  <div className="flex items-center">
-                    <Palette className={`w-5 h-5 mr-3 ${activeTab === 'appearance' ? 'text-blue-500' : darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-                    <span className={`text-sm font-medium ${activeTab === 'appearance'
-                      ? 'text-blue-600'
-                      : darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Giao diện</span>
-                  </div>
-                </li>
-              </ul>
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Settings Navigation - Sidebar for desktop, Tabs for mobile */}
+            <div className="w-full lg:w-64 flex-shrink-0">
+              {/* Desktop Navigation */}
+              <div className="hidden lg:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <ul className="divide-y divide-gray-100">
+                  {tabs.map(tab => (
+                    <li
+                      key={tab.id}
+                      className={`
+                        cursor-pointer transition-colors
+                        ${activeTab === tab.id
+                          ? 'bg-indigo-50 border-l-4 border-indigo-600'
+                          : 'hover:bg-gray-50 border-l-4 border-transparent'}
+                      `}
+                      onClick={() => setActiveTab(tab.id)}
+                    >
+                      <div className="flex items-center px-4 py-3">
+                        <div className={`mr-3 ${activeTab === tab.id ? 'text-indigo-600' : 'text-gray-500'}`}>
+                          {tab.icon}
+                        </div>
+                        <span className={`text-sm font-medium ${activeTab === tab.id ? 'text-indigo-700' : 'text-gray-700'}`}>
+                          {tab.label}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Mobile Navigation */}
+              <div className="lg:hidden bg-white rounded-lg shadow-sm border border-gray-200 p-1 mb-4">
+                <div className="flex overflow-x-auto no-scrollbar">
+                  {tabs.map(tab => (
+                    <button
+                      key={tab.id}
+                      className={`
+                        flex-1 flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap
+                        ${activeTab === tab.id
+                          ? 'bg-indigo-100 text-indigo-700'
+                          : 'text-gray-600 hover:bg-gray-50'}
+                      `}
+                      onClick={() => setActiveTab(tab.id)}
+                    >
+                      <div className="mr-1.5">
+                        {tab.icon}
+                      </div>
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Settings Content */}
             <div className="flex-1">
-              <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-xl shadow-lg overflow-hidden border transition-all duration-300`}>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 {/* Profile Settings */}
                 {activeTab === 'profile' && (
                   <ProfileSetting
@@ -326,4 +354,6 @@ export const SettingPages = () => {
       </div>
     </div>
   );
-}
+};
+
+export default SettingPages;
