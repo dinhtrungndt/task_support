@@ -5,7 +5,7 @@ import { OverviewPages } from "../pages/Overview";
 import { TaskPages } from "../pages/tasks";
 import { MessagesPage } from "../pages/messages";
 import { BusinessPages } from "../pages/Business";
-import { UserPages } from "../pages/Users";
+import { ActionPages } from "../pages/Actions";
 import { SettingPages } from "../pages/Settings";
 import { AuthContext } from "../contexts/start/AuthContext";
 import Login from "../pages/login";
@@ -16,6 +16,7 @@ import PublicRoute from "../components/user/PublicRoute";
 import ServicePages from "../pages/Services";
 import SearchResultsPage from "../pages/search/SearchResults";
 import NotFound from "../utils/NotFound";
+import ProfilePageUser from "../pages/Profile";
 
 export const Routers = () => {
   const { user } = useContext(AuthContext);
@@ -39,10 +40,10 @@ export const Routers = () => {
               <Route path="/message" element={<MessagesPage />} />
               <Route path="/service" element={<ServicePages />} />
               <Route path="/business" element={<BusinessPages />} />
-              {/* <Route path="/users" element={<UserPages />} /> */}
+              <Route path="/users" element={<ProfilePageUser />} />
               <Route path="/settings" element={<SettingPages />} />
               <Route path="/search" element={<SearchResultsPage />} />
-              <Route path="/profile" element={<UserPages />} />
+              <Route path="/actions" element={<ActionPages />} />
             </Route>
 
             {/* Route 404 - Trang không tìm thấy */}

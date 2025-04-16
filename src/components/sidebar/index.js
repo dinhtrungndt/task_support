@@ -1,4 +1,4 @@
-import { Component, NotebookPen, MessageSquareText, Building2, Settings, UserCircle, ServerIcon } from "lucide-react";
+import { Component, NotebookPen, MessageSquareText, Building2, Settings, UserCircle, ServerIcon, PersonStanding } from "lucide-react";
 import Sidebar, { SidebarItem } from './sidebarMenu';
 
 export const SidebarComponents = () => {
@@ -11,7 +11,8 @@ export const SidebarComponents = () => {
       <SidebarItem icon={<Building2 size={20} />} text="Business" to="/business" alert />
       <SidebarItem icon={<MessageSquareText size={20} />} text="Message" to="/message" alert />
       <hr className="my-2" />
-      <SidebarItem icon={<UserCircle size={20} />} text="Users" to="/profile" alert />
+      <SidebarItem icon={<PersonStanding size={20} />} text="Actions" to="/actions" alert />
+      <SidebarItem icon={<UserCircle size={20} />} text="Users" to="/users" alert />
       <SidebarItem icon={<Settings size={20} />} text="Setting" to="/settings" alert />
     </Sidebar>
   );

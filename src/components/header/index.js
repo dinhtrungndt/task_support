@@ -165,7 +165,7 @@ export const HeaderPages = ({ title }) => {
                 </div>
               </div>
 
-              <div className="p-2 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer" onClick={() => navigate("/profile")}>
+              <div className="p-2 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer" onClick={() => navigate("/users")}>
                 <div className="flex items-center space-x-3">
                   <User size={18} className="text-indigo-600" />
                   <span className="text-sm font-medium text-gray-700">
@@ -349,7 +349,7 @@ export const HeaderPages = ({ title }) => {
               </div>
 
               <div className="p-1">
-                <button className="w-full text-left p-2 flex items-center space-x-3 hover:bg-indigo-50 rounded-md transition-colors" onClick={() => navigate("/profile")}>
+                <button className="w-full text-left p-2 flex items-center space-x-3 hover:bg-indigo-50 rounded-md transition-colors" onClick={() => navigate("/users")}>
                   <User size={16} className="text-gray-500" />
                   <span className="text-sm text-gray-700">Hồ sơ cá nhân</span>
                 </button>

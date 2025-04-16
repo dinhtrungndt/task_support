@@ -23,7 +23,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
-export const UserPages = () => {
+export const ActionPages = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { users, loading } = useSelector((state) => state.users);
@@ -442,4 +442,4 @@ export const UserPages = () => {
   );
 };
 
-export default UserPages;
+export default ActionPages;
