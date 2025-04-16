@@ -33,7 +33,14 @@ const serviceService = {
       throw new Error("Service ID is missing or undefined");
     }
 
-    const response = await axiosClient.put(`/services/${service._id}`, service);
+    const serviceToUpdate = {
+      ...service,
+      userCreated: service.userCreated?._id || service.userCreated,
+      companyId: service.companyId?._id || service.companyId,
+    };
+
+    const response = await axiosClient.put(`/services/${service._id}`, serviceToUpdate);
+
     return response.data;
   },
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building, User, Calendar, MapPin } from 'lucide-react';
+import { Building, User, Calendar, MapPin, Clock, AlertTriangle } from 'lucide-react';
 
 const MoreServiceDetailsModal = ({ service }) => {
   if (!service) return <div>Không có thông tin.</div>;
@@ -17,10 +17,69 @@ const MoreServiceDetailsModal = ({ service }) => {
     });
   };
 
+  // Format date without time
+  const formatDateOnly = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
   // Format price with commas
   const formatPrice = (price) => {
     return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || '0';
   };
+
+  // Calculate remaining time until expiration
+  const getRemainingTime = () => {
+    if (!service.expirationDate) return null;
+
+    const expiryDate = new Date(service.expirationDate);
+    const currentDate = new Date();
+
+    // If already expired
+    if (expiryDate < currentDate) {
+      return { expired: true, days: 0, text: "Đã hết hạn" };
+    }
+
+    // Calculate days remaining
+    const diffTime = Math.abs(expiryDate - currentDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // Format based on remaining time
+    let text = `${diffDays} ngày`;
+    if (diffDays > 30) {
+      const months = Math.floor(diffDays / 30);
+      const remainingDays = diffDays % 30;
+      text = `${months} tháng ${remainingDays > 0 ? `${remainingDays} ngày` : ''}`;
+    }
+
+    return { expired: false, days: diffDays, text };
+  };
+
+  // Get expiration status CSS class
+  const getExpirationStatusClass = () => {
+    if (!service.expirationDate) return '';
+
+    const expiryDate = new Date(service.expirationDate);
+    const currentDate = new Date();
+
+    if (expiryDate < currentDate) return 'text-red-500';
+
+    const diffTime = Math.abs(expiryDate - currentDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 7) return 'text-red-500';
+    if (diffDays <= 30) return 'text-amber-500';
+    return 'text-green-500';
+  };
+
+  // Get expiration info
+  const remainingTime = getRemainingTime();
+  const expirationStatusClass = getExpirationStatusClass();
 
   return (
     <div className="space-y-2 max-h-[80vh] overflow-y-auto px-1">
@@ -32,7 +91,7 @@ const MoreServiceDetailsModal = ({ service }) => {
             <tbody className="divide-y divide-gray-200">
               <tr>
                 <td className="px-2 py-1.5 bg-gray-50 font-medium text-gray-500 w-1/3">ID</td>
-                <td className="px-2 py-1.5 text-gray-900 break-all">{service.id}</td>
+                <td className="px-2 py-1.5 text-gray-900 break-all">{service._id}</td>
               </tr>
               <tr>
                 <td className="px-2 py-1.5 bg-gray-50 font-medium text-gray-500">Tên dịch vụ</td>
@@ -119,6 +178,50 @@ const MoreServiceDetailsModal = ({ service }) => {
                 <td className="px-2 py-1.5 text-gray-900">{service.duration} tháng</td>
               </tr>
               <tr>
+                <td className="px-2 py-1.5 bg-gray-50 font-medium text-gray-500">
+                  <div className="flex items-center">
+                    <Calendar className="mr-1" size={12} />
+                    <span>Ngày bắt đầu</span>
+                  </div>
+                </td>
+                <td className="px-2 py-1.5 text-gray-900">
+                  {service.startDate ? formatDateOnly(service.startDate) : 'N/A'}
+                </td>
+              </tr>
+              <tr>
+                <td className="px-2 py-1.5 bg-gray-50 font-medium text-gray-500">
+                  <div className="flex items-center">
+                    <Calendar className="mr-1" size={12} />
+                    <span>Ngày hết hạn</span>
+                  </div>
+                </td>
+                <td className="px-2 py-1.5 text-gray-900">
+                  {service.expirationDate ? formatDateOnly(service.expirationDate) : 'N/A'}
+                </td>
+              </tr>
+              <tr>
+                <td className="px-2 py-1.5 bg-gray-50 font-medium text-gray-500">
+                  <div className="flex items-center">
+                    <Clock className="mr-1" size={12} />
+                    <span>Thời gian còn lại</span>
+                  </div>
+                </td>
+                <td className="px-2 py-1.5">
+                  {remainingTime ? (
+                    <div className={`flex items-center ${expirationStatusClass}`}>
+                      {remainingTime.expired ? (
+                        <AlertTriangle size={12} className="mr-1" />
+                      ) : (
+                        <Clock size={12} className="mr-1" />
+                      )}
+                      <span>{remainingTime.expired ? 'Đã hết hạn' : `Còn lại: ${remainingTime.text}`}</span>
+                    </div>
+                  ) : (
+                    'N/A'
+                  )}
+                </td>
+              </tr>
+              <tr>
                 <td className="px-2 py-1.5 bg-gray-50 font-medium text-gray-500">Trạng thái</td>
                 <td className="px-2 py-1.5">
                   <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${
@@ -126,6 +229,12 @@ const MoreServiceDetailsModal = ({ service }) => {
                   }`}>
                     {service.status}
                   </span>
+                  {service.expirationDate && new Date(service.expirationDate) < new Date() && service.status === 'Active' && (
+                    <span className="ml-2 text-xs text-red-500 inline-flex items-center">
+                      <AlertTriangle size={10} className="mr-1" />
+                      Đã hết hạn nhưng vẫn Active
+                    </span>
+                  )}
                 </td>
               </tr>
             </tbody>

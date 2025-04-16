@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import DropdownMenu from "../DropdownMenu";
 import moment from "moment";
+import ServiceExpiryStatus from "../../utils/ServiceExpiryStatus";
 
 const ServiceList = ({
   filteredServices,
@@ -58,6 +59,12 @@ const ServiceList = ({
     } else {
       return postTime.format("DD/MM/YYYY");
     }
+  };
+
+  // Format expiration date
+  const formatExpirationDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return moment(dateString).format("DD/MM/YYYY");
   };
 
   // Get service type badge style
@@ -204,9 +211,18 @@ const ServiceList = ({
                   </div>
                 </td>
                 <td className="p-3">
-                  <div className="flex items-center">
-                    <Clock size={14} className="text-gray-400 mr-1.5" />
-                    <span className="text-gray-700">{service.duration || 0} tháng</span>
+                  <div className="flex flex-col">
+                    <div className="flex items-center">
+                      <Clock size={14} className="text-gray-400 mr-1.5" />
+                      <span className="text-gray-700">{service.duration || 0} tháng</span>
+                    </div>
+                    {/* Thêm component hiển thị thời hạn còn lại */}
+                    <ServiceExpiryStatus service={service} />
+                    {service.expirationDate && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        Hết hạn: {formatExpirationDate(service.expirationDate)}
+                      </div>
+                    )}
                   </div>
                 </td>
                 <td className="p-3">

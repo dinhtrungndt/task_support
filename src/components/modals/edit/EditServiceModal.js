@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { Plus, X, Search, User, Building, MapPin } from 'lucide-react';
+import { Plus, X, Search, User, Building, MapPin, Calendar, AlertTriangle, Clock } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../../../contexts/start/AuthContext';
@@ -20,6 +20,7 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
     description: '',
     price: '',
     duration: '',
+    startDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
     status: 'Active',
     features: [],
     userCreated: '',
@@ -39,9 +40,17 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
   // Business selection state
   const [selectedBusiness, setSelectedBusiness] = useState(null);
 
+  // Expiration date state
+  const [expirationDate, setExpirationDate] = useState(null);
+
   // Initialize form with service data
   useEffect(() => {
     if (service) {
+      // Format startDate to YYYY-MM-DD for input field
+      let formattedStartDate = service.startDate ?
+        new Date(service.startDate).toISOString().split('T')[0] :
+        new Date().toISOString().split('T')[0];
+
       setFormData({
         _id: service._id || '',
         name: service.name || '',
@@ -49,6 +58,7 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
         description: service.description || '',
         price: service.price || '',
         duration: service.duration || '',
+        startDate: formattedStartDate,
         status: service.status || 'Active',
         features: service.features || [],
         userCreated: service.userCreated?._id || service.userCreated || '',
@@ -68,6 +78,13 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
         setSelectedBusiness(
           typeof service.companyId === 'object' ? service.companyId : { id: service.companyId }
         );
+      }
+
+      // Set expiration date if available
+      if (service.expirationDate) {
+        setExpirationDate(new Date(service.expirationDate));
+      } else {
+        calculateExpirationDate(formattedStartDate, service.duration);
       }
     }
 
@@ -89,6 +106,30 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
       setFilteredUsers(filtered);
     }
   }, [userSearch, users]);
+
+  // Calculate expiration date based on start date and duration
+  const calculateExpirationDate = (startDate, duration) => {
+    if (!startDate || !duration) return null;
+
+    try {
+      const start = new Date(startDate);
+      if (isNaN(start.getTime())) return null;
+
+      const expiry = new Date(start);
+      expiry.setMonth(expiry.getMonth() + Number(duration));
+
+      setExpirationDate(expiry);
+      return expiry;
+    } catch (error) {
+      console.error("Error calculating expiration date:", error);
+      return null;
+    }
+  };
+
+  // Update expiration date when startDate or duration changes
+  useEffect(() => {
+    calculateExpirationDate(formData.startDate, formData.duration);
+  }, [formData.startDate, formData.duration]);
 
   // Handle input change
   const handleChange = (e) => {
@@ -175,6 +216,10 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
       newErrors.duration = 'Thời hạn phải là số nguyên dương';
     }
 
+    if (!formData.startDate || new Date(formData.startDate).toString() === 'Invalid Date') {
+      newErrors.startDate = 'Ngày bắt đầu không hợp lệ';
+    }
+
     if (!formData.companyId) {
       newErrors.companyId = 'Vui lòng chọn doanh nghiệp';
     }
@@ -198,7 +243,9 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
       const serviceToSubmit = {
         ...formData,
         price: Number(formData.price),
-        duration: Number(formData.duration)
+        duration: Number(formData.duration),
+        // Thêm expirationDate vào dữ liệu gửi đi
+        expirationDate: expirationDate ? expirationDate.toISOString() : null
       };
 
       await onSave(serviceToSubmit);
@@ -280,8 +327,8 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
         ></textarea>
       </div>
 
-      {/* Price & Duration row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      {/* Price, Duration, Start Date row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         {/* Giá dịch vụ */}
         <div>
           <label htmlFor="price" className="block text-xs font-medium text-gray-700 mb-1">
@@ -319,6 +366,55 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
           />
           {errors.duration && <p className="mt-1 text-xs text-red-500">{errors.duration}</p>}
         </div>
+
+        {/* Ngày bắt đầu */}
+        <div>
+          <label htmlFor="startDate" className="block text-xs font-medium text-gray-700 mb-1">
+            Ngày bắt đầu <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            id="startDate"
+            name="startDate"
+            value={formData.startDate}
+            onChange={handleChange}
+            className={`w-full p-1.5 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+              errors.startDate ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
+          {errors.startDate && <p className="mt-1 text-xs text-red-500">{errors.startDate}</p>}
+        </div>
+      </div>
+
+      {/* Expiration Date Preview */}
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Ngày hết hạn (tự động tính toán)
+        </label>
+        <div className="p-1.5 bg-gray-50 border border-gray-300 rounded-md text-sm">
+          {expirationDate ? (
+            <div className={`flex items-center ${new Date() > expirationDate ? 'text-red-500' : ''}`}>
+              {new Date() > expirationDate ? (
+                <AlertTriangle size={16} className="mr-2" />
+              ) : (
+                <Calendar size={16} className="mr-2" />
+              )}
+              <span>
+                {new Intl.DateTimeFormat('vi-VN', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                }).format(expirationDate)}
+                {new Date() > expirationDate && ' (Đã hết hạn)'}
+              </span>
+            </div>
+          ) : (
+            'Không thể tính ngày hết hạn'
+          )}
+        </div>
+        <p className="mt-1 text-xs text-gray-500">
+          Dịch vụ sẽ tự động chuyển sang trạng thái "Inactive" khi quá ngày hết hạn
+        </p>
       </div>
 
       {/* Trạng thái */}
@@ -336,6 +432,11 @@ const EditServiceModal = ({ service, onClose, onSave }) => {
           <option value="Active">Active</option>
           <option value="Inactive">Inactive</option>
         </select>
+        {expirationDate && new Date() > expirationDate && formData.status === 'Active' && (
+          <p className="mt-1 text-xs text-red-500">
+            Cảnh báo: Dịch vụ này đã hết hạn nhưng vẫn đang Active
+          </p>
+        )}
       </div>
 
       {/* Tính năng */}

@@ -1,5 +1,5 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
-import { X, FileText, Plus, CheckCircle, User, Building } from 'lucide-react';
+import { X, FileText, Plus, CheckCircle, User, Building, Calendar, Clock, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { AuthContext } from '../../../contexts/start/AuthContext';
@@ -18,11 +18,15 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
     description: '',
     price: '',
     duration: '',
+    startDate: new Date().toISOString().split('T')[0],
     status: 'Active',
     features: [],
     userCreated: user?.id || "",
     companyId: ""
   });
+
+  // Thêm state để tính toán ngày hết hạn
+  const [expirationDate, setExpirationDate] = useState(null);
 
   const [currentFeature, setCurrentFeature] = useState('');
   const [errors, setErrors] = useState({});
@@ -43,6 +47,29 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
       isMounted.current = false;
     };
   }, [user, service.userCreated]);
+
+  // Tính toán ngày hết hạn khi startDate hoặc duration thay đổi
+  useEffect(() => {
+    calculateExpirationDate(service.startDate, service.duration);
+  }, [service.startDate, service.duration]);
+
+  // Hàm tính toán ngày hết hạn
+  const calculateExpirationDate = (startDate, duration) => {
+    if (!startDate || !duration) return setExpirationDate(null);
+
+    try {
+      const start = new Date(startDate);
+      if (isNaN(start.getTime())) return setExpirationDate(null);
+
+      const expiry = new Date(start);
+      expiry.setMonth(expiry.getMonth() + Number(duration));
+
+      setExpirationDate(expiry);
+    } catch (error) {
+      console.error("Error calculating expiration date:", error);
+      setExpirationDate(null);
+    }
+  };
 
   // Handle input change
   const handleChange = (e) => {
@@ -118,6 +145,10 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
       newErrors.duration = 'Thời hạn phải là số nguyên dương';
     }
 
+    if (!service.startDate || new Date(service.startDate).toString() === 'Invalid Date') {
+      newErrors.startDate = 'Ngày bắt đầu không hợp lệ';
+    }
+
     if (!service.companyId) {
       newErrors.companyId = 'Vui lòng chọn doanh nghiệp';
     }
@@ -138,8 +169,10 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
       // Format data for submission
       const serviceToSubmit = {
         ...service,
-        price: parseFloat(service.price), // Ensure it's a valid number
-        duration: parseInt(service.duration, 10), // Ensure it's a valid integer
+        price: parseFloat(service.price),
+        duration: parseInt(service.duration, 10),
+        startDate: service.startDate,
+        expirationDate: expirationDate ? expirationDate.toISOString() : null
       };
 
       const createdService = await dispatch(addService(serviceToSubmit));
@@ -302,25 +335,6 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
                 </div>
 
                 <div>
-                  <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                    Trạng thái
-                  </label>
-                  <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
-                    <CheckCircle className="ml-2 text-gray-400" size={14} />
-                    <select
-                      id="status"
-                      name="status"
-                      value={service.status}
-                      onChange={handleChange}
-                      className="w-full py-2 px-2 border-none focus:outline-none text-sm"
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
                   <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
                     Giá dịch vụ (VNĐ) <span className="text-red-500">*</span>
                   </label>
@@ -345,7 +359,7 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
                     Thời hạn (tháng) <span className="text-red-500">*</span>
                   </label>
                   <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
-                    <FileText className="ml-2 text-gray-400" size={14} />
+                    <Clock className="ml-2 text-gray-400" size={14} />
                     <input
                       type="number"
                       id="duration"
@@ -359,6 +373,46 @@ const CreateService = ({ closeModal, onServiceCreated }) => {
                   </div>
                   {errors.duration && <p className="mt-1 text-xs text-red-500">{errors.duration}</p>}
                 </div>
+
+                <div>
+                  <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+                    Ngày bắt đầu <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
+                    <Calendar className="ml-2 text-gray-400" size={14} />
+                    <input
+                      type="date"
+                      id="startDate"
+                      name="startDate"
+                      value={service.startDate}
+                      onChange={handleChange}
+                      className="w-full py-2 px-2 border-none focus:outline-none text-sm"
+                    />
+                  </div>
+                  {errors.startDate && <p className="mt-1 text-xs text-red-500">{errors.startDate}</p>}
+                </div>
+              </div>
+
+              {/* Expiration Date Preview */}
+              <div className="border border-gray-200 rounded-md p-3 bg-gray-50 mt-2">
+                <p className="text-sm font-medium text-gray-700 mb-2">Ngày hết hạn (tự động tính toán)</p>
+                {expirationDate ? (
+                  <div className="flex items-center text-sm">
+                    <Calendar size={14} className="mr-1.5 text-gray-500" />
+                    <span>
+                      {new Intl.DateTimeFormat('vi-VN', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      }).format(expirationDate)}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">Không thể tính toán ngày hết hạn</p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Dịch vụ sẽ tự động chuyển sang trạng thái "Inactive" khi quá ngày hết hạn
+                </p>
               </div>
 
               <div>

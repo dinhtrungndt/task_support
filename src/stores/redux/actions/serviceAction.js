@@ -50,6 +50,9 @@ export const updateService = (service) => async (dispatch) => {
       type: UPDATE_SERVICE,
       payload: data,
     });
+
+    dispatch(fetchServices());
+
     return data;
   } catch (error) {
     dispatch({
