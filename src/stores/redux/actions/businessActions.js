@@ -5,14 +5,15 @@ import {
   FETCH_BUSINESSES_ERROR,
   UPDATE_BUSINESS,
 } from "./types";
-import axiosClient from "../../../api/axiosClient";
+import businessService from "../../../services/businessService";
 
+// Fetch all businesses
 export const fetchBusinesses = () => async (dispatch) => {
   try {
-    const response = await axiosClient.get("/companies");
+    const data = await businessService.fetchBusinesses();
     dispatch({
       type: FETCH_BUSINESSES,
-      payload: response.data,
+      payload: data,
     });
   } catch (error) {
     dispatch({
@@ -25,20 +26,12 @@ export const fetchBusinesses = () => async (dispatch) => {
 // Add a new business
 export const addBusiness = (business) => async (dispatch) => {
   try {
-    // Format data for the new Company model
-    const businessToAdd = {
-      mst: business.mst,
-      name: business.name,
-      address: business.address,
-    };
-
-    const response = await axiosClient.post("/companies/add", businessToAdd);
+    const data = await businessService.addBusiness(business);
     dispatch({
       type: ADD_BUSINESS,
-      payload: response.data,
+      payload: data,
     });
-
-    return response.data;
+    return data;
   } catch (error) {
     dispatch({
       type: FETCH_BUSINESSES_ERROR,
@@ -51,39 +44,13 @@ export const addBusiness = (business) => async (dispatch) => {
 // Update an existing business
 export const updateBusiness = (business) => async (dispatch) => {
   try {
-    if (!business._id) {
-      // console.error("Business object is missing _id:", business);
-      throw new Error("Business ID is missing or undefined");
-    }
-
-    // Format data for the new Company model
-    const businessToUpdate = {
-      mst: business.mst,
-      name: business.name,
-      address: business.address,
-      // The API only accepts these specific fields
-    };
-
-    const response = await axiosClient.put(
-      `/companies/${business._id}`,
-      businessToUpdate
-    );
-
+    const data = await businessService.updateBusiness(business);
     dispatch({
       type: UPDATE_BUSINESS,
-      payload: {
-        ...response.data,
-        _id: business._id,
-      },
+      payload: data,
     });
-
-    // Return the updated business for the component
-    return {
-      ...response.data,
-      _id: business._id,
-    };
+    return data;
   } catch (error) {
-    // console.error("Error updating business:", error);
     dispatch({
       type: FETCH_BUSINESSES_ERROR,
       payload: error.message || "Failed to update business",
@@ -92,20 +59,15 @@ export const updateBusiness = (business) => async (dispatch) => {
   }
 };
 
-// Delete businesses by their IDs
+// Delete businesses
 export const deleteBusinesses = (businessIds) => async (dispatch) => {
   try {
-    // Updated API endpoint
-    const response = await axiosClient.delete("/companies", {
-      data: businessIds,
-    });
-
+    const data = await businessService.deleteBusinesses(businessIds);
     dispatch({
       type: DELETE_BUSINESSES,
       payload: businessIds,
     });
-
-    return response;
+    return data;
   } catch (error) {
     dispatch({
       type: FETCH_BUSINESSES_ERROR,

@@ -1,6 +1,23 @@
 import axiosClient from "../api/axiosClient";
 import { secureStorage } from "../utils/secureDataUtils";
 
+export const userService = {
+  // Fetch all users
+  async fetchUsers() {
+    const response = await axiosClient.get("/users");
+    return response.data;
+  },
+
+  // Fetch users except for a specific ID
+  async fetchUsersExceptId(userId) {
+    const response = await axiosClient.get(`/users/get-users-except-id/${userId}`);
+    return response.data.map((user) => ({
+      ...user,
+      name: user.name,
+    }));
+  },
+};
+
 // register
 export const register = async (form) => {
   try {

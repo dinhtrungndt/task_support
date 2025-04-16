@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import React from "react";
 import { toast } from "react-toastify";
-import { register } from "../../services/user";
+import { register } from "../../services/userService";
 import { Eye, EyeOff } from "lucide-react";
 
 const Register = () => {

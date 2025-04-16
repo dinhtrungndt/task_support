@@ -6,16 +6,15 @@ import {
   DELETE_TASK,
   DELETE_TASKS,
 } from "./types";
-import axiosClient from "../../../api/axiosClient";
+import taskService from "../../../services/taskService";
 
 // Fetch all tasks
 export const fetchTasks = () => async (dispatch) => {
   try {
-    const response = await axiosClient.get("/tasks");
-
+    const data = await taskService.fetchTasks();
     dispatch({
       type: FETCH_TASKS,
-      payload: response.data,
+      payload: data,
     });
   } catch (error) {
     dispatch({
@@ -25,52 +24,14 @@ export const fetchTasks = () => async (dispatch) => {
   }
 };
 
-// Add a new task with user ID directly passed from component
+// Add a new task
 export const addTask = (taskData, userId) => async (dispatch) => {
   try {
-    if (!userId) {
-      throw new Error(
-        "Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại."
-      );
-    }
-
-    const taskToAdd = {
-      connectionType: taskData.connectionType || "",
-      installer: taskData.PInstaller || taskData.installer || "N/A",
-      codeData: taskData.codeData || "N/A",
-      typeData: taskData.typeData || "Data",
-      installDate:
-        taskData.AtSetting || taskData.installDate || new Date().toISOString(),
-      status: taskData.status || "Pending",
-      notes: taskData.cancellationReason || taskData.notes || "",
-      companyId: taskData.companyId || taskData.businessId,
-      userAdd: userId,
-    };
-
-    let response;
-
-    try {
-      response = await axiosClient.post("/tasks", [taskToAdd]);
-    } catch (error) {
-      response = await axiosClient.post("/tasks/add", taskToAdd);
-
-      if (!Array.isArray(response.data)) {
-        response.data = [response.data];
-      }
-    }
-
-    let createdTask = Array.isArray(response.data) ? response.data[0] : response.data;
-
-    if (createdTask._id) {
-      const detailResponse = await axiosClient.get(`/tasks/${createdTask._id}`);
-      createdTask = detailResponse.data;
-    }
-
+    const createdTask = await taskService.addTask(taskData, userId);
     dispatch({
       type: ADD_TASK,
       payload: createdTask,
     });
-
     return createdTask;
   } catch (error) {
     dispatch({
@@ -84,37 +45,12 @@ export const addTask = (taskData, userId) => async (dispatch) => {
 // Update an existing task
 export const updateTask = (taskData) => async (dispatch) => {
   try {
-    if (!taskData._id) {
-      throw new Error("Task ID is required for update");
-    }
-
-    const originalTask = await axiosClient.get(`/tasks/${taskData._id}`);
-
-    const taskToUpdate = {
-      connectionType: taskData.connectionType || originalTask.data.connectionType || "",
-      installer: taskData.PInstaller || taskData.installer || originalTask.data.installer || "N/A",
-      codeData: taskData.codeData || originalTask.data.codeData || "N/A",
-      typeData: taskData.typeData || originalTask.data.typeData || "Data",
-      installDate: taskData.AtSetting || taskData.installDate || originalTask.data.installDate || new Date().toISOString(),
-      status: taskData.status || originalTask.data.status || "Pending",
-      notes: taskData.cancellationReason || taskData.notes || originalTask.data.notes || "",
-      userAdd: taskData.userAdd || originalTask.data.userAdd
-    };
-
-    const response = await axiosClient.put(
-      `/tasks/${taskData._id}`,
-      taskToUpdate
-    );
-
-    const updatedTaskResponse = await axiosClient.get(`/tasks/${taskData._id}`);
-    const fullUpdatedTask = updatedTaskResponse.data;
-
+    const updatedTask = await taskService.updateTask(taskData);
     dispatch({
       type: UPDATE_TASK,
-      payload: fullUpdatedTask,
+      payload: updatedTask,
     });
-
-    return fullUpdatedTask;
+    return updatedTask;
   } catch (error) {
     dispatch({
       type: FETCH_TASKS_ERROR,
@@ -127,15 +63,12 @@ export const updateTask = (taskData) => async (dispatch) => {
 // Delete a single task
 export const deleteTask = (taskId) => async (dispatch) => {
   try {
-    // Use the updated endpoint
-    const response = await axiosClient.delete(`/tasks/${taskId}`);
-
+    const data = await taskService.deleteTask(taskId);
     dispatch({
       type: DELETE_TASK,
       payload: taskId,
     });
-
-    return response.data;
+    return data;
   } catch (error) {
     dispatch({
       type: FETCH_TASKS_ERROR,
@@ -148,9 +81,7 @@ export const deleteTask = (taskId) => async (dispatch) => {
 // Delete multiple tasks
 export const deleteTasks = (taskIds) => async (dispatch) => {
   try {
-    // Use the updated endpoint
-    await axiosClient.delete("/tasks", { data: taskIds });
-
+    await taskService.deleteTasks(taskIds);
     dispatch({
       type: DELETE_TASKS,
       payload: taskIds,
@@ -167,14 +98,12 @@ export const deleteTasks = (taskIds) => async (dispatch) => {
 // Fetch tasks for a specific company
 export const fetchTasksByCompany = (companyId) => async (dispatch) => {
   try {
-    const response = await axiosClient.get(`/companies/${companyId}/tasks`);
-
+    const data = await taskService.fetchTasksByCompany(companyId);
     dispatch({
       type: FETCH_TASKS,
-      payload: response.data,
+      payload: data,
     });
-
-    return response.data;
+    return data;
   } catch (error) {
     dispatch({
       type: FETCH_TASKS_ERROR,

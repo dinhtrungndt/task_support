@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import React from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { AuthContext } from "../../contexts/start/AuthContext.js";
-import { login } from "../../services/user.js";
+import { login } from "../../services/userService.js";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {

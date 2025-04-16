@@ -1,5 +1,5 @@
 import axios from "axios";
-import { refreshToken } from "../services/user";
+import { refreshToken } from "../services/userService";
 import { secureStorage } from "../utils/secureDataUtils";
 import { toast } from "react-toastify";
 import { clearActivityData } from "../utils/sessionUtils";

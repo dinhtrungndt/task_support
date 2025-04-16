@@ -1,14 +1,18 @@
-import { FETCH_USERS, FETCH_USERS_ERROR, FETCH_USERS_EXCEPT_ID, SET_CURRENT_USER } from "./types";
-import axiosClient from "../../../api/axiosClient";
+import {
+  FETCH_USERS,
+  FETCH_USERS_ERROR,
+  FETCH_USERS_EXCEPT_ID,
+  SET_CURRENT_USER,
+} from "./types";
+import { userService } from "../../../services/userService";
 
 // Fetch all users
 export const fetchUsers = () => async (dispatch) => {
   try {
-    const response = await axiosClient.get("/users");
-
+    const data = await userService.fetchUsers();
     dispatch({
       type: FETCH_USERS,
-      payload: response.data,
+      payload: data,
     });
   } catch (error) {
     dispatch({
@@ -18,24 +22,19 @@ export const fetchUsers = () => async (dispatch) => {
   }
 };
 
+// Set current user (no API call)
 export const setCurrentUser = (user) => ({
   type: SET_CURRENT_USER,
-  payload: user
+  payload: user,
 });
 
 // Fetch users except for a specific ID
 export const fetchUsersExceptId = (userId) => async (dispatch) => {
   try {
-    const response = await axiosClient.get(`/users/get-users-except-id/${userId}`);
-
-    const decryptedUsers = response.data.map((user) => ({
-      ...user,
-      name: user.name,
-    }));
-
+    const data = await userService.fetchUsersExceptId(userId);
     dispatch({
       type: FETCH_USERS_EXCEPT_ID,
-      payload: decryptedUsers,
+      payload: data,
     });
   } catch (error) {
     dispatch({

@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import { getIdUser, refreshToken, logout } from "../../services/user";
+import { getIdUser, refreshToken, logout } from "../../services/userService";
 import { secureStorage } from "../../utils/secureDataUtils";
 import {
   resetActivityTimestamp,
