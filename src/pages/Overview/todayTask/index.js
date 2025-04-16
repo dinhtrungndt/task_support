@@ -186,7 +186,7 @@ export const TodayTasks = ({ userStatus }) => {
 
           <div className="space-y-3">
             {users
-              .filter((user) => user.role === "user")
+              .filter((user) => user.role === "admin")
               .slice(0, 5)
               .map((user) => (
                 <div key={user._id} className="flex items-center p-2 rounded-lg hover:bg-gray-50 transition-colors">
