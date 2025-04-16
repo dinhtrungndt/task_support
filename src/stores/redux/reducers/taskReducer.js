@@ -29,30 +29,42 @@ const taskReducer = (state = initialState, action) => {
         loading: false
       };
 
-      case ADD_TASK:
-        const newTask = action.payload;
-        if (!newTask.companyId || typeof newTask.companyId !== 'object') {
-          const company = state.businesses.find(b => b._id === newTask.companyId);
-          if (company) {
-            newTask.companyId = {
-              _id: company._id,
-              mst: company.mst,
-              name: company.name,
-              address: company.address
-            };
-          }
+    case ADD_TASK:
+      const newTask = action.payload;
+      if (!newTask.companyId || typeof newTask.companyId !== 'object') {
+        const company = state.businesses?.find(b => b._id === newTask.companyId);
+        if (company) {
+          newTask.companyId = {
+            _id: company._id,
+            mst: company.mst,
+            name: company.name,
+            address: company.address
+          };
         }
-        return {
-          ...state,
-          tasks: [...state.tasks, newTask]
-        };
+      }
+      return {
+        ...state,
+        tasks: [...state.tasks, newTask]
+      };
 
     case UPDATE_TASK:
       return {
         ...state,
-        tasks: state.tasks.map(task =>
-          task._id === action.payload._id ? { ...task, ...action.payload } : task
-        ),
+        tasks: state.tasks.map(task => {
+          if (task._id === action.payload._id) {
+            const updatedTask = {
+              ...task,
+              ...action.payload
+            };
+
+            if (!updatedTask.companyId || (typeof updatedTask.companyId !== 'object' && task.companyId && typeof task.companyId === 'object')) {
+              updatedTask.companyId = task.companyId;
+            }
+
+            return updatedTask;
+          }
+          return task;
+        }),
       };
 
     case DELETE_TASK:

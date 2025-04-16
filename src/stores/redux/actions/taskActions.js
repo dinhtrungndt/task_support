@@ -34,7 +34,6 @@ export const addTask = (taskData, userId) => async (dispatch) => {
       );
     }
 
-    // Prepare data for submission
     const taskToAdd = {
       connectionType: taskData.connectionType || "",
       installer: taskData.PInstaller || taskData.installer || "N/A",
@@ -60,10 +59,8 @@ export const addTask = (taskData, userId) => async (dispatch) => {
       }
     }
 
-    // Sau khi thêm task, cần fetch chi tiết task đã được populate đầy đủ
     let createdTask = Array.isArray(response.data) ? response.data[0] : response.data;
 
-    // Lấy chi tiết của task mới tạo để có thông tin đầy đủ
     if (createdTask._id) {
       const detailResponse = await axiosClient.get(`/tasks/${createdTask._id}`);
       createdTask = detailResponse.data;
@@ -76,7 +73,6 @@ export const addTask = (taskData, userId) => async (dispatch) => {
 
     return createdTask;
   } catch (error) {
-    // console.error("Add task error details:", error.response?.data || error);
     dispatch({
       type: FETCH_TASKS_ERROR,
       payload: error.message,
@@ -92,16 +88,17 @@ export const updateTask = (taskData) => async (dispatch) => {
       throw new Error("Task ID is required for update");
     }
 
+    const originalTask = await axiosClient.get(`/tasks/${taskData._id}`);
+
     const taskToUpdate = {
-      connectionType: taskData.connectionType || "",
-      installer: taskData.PInstaller || taskData.installer || "N/A",
-      codeData: taskData.codeData || "N/A",
-      typeData: taskData.typeData || "Data",
-      installDate:
-        taskData.AtSetting || taskData.installDate || new Date().toISOString(),
-      status: taskData.status || "Pending",
-      notes: taskData.cancellationReason || taskData.notes || "",
-      userAdd: taskData.userAdd,
+      connectionType: taskData.connectionType || originalTask.data.connectionType || "",
+      installer: taskData.PInstaller || taskData.installer || originalTask.data.installer || "N/A",
+      codeData: taskData.codeData || originalTask.data.codeData || "N/A",
+      typeData: taskData.typeData || originalTask.data.typeData || "Data",
+      installDate: taskData.AtSetting || taskData.installDate || originalTask.data.installDate || new Date().toISOString(),
+      status: taskData.status || originalTask.data.status || "Pending",
+      notes: taskData.cancellationReason || taskData.notes || originalTask.data.notes || "",
+      userAdd: taskData.userAdd || originalTask.data.userAdd
     };
 
     const response = await axiosClient.put(
@@ -109,18 +106,15 @@ export const updateTask = (taskData) => async (dispatch) => {
       taskToUpdate
     );
 
+    const updatedTaskResponse = await axiosClient.get(`/tasks/${taskData._id}`);
+    const fullUpdatedTask = updatedTaskResponse.data;
+
     dispatch({
       type: UPDATE_TASK,
-      payload: {
-        ...response.data,
-        _id: taskData._id,
-      },
+      payload: fullUpdatedTask,
     });
 
-    return {
-      ...response.data,
-      _id: taskData._id,
-    };
+    return fullUpdatedTask;
   } catch (error) {
     dispatch({
       type: FETCH_TASKS_ERROR,

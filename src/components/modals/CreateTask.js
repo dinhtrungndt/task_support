@@ -1,8 +1,8 @@
-import React, { useState, useContext, useRef } from 'react';
-import { X, FileText, Link, Database, Calendar, User, CheckCircle, Building } from 'lucide-react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
+import { X, FileText, Link, Database, Calendar, User, CheckCircle, Building, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { useDispatch } from 'react-redux';
-import { addTask } from '../../stores/redux/actions/taskActions';
+import { useDispatch, useSelector } from 'react-redux';
+import { addTask, fetchTasks, updateTask } from '../../stores/redux/actions/taskActions';
 import { AuthContext } from '../../contexts/start/AuthContext';
 import BusinessSelector from '../Business/BusinessSelector';
 
@@ -11,6 +11,9 @@ export const CreateTask = ({ closeModal }) => {
     const auth = useContext(AuthContext);
     const isMounted = useRef(true);
     const user = auth.user;
+
+    // Get all tasks from Redux store
+    const { tasks } = useSelector((state) => state.tasks);
 
     const [formData, setFormData] = useState({
         companyId: "",
@@ -30,6 +33,20 @@ export const CreateTask = ({ closeModal }) => {
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // New state for duplicate task warning
+    const [duplicateTaskWarning, setDuplicateTaskWarning] = useState(null);
+    const [cancellationReason, setCancellationReason] = useState("");
+    const [showCancellationInput, setShowCancellationInput] = useState(false);
+
+    // Fetch tasks when component mounts
+    useEffect(() => {
+        dispatch(fetchTasks());
+
+        return () => {
+            isMounted.current = false;
+        };
+    }, [dispatch]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -47,6 +64,30 @@ export const CreateTask = ({ closeModal }) => {
             companyName: business.name,
             address: business.address
         }));
+
+        // Check for existing tasks with this business ID
+        checkForExistingTasks(business._id);
+    };
+
+    // Function to check for existing tasks with the same business ID
+    const checkForExistingTasks = (businessId) => {
+        if (!tasks || !Array.isArray(tasks)) return;
+
+        // Filter active tasks (Pending or Done) for this business
+        const existingActiveTasks = tasks.filter(task =>
+            task.companyId &&
+            (typeof task.companyId === 'object' ?
+                task.companyId._id === businessId :
+                task.companyId === businessId) &&
+            (task.status === "Pending" || task.status === "Done")
+        );
+
+        if (existingActiveTasks.length > 0) {
+            // Store the first active task for reference
+            setDuplicateTaskWarning(existingActiveTasks[0]);
+        } else {
+            setDuplicateTaskWarning(null);
+        }
     };
 
     const handleClearBusinessSelection = () => {
@@ -58,6 +99,27 @@ export const CreateTask = ({ closeModal }) => {
             companyName: "",
             address: ""
         }));
+        setDuplicateTaskWarning(null);
+        setShowCancellationInput(false);
+        setCancellationReason("");
+    };
+
+    // Handle cancellation reason input
+    const handleCancellationReasonChange = (e) => {
+        setCancellationReason(e.target.value);
+    };
+
+    // Function to proceed with creating a new task despite the warning
+    const handleProceedAnyway = () => {
+        setShowCancellationInput(true);
+    };
+
+    // Function to cancel the duplicate task creation
+    const handleCancelDuplicate = () => {
+        handleClearBusinessSelection();
+        setDuplicateTaskWarning(null);
+        setShowCancellationInput(false);
+        setCancellationReason("");
     };
 
     const handleSubmit = async () => {
@@ -82,6 +144,12 @@ export const CreateTask = ({ closeModal }) => {
             return;
         }
 
+        // If there's a duplicate task and cancellation reason is required
+        if (duplicateTaskWarning && showCancellationInput && !cancellationReason) {
+            toast.error("Vui lòng nhập lý do hủy công việc cũ");
+            return;
+        }
+
         // Check if user is logged in
         if (!user || !user.id) {
             toast.error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
@@ -98,16 +166,41 @@ export const CreateTask = ({ closeModal }) => {
                 codeData: formData.codeData || "N/A"
             };
 
+            // If there's a duplicate task that needs to be rejected
+            if (duplicateTaskWarning && showCancellationInput) {
+                // Create a complete task object to update, preserving all the original data
+                const taskToUpdate = {
+                    _id: duplicateTaskWarning._id,
+                    status: "Rejected",
+                    notes: `Bị thay thế bởi công việc mới. Lý do: ${cancellationReason}`,
+                    // Preserve all existing data from the duplicateTaskWarning
+                    connectionType: duplicateTaskWarning.connectionType,
+                    installer: duplicateTaskWarning.installer,
+                    codeData: duplicateTaskWarning.codeData,
+                    typeData: duplicateTaskWarning.typeData,
+                    installDate: duplicateTaskWarning.installDate,
+                    companyId: duplicateTaskWarning.companyId,
+                    userAdd: duplicateTaskWarning.userAdd?._id || duplicateTaskWarning.userAdd
+                };
+
+                await dispatch(updateTask(taskToUpdate));
+            }
+
             // Pass the user ID directly to the action
-            await dispatch(addTask(dataToSubmit, user.id));
+            const newTask = await dispatch(addTask(dataToSubmit, user.id));
 
             toast.success("Tạo công việc thành công!");
+
+            // If we had a duplicate task that was rejected, show additional success message
+            if (duplicateTaskWarning && showCancellationInput) {
+                toast.info(`Công việc cũ của doanh nghiệp "${selectedBusiness.name}" đã bị hủy và thay thế bằng công việc mới.`);
+            }
 
             // Force reset submitting state and close modal
             setIsSubmitting(false);
             window.setTimeout(() => closeModal(), 500);
 
-            return true; // Ensure the function returns something
+            return true;
         } catch (error) {
             toast.error("Lỗi khi tạo công việc: " + (error.message || "Vui lòng thử lại"));
             setIsSubmitting(false);
@@ -120,6 +213,13 @@ export const CreateTask = ({ closeModal }) => {
             toast.error("Vui lòng chọn doanh nghiệp trước khi tiếp tục");
             return;
         }
+
+        // If there's a duplicate warning but user hasn't confirmed with cancellation reason
+        if (duplicateTaskWarning && showCancellationInput && !cancellationReason) {
+            toast.error("Vui lòng nhập lý do hủy công việc cũ trước khi tiếp tục");
+            return;
+        }
+
         setStep(2);
     };
 
@@ -129,7 +229,7 @@ export const CreateTask = ({ closeModal }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto overflow-hidden">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto overflow-y-auto max-h-[90vh]">
                 {/* Header */}
                 <div className="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                     <h2 className="text-lg font-semibold flex items-center">
@@ -181,6 +281,56 @@ export const CreateTask = ({ closeModal }) => {
                                 onBusinessSelect={handleBusinessSelect}
                                 onClearSelection={handleClearBusinessSelection}
                             />
+
+                            {/* Duplicate Task Warning */}
+                            {duplicateTaskWarning && (
+                                <div className="mt-4 p-4 bg-amber-50 border border-amber-300 rounded-md">
+                                    <div className="flex items-start">
+                                        <AlertTriangle size={24} className="text-amber-500 mr-2 flex-shrink-0 mt-0.5" />
+                                        <div>
+                                            <h3 className="font-medium text-amber-800">Cảnh báo: Đã tồn tại công việc</h3>
+                                            <p className="text-sm text-amber-700 mt-1">
+                                                Doanh nghiệp "{selectedBusiness?.name}" đã có công việc {duplicateTaskWarning.status === "Pending" ? "đang xử lý" : "đã hoàn thành"}.
+                                            </p>
+                                            <div className="mt-3 text-xs text-amber-700 bg-amber-100 p-2 rounded">
+                                                <div className="mb-1"><span className="font-medium">Loại kết nối:</span> {duplicateTaskWarning.connectionType}</div>
+                                                <div className="mb-1"><span className="font-medium">Người lắp đặt:</span> {duplicateTaskWarning.installer}</div>
+                                                <div><span className="font-medium">Ngày tạo:</span> {new Date(duplicateTaskWarning.createdAt).toLocaleDateString()}</div>
+                                            </div>
+
+                                            {!showCancellationInput ? (
+                                                <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                                                    <button
+                                                        onClick={handleProceedAnyway}
+                                                        className="px-3 py-1.5 bg-amber-600 text-white rounded text-xs font-medium hover:bg-amber-700 transition-colors"
+                                                    >
+                                                        Vẫn thêm mới và hủy công việc cũ
+                                                    </button>
+                                                    <button
+                                                        onClick={handleCancelDuplicate}
+                                                        className="px-3 py-1.5 border border-gray-300 bg-white text-gray-700 rounded text-xs font-medium hover:bg-gray-50 transition-colors"
+                                                    >
+                                                        Chọn doanh nghiệp khác
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="mt-3">
+                                                    <label className="block text-sm font-medium text-amber-800 mb-1">
+                                                        Lý do hủy công việc cũ <span className="text-red-500">*</span>
+                                                    </label>
+                                                    <textarea
+                                                        value={cancellationReason}
+                                                        onChange={handleCancellationReasonChange}
+                                                        className="w-full p-2 border border-amber-300 bg-white rounded-md text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                                        placeholder="Nhập lý do hủy công việc cũ"
+                                                        rows={3}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Current user info */}
                             <div className="mt-4 p-2 bg-gray-50 border border-gray-200 rounded-md">
@@ -340,7 +490,7 @@ export const CreateTask = ({ closeModal }) => {
                             <button
                                 onClick={handleNextStep}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                                disabled={!selectedBusiness || isSubmitting}
+                                disabled={!selectedBusiness || isSubmitting || (duplicateTaskWarning && showCancellationInput && !cancellationReason)}
                             >
                                 Tiếp tục
                             </button>
