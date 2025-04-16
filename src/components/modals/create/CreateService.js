@@ -2,9 +2,9 @@ import React, { useState, useContext, useRef, useEffect } from 'react';
 import { X, FileText, Plus, CheckCircle, User, Building } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
-import { AuthContext } from '../../contexts/start/AuthContext';
-import BusinessSelector from '../Business/BusinessSelector';
-import { addService } from '../../stores/redux/actions/serviceAction';
+import { AuthContext } from '../../../contexts/start/AuthContext';
+import BusinessSelector from '../../Business/BusinessSelector';
+import { addService } from '../../../stores/redux/actions/serviceAction';
 
 const CreateService = ({ closeModal, onServiceCreated }) => {
   const dispatch = useDispatch();

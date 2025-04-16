@@ -15,8 +15,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import Modal from "../../components/modals";
-import EditTaskModal from "../../components/modals/EditTask";
-import MoreDetailsModal from "../../components/modals/MoreTask";
+import EditTaskModal from "../../components/modals/edit/EditTask";
+import MoreDetailsModal from "../../components/modals/more/MoreTask";
 import { Tasks } from "../../components/Tasks";
 import {
   fetchTasks,
@@ -25,7 +25,7 @@ import {
 } from "../../stores/redux/actions/taskActions";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
-import PrintPreviewModal from "../../components/modals/PrintPreviewModal";
+import TasksPrintPreviewModal from "../../components/modals/reports/TasksPrintPreviewModal";
 
 export const TaskPages = () => {
   const dispatch = useDispatch();
@@ -549,7 +549,7 @@ export const TaskPages = () => {
       </Modal>
 
       {/* Print Preview Modal */}
-      <PrintPreviewModal
+      <TasksPrintPreviewModal
         isOpen={printPreviewOpen}
         onClose={() => setPrintPreviewOpen(false)}
         tasks={selectedIds.length > 0

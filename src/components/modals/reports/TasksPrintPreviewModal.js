@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Printer, X, Settings, Check, FileText, Info } from 'lucide-react';
 import moment from 'moment';
 
-const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
+const TasksPrintPreviewModal = ({ isOpen, onClose, tasks }) => {
   const printableRef = useRef(null);
   const [options, setOptions] = useState({
     showCompanyInfo: true,
@@ -611,4 +611,4 @@ const PrintPreviewModal = ({ isOpen, onClose, tasks }) => {
   );
 };
 
-export default PrintPreviewModal;
+export default TasksPrintPreviewModal;

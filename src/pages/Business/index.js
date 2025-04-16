@@ -14,9 +14,9 @@ import {
 } from "lucide-react";
 import Modal from "../../components/modals";
 import DropdownMenu from "../../components/DropdownMenu";
-import EditBusinessModal from "../../components/modals/EditBusiness";
-import MoreDetailsModalBusiness from "../../components/modals/MoreBusiness";
-import CreateBusiness from "../../components/modals/CreateBusiness";
+import EditBusinessModal from "../../components/modals/edit/EditBusiness";
+import MoreDetailsModalBusiness from "../../components/modals/more/MoreBusiness";
+import CreateBusiness from "../../components/modals/create/CreateBusiness";
 import {
   fetchBusinesses,
   deleteBusinesses,
@@ -25,7 +25,7 @@ import {
 import * as XLSX from "xlsx";
 import { toast } from "react-toastify";
 import BusinessList from "../../components/Business/Business";
-import BusinessPrintPreviewModal from "../../components/modals/BusinessReportPrintModal";
+import BusinessPrintPreviewModal from "../../components/modals/reports/BusinessReportPrintModal";
 
 export const BusinessPages = () => {
   const dispatch = useDispatch();

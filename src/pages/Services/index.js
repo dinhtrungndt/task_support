@@ -13,10 +13,10 @@ import {
   Printer,
 } from "lucide-react";
 import Modal from "../../components/modals";
-import CreateService from "../../components/modals/CreateService";
-import EditServiceModal from "../../components/modals/EditServiceModal";
-import MoreServiceDetailsModal from "../../components/modals/MoreServiceDetailsModal";
-import ServicePrintPreviewModal from "../../components/modals/ServicePrintPreviewModal";
+import CreateService from "../../components/modals/create/CreateService";
+import EditServiceModal from "../../components/modals/edit/EditServiceModal";
+import MoreServiceDetailsModal from "../../components/modals/more/MoreServiceDetailsModal";
+import ServicePrintPreviewModal from "../../components/modals/reports/ServicePrintPreviewModal";
 import {
   fetchServices,
   deleteServices,

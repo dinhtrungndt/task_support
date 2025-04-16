@@ -1,6 +1,6 @@
 import React from 'react';
 import { MoreVertical, AlertTriangle, User, MoreHorizontal, Calendar, MapPin, Link as LinkIcon, CreditCard, Tag, Clock, FileText } from 'lucide-react';
-import CreateTask from '../modals/CreateTask';
+import CreateTask from '../modals/create/CreateTask';
 import DropdownMenu from '../DropdownMenu';
 import moment from 'moment';
 

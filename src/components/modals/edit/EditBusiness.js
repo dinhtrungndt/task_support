@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { toast } from 'react-toastify';
-import addressData from '../../assets/json/Danhsach_diachi_json.json';
+import addressData from '../../../assets/json/Danhsach_diachi_json.json';
 
 export const EditBusinessModal = ({
   business,

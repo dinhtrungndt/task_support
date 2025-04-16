@@ -2,9 +2,9 @@ import React, { useState, useContext, useRef, useEffect } from 'react';
 import { X, FileText, Link, Database, Calendar, User, CheckCircle, Building, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
-import { addTask, fetchTasks, updateTask } from '../../stores/redux/actions/taskActions';
-import { AuthContext } from '../../contexts/start/AuthContext';
-import BusinessSelector from '../Business/BusinessSelector';
+import { addTask, fetchTasks, updateTask } from '../../../stores/redux/actions/taskActions';
+import { AuthContext } from '../../../contexts/start/AuthContext';
+import BusinessSelector from '../../Business/BusinessSelector';
 
 export const CreateTask = ({ closeModal }) => {
     const dispatch = useDispatch();

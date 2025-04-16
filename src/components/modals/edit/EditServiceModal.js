@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Plus, X, Search, User, Building, MapPin } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { AuthContext } from '../../contexts/start/AuthContext';
-import BusinessSelector from '../Business/BusinessSelector';
+import { AuthContext } from '../../../contexts/start/AuthContext';
+import BusinessSelector from '../../Business/BusinessSelector';
 
 const EditServiceModal = ({ service, onClose, onSave }) => {
   const auth = useContext(AuthContext);

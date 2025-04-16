@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
-import { addBusiness } from '../../stores/redux/actions/businessActions';
-import addressData from '../../assets/json/Danhsach_diachi_json.json';
+import { addBusiness } from '../../../stores/redux/actions/businessActions';
+import addressData from '../../../assets/json/Danhsach_diachi_json.json';
 
 export const CreateBusiness = ({ closeModal, businesses, onBusinessCreated }) => {
     const dispatch = useDispatch();

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import 'moment/locale/vi';
 import { AuthContext } from '../../contexts/start/AuthContext';
-import UserDetailModal from '../../components/modals/UserDetailModal';
+import UserDetailModal from '../../components/modals/detail/UserDetailModal';
 import { HeaderPages } from '../../components/header';
 import {
   Users,
