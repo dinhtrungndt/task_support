@@ -175,20 +175,6 @@ export const SettingPages = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <HeaderPages title="Cài đặt" />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center">
-            <Loader className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
-            <p className="text-lg font-medium text-gray-800">Đang tải thông tin cài đặt...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const tabs = [
     { id: 'profile', label: 'Thông tin người dùng', icon: <UserCircle className="w-5 h-5" /> },
     { id: 'notifications', label: 'Thông báo', icon: <Bell className="w-5 h-5" /> },
