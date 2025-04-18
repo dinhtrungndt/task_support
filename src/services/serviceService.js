@@ -7,6 +7,12 @@ const serviceService = {
     return response.data;
   },
 
+  // Fetch services by user ID
+  async fetchServicesByUser(userId) {
+    const response = await axiosClient.get(`/services/user/${userId}`);
+    return response.data;
+  },
+
   // Add a new service
   async addService(service) {
     const serviceToAdd = {

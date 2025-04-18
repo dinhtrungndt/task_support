@@ -4,7 +4,8 @@ import {
   ADD_TASK,
   UPDATE_TASK,
   DELETE_TASK,
-  DELETE_TASKS
+  DELETE_TASKS,
+  FETCH_TASKS_BY_USER
 } from "../actions/types";
 
 const initialState = {
@@ -16,6 +17,13 @@ const initialState = {
 const taskReducer = (state = initialState, action) => {
   switch (action.type) {
     case FETCH_TASKS:
+      return {
+        ...state,
+        tasks: action.payload,
+        loading: false
+      };
+
+    case FETCH_TASKS_BY_USER:
       return {
         ...state,
         tasks: action.payload,

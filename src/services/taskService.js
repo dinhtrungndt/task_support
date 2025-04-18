@@ -7,6 +7,15 @@ const taskService = {
     return response.data;
   },
 
+  // Fetch tasks by user ID
+  async fetchTasksByUser(userId) {
+    if (!userId) {
+      throw new Error("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+    }
+    const response = await axiosClient.get(`/tasks/user/${userId}`);
+    return response.data;
+  },
+
   // Add a new task
   async addTask(taskData, userId) {
     if (!userId) {

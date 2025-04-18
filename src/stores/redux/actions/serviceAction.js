@@ -5,6 +5,7 @@ import {
   UPDATE_SERVICE,
   DELETE_SERVICE,
   DELETE_SERVICES,
+  FETCH_SERVICES_BY_USER,
 } from "./types";
 import serviceService from "../../../services/serviceService";
 
@@ -14,6 +15,22 @@ export const fetchServices = () => async (dispatch) => {
     const data = await serviceService.fetchServices();
     dispatch({
       type: FETCH_SERVICES,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: FETCH_SERVICES_ERROR,
+      payload: error.response?.data?.message || error.message,
+    });
+  }
+};
+
+// Fetch services by user ID
+export const fetchServicesByUser = (userId) => async (dispatch) => {
+  try {
+    const data = await serviceService.fetchServicesByUser(userId);
+    dispatch({
+      type: FETCH_SERVICES_BY_USER,
       payload: data,
     });
   } catch (error) {

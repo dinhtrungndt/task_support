@@ -4,7 +4,8 @@ import {
   ADD_SERVICE,
   UPDATE_SERVICE,
   DELETE_SERVICE,
-  DELETE_SERVICES
+  DELETE_SERVICES,
+  FETCH_SERVICES_BY_USER
 } from "../actions/types";
 
 const initialState = {
@@ -30,6 +31,13 @@ const normalizeService = (service) => {
 const serviceReducer = (state = initialState, action) => {
   switch (action.type) {
     case FETCH_SERVICES:
+      return {
+        ...state,
+        services: action.payload.map(service => normalizeService(service)),
+        loading: false
+      };
+
+    case FETCH_SERVICES_BY_USER:
       return {
         ...state,
         services: action.payload.map(service => normalizeService(service)),

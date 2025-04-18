@@ -5,6 +5,7 @@ import {
   UPDATE_TASK,
   DELETE_TASK,
   DELETE_TASKS,
+  FETCH_TASKS_BY_USER,
 } from "./types";
 import taskService from "../../../services/taskService";
 
@@ -14,6 +15,22 @@ export const fetchTasks = () => async (dispatch) => {
     const data = await taskService.fetchTasks();
     dispatch({
       type: FETCH_TASKS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: FETCH_TASKS_ERROR,
+      payload: error.message,
+    });
+  }
+};
+
+// Fetch tasks by user ID
+export const fetchTasksByUser = (userId) => async (dispatch) => {
+  try {
+    const data = await taskService.fetchTasksByUser(userId);
+    dispatch({
+      type: FETCH_TASKS_BY_USER,
       payload: data,
     });
   } catch (error) {

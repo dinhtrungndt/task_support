@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Building, FileText, MapPin, Calendar, User, Link, Database, Clock, CheckCircle, XCircle, AlertTriangle, BarChart, Info } from 'lucide-react';
 import { useSelector } from 'react-redux';
+import { formatDateDetail } from '../../../utils/formatDate';
 
 const MoreDetailsModal = ({ task }) => {
   const [activeTab, setActiveTab] = useState('details');
@@ -19,22 +20,6 @@ const MoreDetailsModal = ({ task }) => {
   }, [task, users]);
 
   if (!task) return null;
-
-  // Format date for display
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      }).format(date);
-    } catch (e) {
-      return dateString;
-    }
-  };
 
   // Get creator name safely
   const getCreatorName = () => {
@@ -89,7 +74,7 @@ const MoreDetailsModal = ({ task }) => {
       <div className="grid grid-cols-3 gap-2 mb-2">
         <div className="bg-white border border-gray-200 rounded-md p-2 text-center">
           <p className="text-xs text-gray-500">Ngày lắp đặt</p>
-          <p className="text-xs font-medium">{formatDate(task.installDate)}</p>
+          <p className="text-xs font-medium">{formatDateDetail(task.installDate)}</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-md p-2 text-center">
           <p className="text-xs text-gray-500">Người lắp đặt</p>
@@ -116,7 +101,7 @@ const MoreDetailsModal = ({ task }) => {
             <p className="text-xs text-gray-500 mt-0.5">{taskCreator.email}</p>
           )}
           <p className="text-xs text-gray-500 mt-0.5">
-            Ngày tạo: {formatDate(task.createdAt)}
+            Ngày tạo: {formatDateDetail(task.createdAt)}
           </p>
         </div>
       </div>
@@ -193,7 +178,7 @@ const MoreDetailsModal = ({ task }) => {
       {/* Last Modified Info */}
       <div className="mt-2 text-xs text-gray-500 flex justify-end">
         <Clock size={12} className="mr-1" />
-        Cập nhật lần cuối: {formatDate(task.lastModified)}
+        Cập nhật lần cuối: {formatDateDetail(task.lastModified)}
       </div>
     </div>
   );
@@ -249,7 +234,7 @@ const MoreDetailsModal = ({ task }) => {
                              record.status === 'Pending' ? 'Đang xử lý' :
                              'Từ chối công việc'}
                           </h4>
-                          <span className="text-xs text-gray-500">{formatDate(record.date)}</span>
+                          <span className="text-xs text-gray-500">{formatDateDetail(record.date)}</span>
                         </div>
 
                         <div className="mt-1 grid grid-cols-2 gap-2 text-xs text-gray-600">

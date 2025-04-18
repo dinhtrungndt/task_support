@@ -1,37 +1,10 @@
 import React from 'react';
 import { Building, User, Calendar, MapPin, Clock, AlertTriangle } from 'lucide-react';
+import { formatDateDetail, formatDateOnlyDetail } from '../../../utils/formatDate';
+import { formatPrice } from '../../../utils/formatPrice';
 
 const MoreServiceDetailsModal = ({ service }) => {
   if (!service) return <div>Không có thông tin.</div>;
-
-  // Format date
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  // Format date without time
-  const formatDateOnly = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  };
-
-  // Format price with commas
-  const formatPrice = (price) => {
-    return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || '0';
-  };
 
   // Calculate remaining time until expiration
   const getRemainingTime = () => {
@@ -185,7 +158,7 @@ const MoreServiceDetailsModal = ({ service }) => {
                   </div>
                 </td>
                 <td className="px-2 py-1.5 text-gray-900">
-                  {service.startDate ? formatDateOnly(service.startDate) : 'N/A'}
+                  {service.startDate ? formatDateOnlyDetail(service.startDate) : 'N/A'}
                 </td>
               </tr>
               <tr>
@@ -196,7 +169,7 @@ const MoreServiceDetailsModal = ({ service }) => {
                   </div>
                 </td>
                 <td className="px-2 py-1.5 text-gray-900">
-                  {service.expirationDate ? formatDateOnly(service.expirationDate) : 'N/A'}
+                  {service.expirationDate ? formatDateOnlyDetail(service.expirationDate) : 'N/A'}
                 </td>
               </tr>
               <tr>
@@ -287,7 +260,7 @@ const MoreServiceDetailsModal = ({ service }) => {
                     <span>Ngày tạo</span>
                   </div>
                 </td>
-                <td className="px-2 py-1.5 text-gray-900">{formatDate(service.createdAt)}</td>
+                <td className="px-2 py-1.5 text-gray-900">{formatDateDetail(service.createdAt)}</td>
               </tr>
               <tr>
                 <td className="px-2 py-1.5 bg-gray-50 font-medium text-gray-500">
@@ -296,7 +269,7 @@ const MoreServiceDetailsModal = ({ service }) => {
                     <span>Cập nhật lần cuối</span>
                   </div>
                 </td>
-                <td className="px-2 py-1.5 text-gray-900">{formatDate(service.lastModified)}</td>
+                <td className="px-2 py-1.5 text-gray-900">{formatDateDetail(service.lastModified)}</td>
               </tr>
             </tbody>
           </table>

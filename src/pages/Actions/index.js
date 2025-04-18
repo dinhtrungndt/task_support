@@ -22,6 +22,7 @@ import {
   Clock,
   AlertTriangle
 } from 'lucide-react';
+import { formatDate } from '../../utils/formatDate';
 
 export const ActionPages = () => {
   const dispatch = useDispatch();
@@ -102,12 +103,6 @@ export const ActionPages = () => {
     const nameParts = name.split(' ');
     if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
     return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
-  };
-
-  // Format date for display
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return moment(dateString).format('DD/MM/YYYY');
   };
 
   return (

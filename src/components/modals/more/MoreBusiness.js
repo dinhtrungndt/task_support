@@ -1,28 +1,11 @@
 import React, { useState } from 'react';
 import { Info, Calendar, AlertCircle, ChevronRight } from 'lucide-react';
+import { formatDateDetail } from '../../../utils/formatDate';
 
 export const MoreDetailsModalBusiness = ({ business }) => {
   const [activeTab, setActiveTab] = useState('Tổng quan');
 
   if (!business) return null;
-
-  // Format date for better display
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }).format(date);
-    } catch (e) {
-      return dateString;
-    }
-  };
 
   // Safely check for typeData array
   const getTypeData = () => {
@@ -65,11 +48,11 @@ export const MoreDetailsModalBusiness = ({ business }) => {
           <div className="space-y-2">
             <div className="bg-white p-3 rounded-md border border-gray-100 shadow-sm">
               <p className="text-xs text-gray-500">Ngày tạo</p>
-              <p className="text-sm font-medium text-gray-900">{formatDate(business.createdAt)}</p>
+              <p className="text-sm font-medium text-gray-900">{formatDateDetail(business.createdAt)}</p>
             </div>
             <div className="bg-white p-3 rounded-md border border-gray-100 shadow-sm">
               <p className="text-xs text-gray-500">Cập nhật cuối</p>
-              <p className="text-sm font-medium text-gray-900">{formatDate(business.lastModified)}</p>
+              <p className="text-sm font-medium text-gray-900">{formatDateDetail(business.lastModified)}</p>
             </div>
             <div className="bg-white p-3 rounded-md border border-gray-100 shadow-sm">
               <p className="text-xs text-gray-500">ID</p>

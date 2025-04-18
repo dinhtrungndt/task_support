@@ -24,120 +24,45 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { HeaderPages } from "../../components/header";
-import axiosClient from "../../api/axiosClient";
 import moment from "moment";
+import { fetchTasksByUser } from "../../stores/redux/actions/taskActions";
+import { fetchServicesByUser } from "../../stores/redux/actions/serviceAction";
+import { ListViewTask } from "./tasks/listView";
+import { formatDate, formatDateDetail } from "../../utils/formatDate";
+import { getStatusClass, getStatusIcon } from "../../utils/StatusClass";
+import { getTypeBadge } from "../../utils/TypeBadge";
+import { CardViewTask } from "./tasks/cardView";
+import { ListViewService } from "./services/listView";
+import { formatCurrency } from "../../utils/formatPrice";
+import { CardViewService } from "./services/cardView";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  // Redux state
   const { currentUser } = useSelector((state) => state.users);
-  const [userTasks, setUserTasks] = useState([]);
-  const [userServices, setUserServices] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { tasks: allTasks, loading: tasksLoading } = useSelector((state) => state.tasks);
+  const { services: allServices, loading: servicesLoading } = useSelector((state) => state.services);
+
+  // Local state
   const [activeTab, setActiveTab] = useState("tasks");
-  const [taskViewMode, setTaskViewMode] = useState("list"); // "list" or "card"
-  const [serviceViewMode, setServiceViewMode] = useState("list"); // "list" or "card"
+  const [taskViewMode, setTaskViewMode] = useState("list");
+  const [serviceViewMode, setServiceViewMode] = useState("list");
+
+  // Filter tasks and services for the current user
+  const userTasks = allTasks.filter(task => task.userAdd === currentUser?.id);
+  const userServices = allServices.filter(service => service.userCreated === currentUser?.id);
+
+  // Loading state based on Redux loading status
+  const isLoading = tasksLoading || servicesLoading;
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        setIsLoading(true);
-        const tasksResponse = await axiosClient.get(`/tasks/user/${currentUser?.id}`);
-        setUserTasks(tasksResponse.data || []);
-
-        const servicesResponse = await axiosClient.get(`/services/user/${currentUser?.id}`);
-        setUserServices(servicesResponse.data || []);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     if (currentUser?.id) {
-      fetchUserData();
+      dispatch(fetchTasksByUser(currentUser.id));
+      dispatch(fetchServicesByUser(currentUser.id));
     }
-  }, [currentUser?.id]);
-
-  const getStatusClass = (status) => {
-    switch (status?.toLowerCase()) {
-      case "done":
-      case "active":
-        return "bg-green-100 text-green-800 border border-green-200";
-      case "pending":
-        return "bg-amber-100 text-amber-800 border border-amber-200";
-      case "rejected":
-      case "inactive":
-        return "bg-red-100 text-red-800 border border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border border-gray-200";
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status?.toLowerCase()) {
-      case "done":
-      case "active":
-        return <CheckCircle size={12} className="mr-1" />;
-      case "pending":
-        return <div className="w-2 h-2 bg-amber-500 rounded-full mr-1.5"></div>;
-      case "rejected":
-      case "inactive":
-        return <XCircle size={12} className="mr-1" />;
-      default:
-        return <div className="w-2 h-2 bg-gray-400 rounded-full mr-1.5"></div>;
-    }
-  };
-
-  const getServiceTypeBadge = (type) => {
-    switch (type) {
-      case "Data":
-        return "bg-blue-100 text-blue-800 border border-blue-200";
-      case "Cloud":
-        return "bg-purple-100 text-purple-800 border border-purple-200";
-      case "Network":
-        return "bg-green-100 text-green-800 border border-green-200";
-      default:
-        return "bg-gray-100 text-gray-800 border border-gray-200";
-    }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
-      day: "numeric",
-      month: "numeric",
-      year: "numeric",
-    });
-  };
-
-  const formatRelativeTime = (dateString) => {
-    const currentTime = moment();
-    const postTime = moment(dateString);
-    const diffInSeconds = currentTime.diff(postTime, "seconds");
-
-    if (diffInSeconds < 1) {
-      return "Vừa đăng";
-    } else if (diffInSeconds < 60) {
-      return `${diffInSeconds} giây trước`;
-    } else if (diffInSeconds < 3600) {
-      return `${Math.floor(diffInSeconds / 60)} phút trước`;
-    } else if (diffInSeconds < 24 * 3600) {
-      return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
-    } else if (diffInSeconds < 30 * 24 * 3600) {
-      return `${Math.floor(diffInSeconds / (24 * 3600))} ngày trước`;
-    } else if (diffInSeconds < 12 * 30 * 24 * 3600) {
-      return `${Math.floor(diffInSeconds / (30 * 24 * 3600))} tháng trước`;
-    } else {
-      return `${Math.floor(diffInSeconds / (365 * 24 * 3600))} năm trước`;
-    }
-  };
-
-  const formatCurrency = (price) => {
-    if (price === undefined || price === null) return "N/A";
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-  };
+  }, [currentUser?.id, dispatch]);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-8">
@@ -243,7 +168,7 @@ const ProfilePage = () => {
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Ngày tham gia</p>
-                      <p className="text-sm font-medium text-gray-800">{formatDate(currentUser?.createdAt)}</p>
+                      <p className="text-sm font-medium text-gray-800">{formatDateDetail(currentUser?.createdAt)}</p>
                     </div>
                   </div>
                 </div>
@@ -413,339 +338,22 @@ const ProfilePage = () => {
 
               {/* Tasks - List View */}
               {!isLoading && activeTab === "tasks" && userTasks.length > 0 && taskViewMode === "list" && (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Loại kết nối
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Doanh nghiệp
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Mã dữ liệu
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Loại dữ liệu
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Ngày lắp đặt
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Trạng thái
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {userTasks.map((task) => (
-                        <tr key={task._id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <LinkIcon size={14} className="text-gray-400 mr-1.5" />
-                              <span className="text-sm font-medium text-gray-800">{task.connectionType}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {task.companyId && typeof task.companyId === 'object' ? (
-                              <div className="flex items-center">
-                                <div className="w-6 h-6 bg-indigo-100 rounded-md flex items-center justify-center text-indigo-600 mr-2">
-                                  <Building size={12} />
-                                </div>
-                                <span className="text-sm text-gray-800">{task.companyId.name || 'N/A'}</span>
-                              </div>
-                            ) : 'N/A'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <Tag size={14} className="text-gray-400 mr-1.5" />
-                              <span className="text-sm text-gray-700 font-mono">{task.codeData || 'N/A'}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <Tag size={14} className="text-gray-400 mr-1.5" />
-                              <span className="text-sm text-gray-700">{task.typeData || 'N/A'}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <Calendar size={14} className="text-gray-400 mr-1.5" />
-                              <span className="text-sm text-gray-700">{formatDate(task.installDate)}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClass(task.status)}`}>
-                              {getStatusIcon(task.status)}
-                              {task.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <ListViewTask userTasks={userTasks} />
               )}
 
               {/* Tasks - Card View */}
               {!isLoading && activeTab === "tasks" && userTasks.length > 0 && taskViewMode === "card" && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6">
-                  {userTasks.map((task) => (
-                    <div key={task._id} className="border border-gray-200 rounded-lg hover:border-indigo-200 hover:shadow-md transition-all duration-200 overflow-hidden">
-                      {/* Header with status */}
-                      <div className="flex justify-between items-center px-4 py-3 bg-gray-50 border-b border-gray-200">
-                        <div className="flex items-center">
-                          <LinkIcon size={14} className="text-indigo-600 mr-1.5" />
-                          <span className="text-sm font-medium text-gray-800">{task.connectionType}</span>
-                        </div>
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClass(task.status)}`}>
-                          {getStatusIcon(task.status)}
-                          {task.status}
-                        </span>
-                      </div>
-
-                      {/* Body content */}
-                      <div className="px-4 py-3">
-                        {/* Company info */}
-                        {task.companyId && typeof task.companyId === 'object' && (
-                          <div className="mb-3">
-                            <div className="flex items-center mb-1">
-                              <Building size={14} className="text-gray-500 mr-1.5" />
-                              <span className="text-sm font-medium text-gray-800">{task.companyId.name || 'N/A'}</span>
-                            </div>
-                            {task.companyId.address && (
-                              <div className="flex items-center text-xs text-gray-500 pl-5">
-                                <MapPin size={10} className="mr-1" />
-                                <span className="truncate">{task.companyId.address}</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Data details */}
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-3">
-                          <div>
-                            <p className="text-xs text-gray-500 mb-0.5">Mã dữ liệu</p>
-                            <div className="flex items-center">
-                              <Tag size={12} className="text-gray-500 mr-1" />
-                              <span className="text-sm text-gray-800 font-medium font-mono">{task.codeData || 'N/A'}</span>
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-0.5">Loại dữ liệu</p>
-                            <div className="flex items-center">
-                              <div className="w-2 h-2 rounded-full bg-blue-500 mr-1.5"></div>
-                              <span className="text-sm text-gray-800">{task.typeData || 'N/A'}</span>
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-0.5">Người lắp đặt</p>
-                            <div className="flex items-center">
-                              <User size={12} className="text-gray-500 mr-1" />
-                              <span className="text-sm text-gray-800">{task.installer || 'N/A'}</span>
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-0.5">Ngày lắp đặt</p>
-                            <div className="flex items-center">
-                              <Calendar size={12} className="text-gray-500 mr-1" />
-                              <span className="text-sm text-gray-800">{formatDate(task.installDate)}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Notes */}
-                        {task.notes && (
-                          <div className="mt-2 pt-2 border-t border-gray-100">
-                            <p className="text-xs text-gray-500 mb-1">Ghi chú</p>
-                            <p className="text-sm text-gray-700">{task.notes}</p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Footer */}
-                      <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
-                        <div className="flex justify-between items-center">
-                          <span>Được tạo {formatRelativeTime(task.createdAt)}</span>
-                          <span>Cập nhật {formatRelativeTime(task.updatedAt || task.lastModified)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+               <CardViewTask userTasks={userTasks} />
               )}
 
               {/* Services - List View */}
               {!isLoading && activeTab === "services" && userServices.length > 0 && serviceViewMode === "list" && (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Tên dịch vụ
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Loại dịch vụ
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Doanh nghiệp
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Giá dịch vụ
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Thời hạn
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Trạng thái
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {userServices.map((service) => (
-                        <tr key={service._id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <div className="w-6 h-6 bg-indigo-100 rounded-md flex items-center justify-center text-indigo-600 mr-2">
-                                <Shield size={12} />
-                              </div>
-                              <span className="text-sm font-medium text-gray-800">{service.name}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getServiceTypeBadge(service.type)}`}>
-                              <Tag size={12} className="mr-1" />
-                              {service.type || "N/A"}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {service.companyId && typeof service.companyId === 'object' ? (
-                              <div className="flex items-center">
-                                <div className="w-5 h-5 bg-blue-100 rounded-md flex items-center justify-center text-blue-600 mr-1.5">
-                                  <Building size={10} />
-                                </div>
-                                <span className="text-sm text-gray-800">{service.companyId.name || 'N/A'}</span>
-                              </div>
-                            ) : 'N/A'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <DollarSign size={14} className="text-gray-400 mr-1" />
-                              <span className="text-sm font-medium text-gray-800">{formatCurrency(service.price)}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <Clock size={14} className="text-gray-400 mr-1.5" />
-                              <span className="text-sm text-gray-700">{service.duration || 0} tháng</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClass(service.status)}`}>
-                              {getStatusIcon(service.status)}
-                              {service.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+               <ListViewService userServices={userServices} />
               )}
 
               {/* Services - Card View */}
               {!isLoading && activeTab === "services" && userServices.length > 0 && serviceViewMode === "card" && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6">
-                  {userServices.map((service) => (
-                    <div key={service._id} className="border border-gray-200 rounded-lg hover:border-indigo-200 hover:shadow-md transition-all duration-200 overflow-hidden">
-                      {/* Header with status */}
-                      <div className="px-4 py-3 flex items-center justify-between border-b border-gray-200">
-                        <div className="flex items-center">
-                          <div className="w-6 h-6 bg-indigo-100 rounded-md flex items-center justify-center text-indigo-600 mr-2">
-                            <Shield size={12} />
-                          </div>
-                          <span className="font-medium text-gray-800">{service.name}</span>
-                        </div>
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClass(service.status)}`}>
-                          {getStatusIcon(service.status)}
-                          {service.status}
-                        </span>
-                      </div>
-
-                      {/* Service type and company */}
-                      <div className="px-4 py-3 flex items-center justify-between border-b border-gray-100 bg-gray-50">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getServiceTypeBadge(service.type)}`}>
-                          <Tag size={12} className="mr-1" />
-                          {service.type || "N/A"}
-                        </span>
-
-                        {service.companyId && typeof service.companyId === 'object' && (
-                          <div className="flex items-center">
-                            <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-1">
-                              <Building size={10} />
-                            </div>
-                            <span className="text-xs text-gray-700">{service.companyId.name || 'N/A'}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Body content */}
-                      <div className="px-4 py-3">
-                        {/* Description */}
-                        {service.description && (
-                          <div className="mb-3">
-                            <p className="text-xs text-gray-500 mb-1">Mô tả</p>
-                            <p className="text-sm text-gray-700">{service.description}</p>
-                          </div>
-                        )}
-
-                        {/* Features */}
-                        {service.features && service.features.length > 0 && (
-                          <div className="mb-3">
-                            <p className="text-xs text-gray-500 mb-1">Tính năng</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {service.features.map((feature, index) => (
-                                <span
-                                  key={index}
-                                  className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full flex items-center"
-                                >
-                                  <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full mr-1"></div>
-                                  {feature}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Price and duration */}
-                        <div className="grid grid-cols-2 gap-4 mt-2">
-                          <div>
-                            <p className="text-xs text-gray-500 mb-0.5">Giá dịch vụ</p>
-                            <div className="flex items-center">
-                              <DollarSign size={14} className="text-indigo-500 mr-1" />
-                              <span className="text-sm font-medium text-gray-800">{formatCurrency(service.price)}</span>
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500 mb-0.5">Thời hạn</p>
-                            <div className="flex items-center">
-                              <Clock size={14} className="text-indigo-500 mr-1" />
-                              <span className="text-sm font-medium text-gray-800">{service.duration || 0} tháng</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Footer */}
-                      <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
-                        <div className="flex justify-between items-center">
-                          <span>Được tạo {formatRelativeTime(service.createdAt)}</span>
-                          <span>Cập nhật {formatRelativeTime(service.lastModified || service.updatedAt)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <CardViewService userServices={userServices} />
               )}
 
               {/* Pagination */}

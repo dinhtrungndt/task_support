@@ -16,6 +16,9 @@ import {
 import DropdownMenu from "../DropdownMenu";
 import moment from "moment";
 import ServiceExpiryStatus from "../../utils/ServiceExpiryStatus";
+import { formatDate, formatExpirationDate } from "../../utils/formatDate";
+import { getServiceData } from "../../utils/StatusClass";
+import { formatPrice } from "../../utils/formatPrice";
 
 const ServiceList = ({
   filteredServices,
@@ -31,55 +34,6 @@ const ServiceList = ({
   setSearchTerm,
   setActiveDropdown,
 }) => {
-  // Format price with commas
-  const formatPrice = (price) => {
-    return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || "0";
-  };
-
-  // Format date
-  const formatDate = (dateString) => {
-    const currentTime = moment();
-    const postTime = moment(dateString);
-    const diffInSeconds = currentTime.diff(postTime, "seconds");
-
-    if (diffInSeconds < 1) {
-      return "Vừa đăng";
-    } else if (diffInSeconds < 60) {
-      return `${diffInSeconds} giây trước`;
-    } else if (diffInSeconds < 3600) {
-      return `${Math.floor(diffInSeconds / 60)} phút trước`;
-    } else if (diffInSeconds < 24 * 3600) {
-      return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
-    } else if (diffInSeconds < 30 * 24 * 3600) {
-      return `${Math.floor(diffInSeconds / (24 * 3600))} ngày trước`;
-    } else if (diffInSeconds < 12 * 30 * 24 * 3600) {
-      return `${Math.floor(diffInSeconds / (30 * 24 * 3600))} tháng trước`;
-    } else if (diffInSeconds < 12 * 365 * 24 * 3600) {
-      return `${Math.floor(diffInSeconds / (12 * 30 * 24 * 3600))} năm trước`;
-    } else {
-      return postTime.format("DD/MM/YYYY");
-    }
-  };
-
-  // Format expiration date
-  const formatExpirationDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return moment(dateString).format("DD/MM/YYYY");
-  };
-
-  // Get service type badge style
-  const getServiceTypeBadge = (type) => {
-    switch (type) {
-      case "Data":
-        return "bg-blue-100 text-blue-800 border border-blue-200";
-      case "Cloud":
-        return "bg-purple-100 text-purple-800 border border-purple-200";
-      case "Network":
-        return "bg-green-100 text-green-800 border border-green-200";
-      default:
-        return "bg-gray-100 text-gray-800 border border-gray-200";
-    }
-  };
 
   // Get service status badge style
   const getStatusBadge = (status) => {
@@ -183,7 +137,7 @@ const ServiceList = ({
                 </td>
                 <td className="p-3">
                   <div className="flex items-center">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getServiceTypeBadge(service.type)}`}>
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getServiceData(service.type)}`}>
                       <Tag size={12} className="mr-1" />
                       {service.type || "N/A"}
                     </span>

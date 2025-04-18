@@ -3,6 +3,8 @@ import { MoreVertical, AlertTriangle, User, MoreHorizontal, Calendar, MapPin, Li
 import CreateTask from '../modals/create/CreateTask';
 import DropdownMenu from '../DropdownMenu';
 import moment from 'moment';
+import { formatDate } from '../../utils/formatDate';
+import { getStatusClass, getStatusIcon } from '../../utils/StatusClass';
 
 export const Tasks = ({
   filteredTasks,
@@ -26,58 +28,6 @@ export const Tasks = ({
   if (openModalCreateTask) {
     return <CreateTask closeModal={() => setOpenModalCreateTask(false)} />;
   }
-
-  const getStatusClassName = (status) => {
-    switch (status) {
-      case "Done":
-        return "bg-green-100 text-green-800 border border-green-200";
-      case "Pending":
-        return "bg-amber-100 text-amber-800 border border-amber-200";
-      case "Rejected":
-        return "bg-red-100 text-red-800 border border-red-200";
-      default:
-        return "bg-gray-100 text-gray-600 border border-gray-200";
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "Done":
-        return <div className="w-2 h-2 bg-green-500 rounded-full mr-1.5"></div>;
-      case "Pending":
-        return <div className="w-2 h-2 bg-amber-500 rounded-full mr-1.5"></div>;
-      case "Rejected":
-        return <div className="w-2 h-2 bg-red-500 rounded-full mr-1.5"></div>;
-      default:
-        return <div className="w-2 h-2 bg-gray-400 rounded-full mr-1.5"></div>;
-    }
-  };
-
-  // Format date for display
-  const formatDate = (dateString) => {
-    const currentTime = moment();
-    const postTime = moment(dateString);
-    const diffInSeconds = currentTime.diff(postTime, 'seconds');
-
-    if (diffInSeconds < 1) {
-      return 'Vừa đăng';
-    } else if (diffInSeconds < 60) {
-      return `${diffInSeconds} giây trước`;
-    } else if (diffInSeconds < 3600) {
-      return `${Math.floor(diffInSeconds / 60)} phút trước`;
-    } else if (diffInSeconds < 24 * 3600) {
-      return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
-    } else if (diffInSeconds < 30 * 24 * 3600) {
-      return `${Math.floor(diffInSeconds / (24 * 3600))} ngày trước`;
-    } else if (diffInSeconds < 12 * 30 * 24 * 3600) {
-      return `${Math.floor(diffInSeconds / (30 * 24 * 3600))} tháng trước`;
-    } else if (diffInSeconds < 12 * 365 * 24 * 3600) {
-      return `${Math.floor(diffInSeconds / (12 * 30 * 24 * 3600))} năm trước`;
-    } else {
-      return postTime.format('DD/MM/YYYY');
-    }
-  };
-
   // Format user display name
   const formatUserName = (user) => {
     if (!user) return 'N/A';
@@ -207,9 +157,9 @@ export const Tasks = ({
                     </div>
                   </td>
                   <td className="p-3">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClassName(task.status || 'Pending')}`}>
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusClass(task.status || 'pending')}`}>
                       {getStatusIcon(task.status)}
-                      {task.status || 'Pending'}
+                      {task.status || 'pending'}
                     </span>
                   </td>
                   <td className="p-3">
