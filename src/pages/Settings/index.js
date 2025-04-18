@@ -6,7 +6,6 @@ import { SecuritySetting } from './security/security';
 import { NotificationsSetting } from './notifications/notifications';
 import { ProfileSetting } from './Profile/Profile';
 import addressData from '../../assets/json/timezones.json';
-import axiosClient from '../../api/axiosClient';
 import {
   Cog,
   Save,
@@ -15,12 +14,23 @@ import {
   ShieldCheck,
   Palette,
   Loader,
-  ArrowLeft,
   Check
 } from 'lucide-react';
 import { HeaderPages } from '../../components/header';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchProfile,
+  updateProfile,
+  updateNotifications,
+  updateSecurity,
+  // Sử dụng các action mới chỉ cập nhật state
+  updateProfileState,
+  updateNotificationsState,
+  updateSecurityState
+} from '../../stores/redux/actions/profileAction';
 
 export const SettingPages = () => {
+  const dispatch = useDispatch();
   const auth = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('profile');
   const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
@@ -28,90 +38,45 @@ export const SettingPages = () => {
   const [timeZone, setTimeZone] = useState([]);
   const [originalSettings, setOriginalSettings] = useState({});
   const [hasChanges, setHasChanges] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const [profileSettings, setProfileSettings] = useState({
-    name: auth?.user?.name || '',
-    email: auth?.user?.email || '',
-    phone: '',
-    jobTitle: '',
-    department: '',
-    timeZone: 'GMT+7',
-    avatar: null
-  });
+  const defaultSettings = {
+    profileSettings: {
+      name: auth?.user?.name || '',
+      email: auth?.user?.email || '',
+      phone: '',
+      jobTitle: '',
+      department: '',
+      timeZone: 'GMT+7',
+      avatar: null
+    },
+    notificationSettings: {
+      emailNotifications: true,
+      pushNotifications: true,
+      taskReminders: true,
+      teamUpdates: true,
+      projectChanges: true
+    },
+    securitySettings: {
+      twoFactorAuth: false,
+      sessionTimeout: '30',
+      lastPasswordChange: null
+    },
+    loading: true
+  };
 
-  const [notificationSettings, setNotificationSettings] = useState({
-    emailNotifications: true,
-    pushNotifications: true,
-    taskReminders: true,
-    teamUpdates: true,
-    projectChanges: true
-  });
-
-  const [securitySettings, setSecuritySettings] = useState({
-    twoFactorAuth: false,
-    sessionTimeout: '30',
-    lastPasswordChange: null
-  });
+  const reduxState = useSelector(state => state.profiles);
+  const {
+    profileSettings = defaultSettings.profileSettings,
+    notificationSettings = defaultSettings.notificationSettings,
+    securitySettings = defaultSettings.securitySettings,
+    loading: isLoading = defaultSettings.loading
+  } = reduxState || defaultSettings;
 
   useEffect(() => {
-    const fetchUserSettings = async () => {
-      if (!auth?.user?.id) return;
-
-      setIsLoading(true);
-      try {
-        const response = await axiosClient.get('/profile');
-
-        if (response.data && response.data.status === 200 && response.data.user) {
-          const userData = response.data.user;
-
-          const newProfileSettings = {
-            name: userData.name || '',
-            email: userData.email || '',
-            phone: userData.phone || '',
-            jobTitle: userData.jobTitle || '',
-            department: userData.department || '',
-            timeZone: userData.timeZone || 'GMT+7',
-            avatar: userData.avatar || null
-          };
-
-          setProfileSettings(newProfileSettings);
-
-          if (userData.notifications) {
-            setNotificationSettings({
-              emailNotifications: userData.notifications.emailNotifications ?? true,
-              pushNotifications: userData.notifications.pushNotifications ?? true,
-              taskReminders: userData.notifications.taskReminders ?? true,
-              teamUpdates: userData.notifications.teamUpdates ?? true,
-              projectChanges: userData.notifications.projectChanges ?? true
-            });
-          }
-
-          if (userData.security) {
-            setSecuritySettings({
-              twoFactorAuth: userData.security.twoFactorAuth ?? false,
-              sessionTimeout: userData.security.sessionTimeout || '30',
-              lastPasswordChange: userData.updatedAt || null
-            });
-          }
-
-          setOriginalSettings({
-            profile: newProfileSettings,
-            notifications: { ...notificationSettings },
-            security: { ...securitySettings }
-          });
-        }
-      } catch (error) {
-        toast.error('Không thể tải thông tin cài đặt. Vui lòng thử lại sau.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserSettings();
+    dispatch(fetchProfile());
     setTimeZone(addressData);
-  }, [auth?.user?.id]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (darkMode) {
@@ -123,6 +88,18 @@ export const SettingPages = () => {
     }
   }, [darkMode]);
 
+  // Store original settings to track changes
+  useEffect(() => {
+    if (profileSettings && notificationSettings && securitySettings) {
+      setOriginalSettings({
+        profile: { ...profileSettings },
+        notifications: { ...notificationSettings },
+        security: { ...securitySettings }
+      });
+    }
+  }, [profileSettings, notificationSettings, securitySettings]);
+
+  // Check for changes in settings
   useEffect(() => {
     if (Object.keys(originalSettings).length === 0) return;
 
@@ -141,42 +118,46 @@ export const SettingPages = () => {
     setHasChanges(profileChanged || notificationChanged || securityChanged);
   }, [profileSettings, notificationSettings, securitySettings, originalSettings]);
 
+  // Chỉ cập nhật state, không gọi API
   const handleNotificationChange = (setting) => {
-    setNotificationSettings({
+    dispatch(updateNotificationsState({
       ...notificationSettings,
       [setting]: !notificationSettings[setting]
-    });
+    }));
   };
 
+  // Chỉ cập nhật state, không gọi API
   const handleProfileChange = (field, value) => {
-    setProfileSettings({
+    dispatch(updateProfileState({
       ...profileSettings,
       [field]: value
-    });
+    }));
   };
 
+  // Chỉ cập nhật state, không gọi API
   const handleSecurityChange = (field, value) => {
-    setSecuritySettings({
+    dispatch(updateSecurityState({
       ...securitySettings,
       [field]: value
-    });
+    }));
   };
 
+  // Chỉ khi nhấn nút "Lưu thay đổi" mới gọi API
   const saveAllChanges = async () => {
     if (!hasChanges) return;
 
     setIsSaving(true);
     try {
-      await axiosClient.put('/profile', profileSettings);
+      // Update profile settings
+      await dispatch(updateProfile(profileSettings));
 
-      await axiosClient.put('/profile', {
-        notifications: notificationSettings
-      });
+      // Update notification settings
+      await dispatch(updateNotifications(notificationSettings));
 
-      await axiosClient.put('/profile', {
-        security: securitySettings
-      });
+      // Update security settings
+      await dispatch(updateSecurity(securitySettings));
 
+      // Update original settings to match current settings
       setOriginalSettings({
         profile: { ...profileSettings },
         notifications: { ...notificationSettings },

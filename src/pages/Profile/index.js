@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
-  ChevronLeft,
-  User,
   Mail,
   Phone,
   Briefcase,
@@ -13,27 +11,15 @@ import {
   Shield,
   Calendar,
   Server,
-  FileText,
-  Tag,
-  MapPin,
-  LinkIcon,
-  CreditCard,
-  DollarSign,
-  CheckCircle,
-  XCircle,
   AlertTriangle
 } from "lucide-react";
 import { HeaderPages } from "../../components/header";
-import moment from "moment";
 import { fetchTasksByUser } from "../../stores/redux/actions/taskActions";
 import { fetchServicesByUser } from "../../stores/redux/actions/serviceAction";
 import { ListViewTask } from "./tasks/listView";
-import { formatDate, formatDateDetail } from "../../utils/formatDate";
-import { getStatusClass, getStatusIcon } from "../../utils/StatusClass";
-import { getTypeBadge } from "../../utils/TypeBadge";
+import { formatDateDetail } from "../../utils/formatDate";
 import { CardViewTask } from "./tasks/cardView";
 import { ListViewService } from "./services/listView";
-import { formatCurrency } from "../../utils/formatPrice";
 import { CardViewService } from "./services/cardView";
 
 const ProfilePage = () => {

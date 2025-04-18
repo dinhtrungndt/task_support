@@ -4,6 +4,7 @@ import taskReducer from './taskReducer';
 import userReducer from './userReducer';
 import serviceReducer from './serviceReducer';
 import messageReducer from './messageReducer';
+import profileReducer from './profileReducer';
 
 const rootReducer = combineReducers({
   business: businessReducer,
@@ -11,6 +12,7 @@ const rootReducer = combineReducers({
   users: userReducer,
   services: serviceReducer,
   messages: messageReducer,
+  profiles: profileReducer,
 });
 
 export default rootReducer;

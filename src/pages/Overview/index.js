@@ -3,11 +3,12 @@ import { HeaderPages } from "../../components/header";
 import { TodayTasks } from "./todayTask";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBusinesses } from "../../stores/redux/actions/businessActions";
-import { fetchTasks } from "../../stores/redux/actions/taskActions";
-import { fetchServices } from "../../stores/redux/actions/serviceAction";
+import { fetchTasks, fetchTasksByUser } from "../../stores/redux/actions/taskActions";
+import { fetchServices, fetchServicesByUser } from "../../stores/redux/actions/serviceAction";
 import { fetchUsers, fetchUsersExceptId } from "../../stores/redux/actions/userActions";
 import { AuthContext } from "../../contexts/start/AuthContext";
 import { Users, UserPlus, Bell, Search, Calendar, Activity, Briefcase, Settings } from "lucide-react";
+import { fetchProfile } from "../../stores/redux/actions/profileAction";
 
 export const OverviewPages = () => {
   const dispatch = useDispatch();
@@ -39,8 +40,11 @@ export const OverviewPages = () => {
     dispatch(fetchBusinesses());
     dispatch(fetchTasks());
     dispatch(fetchServices());
+    dispatch(fetchProfile());
     if (currentUser?.id) {
       dispatch(fetchUsersExceptId(currentUser.id));
+      dispatch(fetchTasksByUser(currentUser.id));
+      dispatch(fetchServicesByUser(currentUser.id));
     } else {
       dispatch(fetchUsers());
     }
@@ -230,7 +234,7 @@ export const OverviewPages = () => {
           </div>
         </div>
         {/* Tasks Section with Improved Styling */}
-        <TodayTasks userStatus={userStatus}/>
+        <TodayTasks userStatus={userStatus} />
         {/* Footer */}
         <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex justify-between items-center">
