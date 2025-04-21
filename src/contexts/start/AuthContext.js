@@ -53,7 +53,12 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      const newSocket = io('https://api-ithelp.fly.dev/');
+      const newSocket = io(process.env.REACT_APP_API_URL, {
+        transports: ["websocket", "polling"],
+        auth: {
+          token: token,
+        },
+      });
 
       setSocket(newSocket);
 
@@ -122,7 +127,15 @@ export const AuthProvider = ({ children }) => {
     if (user) {
       const token = secureStorage.getItem("tz");
 
-      const newSocket = io('https://api-ithelp.fly.dev/');
+      const newSocket = io(process.env.REACT_APP_API_URL, {
+        transports: ["websocket", "polling"],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        auth: {
+          token: token,
+        },
+      });
 
       newSocket.on("connect", () => {
         // console.log("Socket.IO connected successfully");
