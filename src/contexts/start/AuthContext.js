@@ -33,7 +33,6 @@ const safelyDecodeToken = (token) => {
 
     return JSON.parse(jsonPayload);
   } catch (error) {
-    // console.error("Token decode error");
     return null;
   }
 };
@@ -45,30 +44,7 @@ export const AuthProvider = ({ children }) => {
   const [tokenExpiryTime, setTokenExpiryTime] = useState(null);
   const [socket, setSocket] = useState(null);
 
-  useEffect(() => {
-    if (user) {
-      const token = secureStorage.getItem("tz");
-      if (!token) {
-        // console.error("No token found. Please log in.");
-        return;
-      }
-
-      const newSocket = io(process.env.REACT_APP_API_URL, {
-        transports: ["websocket", "polling"],
-        auth: {
-          token: token,
-        },
-      });
-
-      setSocket(newSocket);
-
-      return () => {
-        newSocket.disconnect();
-        setSocket(null);
-      };
-    }
-  }, [user]);
-
+  // Initialize authentication
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -76,44 +52,34 @@ export const AuthProvider = ({ children }) => {
         const storedUser = secureStorage.getItem("ts");
 
         if (token && storedUser) {
-          try {
-            const decodedToken = safelyDecodeToken(token);
+          const decodedToken = safelyDecodeToken(token);
 
-            if (decodedToken && decodedToken.exp) {
-              const expiryTime = new Date(decodedToken.exp * 1000);
-              setTokenExpiryTime(expiryTime);
+          if (decodedToken && decodedToken.exp) {
+            const expiryTime = new Date(decodedToken.exp * 1000);
+            setTokenExpiryTime(expiryTime);
 
-              const timeUntilExpiry =
-                expiryTime.getTime() - new Date().getTime();
-              if (timeUntilExpiry < 300000) {
-                try {
-                  const newToken = await refreshToken();
-                  if (newToken) {
-                    const newDecodedToken = safelyDecodeToken(newToken);
-                    if (newDecodedToken && newDecodedToken.exp) {
-                      setTokenExpiryTime(new Date(newDecodedToken.exp * 1000));
-                    }
+            const timeUntilExpiry = expiryTime.getTime() - new Date().getTime();
+            if (timeUntilExpiry < 300000) {
+              try {
+                const newToken = await refreshToken();
+                if (newToken) {
+                  const newDecodedToken = safelyDecodeToken(newToken);
+                  if (newDecodedToken && newDecodedToken.exp) {
+                    setTokenExpiryTime(new Date(newDecodedToken.exp * 1000));
                   }
-                } catch (refreshError) {
-                  // console.warn("Token refresh failed during initialization");
                 }
+              } catch (refreshError) {
+                console.warn("Token refresh failed during initialization", refreshError);
               }
             }
-
-            setUser(storedUser);
-            dispatch(setCurrentUser(storedUser));
-
-            resetActivityTimestamp();
-          } catch (tokenError) {
-            // console.error("Token validation error");
-            setUser(storedUser);
-            dispatch(setCurrentUser(storedUser));
-
-            resetActivityTimestamp();
           }
+
+          setUser(storedUser);
+          dispatch(setCurrentUser(storedUser));
+          resetActivityTimestamp();
         }
       } catch (error) {
-        // console.error("Auth initialization error");
+        console.error("Auth initialization error", error);
         handleLogout();
       } finally {
         setLoading(false);
@@ -121,46 +87,54 @@ export const AuthProvider = ({ children }) => {
     };
 
     initAuth();
-  }, []);
+  }, [dispatch]);
 
+  // Handle Socket.IO connection
   useEffect(() => {
-    if (user) {
-      const token = secureStorage.getItem("tz");
+    if (!user) return;
 
-      const newSocket = io(process.env.REACT_APP_API_URL, {
-        transports: ["websocket", "polling"],
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-        auth: {
-          token: token,
-        },
-      });
-
-      newSocket.on("connect", () => {
-        // console.log("Socket.IO connected successfully");
-      });
-
-      newSocket.on("connect_error", (error) => {
-        if (error.message === "Authentication error: Token required") {
-          // console.error("Authentication failed. Please log in again.");
-          handleLogout();
-        } else {
-          // console.error("Socket.IO connection error:", error);
-        }
-      });
-
-      newSocket.on("disconnect", (reason) => {
-        // console.log("Socket.IO disconnected:", reason);
-      });
-
-      setSocket(newSocket);
-
-      return () => {
-        newSocket.disconnect();
-        setSocket(null);
-      };
+    const token = secureStorage.getItem("tz");
+    if (!token) {
+      console.error("No token found. Please log in.");
+      handleLogout();
+      return;
     }
+
+    // Initialize Socket.IO with authentication token
+    const newSocket = io(process.env.REACT_APP_API_URL, {
+      auth: {
+        token: token,
+      },
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
+
+    newSocket.on("connect", () => {
+      console.log("Socket.IO connected successfully:", newSocket.id);
+    });
+
+    newSocket.on("connect_error", (error) => {
+      console.error("Socket.IO connection error:", error.message);
+      if (error.message === "Authentication error: Token required") {
+        console.error("Authentication failed. Please log in again.");
+        handleLogout();
+      }
+    });
+
+    newSocket.on("disconnect", (reason) => {
+      console.log("Socket.IO disconnected:", reason);
+    });
+
+    setSocket(newSocket);
+
+    // Cleanup on unmount or user change
+    return () => {
+      console.log("Disconnecting Socket.IO...");
+      newSocket.disconnect();
+      setSocket(null);
+    };
   }, [user]);
 
   const handleLogout = () => {
@@ -170,7 +144,7 @@ export const AuthProvider = ({ children }) => {
     setTokenExpiryTime(null);
 
     if (socket) {
-      socket.disconnect()
+      socket.disconnect();
       setSocket(null);
     }
   };
